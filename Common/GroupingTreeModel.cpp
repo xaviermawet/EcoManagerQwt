@@ -84,6 +84,7 @@ int GroupingTreeModel::columnCount(const QModelIndex &parent) const
 
 Qt::ItemFlags GroupingTreeModel::flags(const QModelIndex &index) const
 {
+    /*
     if (! index.isValid())
         return 0;
 
@@ -93,6 +94,18 @@ Qt::ItemFlags GroupingTreeModel::flags(const QModelIndex &index) const
     // Seuls les noeds sans enfant (feuilles) peuvent etre sélectionnés
     if (item->childrenCount() <= 0)
         flags |= Qt::ItemIsSelectable;
+
+    if (item->isAlterable())
+        flags |= Qt::ItemIsEditable;
+
+    return flags;
+    */
+
+    if (!index.isValid())
+        return 0;
+
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
 
     if (item->isAlterable())
         flags |= Qt::ItemIsEditable;

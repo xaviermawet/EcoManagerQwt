@@ -370,6 +370,8 @@
      <addaction name="actionRaceViewDisplayLap"/>
      <addaction name="actionRaceViewRemoveLap"/>
      <addaction name="actionRaceViewExportLapDataInCSV"/>
+     <addaction name="actionRaceViewDeleteRace"/>
+     <addaction name="actionRaceViewDeleteRacesAtSpecificDate"/>
     </widget>
     <addaction name="menuEditRaceView"/>
     <addaction name="menuLapDataTable"/>
@@ -742,6 +744,22 @@
    </property>
    <property name="text">
     <string>Exporter dans un fichier CSV</string>
+   </property>
+  </action>
+  <action name="actionRaceViewDeleteRace">
+   <property name="text">
+    <string>Supprimer la course &lt;?&gt;</string>
+   </property>
+   <property name="toolTip">
+    <string>Supprimer la course et tous les tours de la course de la base de données</string>
+   </property>
+  </action>
+  <action name="actionRaceViewDeleteRacesAtSpecificDate">
+   <property name="text">
+    <string>Supprimer les courses à la date du &lt;?&gt;</string>
+   </property>
+   <property name="toolTip">
+    <string>Supprimer toutes les courses d'une meme date</string>
    </property>
   </action>
  </widget>

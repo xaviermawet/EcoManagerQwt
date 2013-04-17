@@ -4,6 +4,9 @@
  * http://www.developpez.net/forums/d719698/c-cpp/bibliotheques/qt/qtreeview-menu-contextuel/
  */
 
+/* Modification du GroupingTreeModel afin de pouvoir à nouveau sélectionner n'importe quel élément dans la treeView
+ */
+
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
 
@@ -79,6 +82,7 @@ class MainWindow : public QMainWindow
         void on_menuEditRaceView_aboutToShow(void);
         void on_actionRaceViewDisplayLap_triggered(void);
         void on_actionRaceViewRemoveLap_triggered(void);
+        void on_actionRaceViewExportLapDataInCSV_triggered(void);
 
         // Personal slots
         void loadCompetition(int index);

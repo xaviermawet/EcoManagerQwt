@@ -534,45 +534,127 @@ void MainWindow::on_actionLapDataDisplayInAllViews_triggered(void)
 
 void MainWindow::on_menuEditRaceView_aboutToShow(void)
 {
-    // Si au moins un tour est sélectionné
-    if (this->ui->raceView->selectionModel())
-    {
-        QModelIndex curIndex =
-                this->ui->raceView->selectionModel()->currentIndex();
-
-        // Si on a bien sélectionné un tour
-        if (curIndex.parent().parent().isValid())
-        {
-            // Create trak identifier
-            int ref_race = competitionModel->data(
-                        competitionModel->index(curIndex.row(), 1,
-                                                curIndex.parent())).toInt();
-            int ref_lap = competitionModel->data(
-                        competitionModel->index(curIndex.row(), 2,
-                                                curIndex.parent())).toInt();
-
-            QMap<QString, QVariant> trackIdentifier;
-            trackIdentifier["race"] = ref_race;
-            trackIdentifier["lap"] = ref_lap;
-
-            bool lapAlreadyDisplayed = this->currentTracksDisplayed.contains(
-                        trackIdentifier);
-
-            this->ui->actionRaceViewDisplayLap->setVisible(!lapAlreadyDisplayed);
-            this->ui->actionRaceViewRemoveLap->setVisible(lapAlreadyDisplayed);
-            this->ui->actionRaceViewExportLapDataInCSV->setVisible(true);
-            return;
-        }
-    }
-
     this->ui->actionRaceViewDisplayLap->setVisible(false);
     this->ui->actionRaceViewRemoveLap->setVisible(false);
     this->ui->actionRaceViewExportLapDataInCSV->setVisible(false);
+    this->ui->actionRaceViewDeleteRace->setVisible(false);
+    this->ui->actionRaceViewDeleteRacesAtSpecificDate->setVisible(false);
+
+    // Si la tree view ne contient aucune model
+    if(this->ui->raceView->selectionModel() == NULL)
+        return;
+
+    // Récupération de l'élément sélectionné
+    QModelIndex curIndex = this->ui->raceView->selectionModel()->currentIndex();
+
+
+    // Si l'utilisateur clique droit sur une date
+    if (!curIndex.parent().isValid())
+    {
+        qDebug() << "On a cliqué sur une date ... proposer de supprimer toutes les course de cette meme date";
+
+        QDate date = this->competitionModel->data(curIndex).toDate();
+
+        qDebug() << "Date = " << date;
+
+        this->ui->actionRaceViewDeleteRacesAtSpecificDate->setText(
+                    tr("Supprimer les courses à la date du ") +
+                    date.toString(Qt::SystemLocaleShortDate));
+        this->ui->actionRaceViewDeleteRacesAtSpecificDate->setVisible(true);
+    }
+    else if (!curIndex.parent().parent().isValid())
+    {
+        qDebug() << "On a cliqué sur une course ... proposer de supprimer cette course (et donc tous ses tours)";
+
+        /* ------------------------------------------------------------------ *
+         *                         Get lap identifier                         *
+         * ------------------------------------------------------------------ */
+        int ref_race = this->competitionModel->data(curIndex).toInt();
+
+        qDebug() << "Course = " << ref_race;
+
+        this->ui->actionRaceViewDeleteRace->setText(
+                    tr("Supprimer la course ") + QString::number(ref_race));
+        this->ui->actionRaceViewDeleteRace->setVisible(true);
+    }
+    else
+    {
+        qDebug() << "On a cliqué sur un tour... proposer le menu habituel";
+
+        /* ------------------------------------------------------------------ *
+         *                        Get track identifier                        *
+         * ------------------------------------------------------------------ */
+        int ref_race = competitionModel->data(
+                    competitionModel->index(curIndex.row(), 1,
+                                            curIndex.parent())).toInt();
+        int ref_lap = competitionModel->data(
+                    competitionModel->index(curIndex.row(), 2,
+                                            curIndex.parent())).toInt();
+        qDebug() << "course = " << ref_race;
+        qDebug() << "tour   = " << ref_lap;
+
+        QMap<QString, QVariant> trackIdentifier;
+        trackIdentifier["race"] = ref_race;
+        trackIdentifier["lap"] = ref_lap;
+
+        bool lapAlreadyDisplayed = this->currentTracksDisplayed.contains(
+                    trackIdentifier);
+
+        this->ui->actionRaceViewDisplayLap->setVisible(!lapAlreadyDisplayed);
+        this->ui->actionRaceViewRemoveLap->setVisible(lapAlreadyDisplayed);
+        this->ui->actionRaceViewExportLapDataInCSV->setVisible(true);
+    }
+
+
+
+//    // Si au moins un tour est sélectionné
+//    if (this->ui->raceView->selectionModel())
+//    {
+//        QModelIndex curIndex =
+//                this->ui->raceView->selectionModel()->currentIndex();
+
+//        // Si on a bien sélectionné un tour
+//        if (curIndex.parent().parent().isValid())
+//        {
+//            // Create trak identifier
+//            int ref_race = competitionModel->data(
+//                        competitionModel->index(curIndex.row(), 1,
+//                                                curIndex.parent())).toInt();
+//            int ref_lap = competitionModel->data(
+//                        competitionModel->index(curIndex.row(), 2,
+//                                                curIndex.parent())).toInt();
+
+//            QMap<QString, QVariant> trackIdentifier;
+//            trackIdentifier["race"] = ref_race;
+//            trackIdentifier["lap"] = ref_lap;
+
+//            bool lapAlreadyDisplayed = this->currentTracksDisplayed.contains(
+//                        trackIdentifier);
+
+//            this->ui->actionRaceViewDisplayLap->setVisible(!lapAlreadyDisplayed);
+//            this->ui->actionRaceViewRemoveLap->setVisible(lapAlreadyDisplayed);
+//            this->ui->actionRaceViewExportLapDataInCSV->setVisible(true);
+//            return;
+//        }
+//    }
+
+//    this->ui->actionRaceViewDisplayLap->setVisible(false);
+//    this->ui->actionRaceViewRemoveLap->setVisible(false);
+//    this->ui->actionRaceViewExportLapDataInCSV->setVisible(false);
 }
 
 void MainWindow::on_actionRaceViewDisplayLap_triggered(void)
 {
     this->displayDataLap();
+}
+
+void MainWindow::on_actionRaceViewExportLapDataInCSV_triggered(void)
+{
+    QMessageBox::information(this, "exportation des données", "exportation des données");
+
+    /* ---------------------------------------------------------------------- *
+     *                        Get the track identifier                        *
+     * ---------------------------------------------------------------------- */
 }
 
 void MainWindow::on_actionRaceViewRemoveLap_triggered(void)
