@@ -83,6 +83,8 @@ class MainWindow : public QMainWindow
         void on_actionRaceViewDisplayLap_triggered(void);
         void on_actionRaceViewRemoveLap_triggered(void);
         void on_actionRaceViewExportLapDataInCSV_triggered(void);
+        void on_actionRaceViewDeleteRace_triggered(void);
+        void on_actionRaceViewDeleteRacesAtSpecificDate_triggered(void);
 
         // Personal slots
         void loadCompetition(int index);
@@ -135,6 +137,9 @@ class MainWindow : public QMainWindow
         // Personal Models
         GroupingTreeModel* competitionModel;
         LapInformationTreeModel* raceInformationTableModel; //TreeLapInformationModel* raceInformationTableModel;
+
+        // RaceView item identifier
+        QVariant raceViewItemidentifier;
 };
 
 #endif /* __MAINWINDOW_HPP__ */
