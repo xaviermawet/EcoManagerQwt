@@ -444,6 +444,9 @@ bool ImportModule::loadSpeedData(const QString &path, Race& race)
         Q_ASSERT((absTime - prevAbsTime) >= 0);
         qreal value = race.wheelPerimeter() * 3600.0 * 1000 * 1000 / (absTime - prevAbsTime); // vitesse en km/h
 
+        if (numLap == -1)
+            continue;
+
         // FIXME : filter max value
         if (!qIsInf(value) && value < 80) {
             timestamps << lapTimeOrigin.msecsTo(dt.time());

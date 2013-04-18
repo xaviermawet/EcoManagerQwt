@@ -94,7 +94,18 @@ class MainWindow : public QMainWindow
 
         void displayLapInformation(float timeValue, const QVariant& trackId);
         void displayLapInformation(float lowerTimeValue, float upperTimeValue,
-                                   const QVariant &trackId);  
+                                   const QVariant &trackId);
+
+        void deleteRace(int raceId);
+
+        void on_actionCompter_le_nombre_de_tours_triggered();
+
+        void on_actionCompter_le_nombre_de_courses_triggered();
+
+        void on_actionPRAGMA_foreign_keys_triggered();
+
+        void on_actionListing_des_courses_triggered();
+
     private:
 
         void centerOnScreen(void);
@@ -111,6 +122,7 @@ class MainWindow : public QMainWindow
         void reloadRaceView(void);
         void loadSectors(const QString& competitionName);
         void highlightPointInAllView(const QModelIndex& index);
+        void removeTrackFromAllView(QMap<QString, QVariant> const& trackId);
 
     protected:
 

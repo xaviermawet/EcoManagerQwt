@@ -303,6 +303,10 @@
     <addaction name="menuExport"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
+    <addaction name="actionCompter_le_nombre_de_tours"/>
+    <addaction name="actionCompter_le_nombre_de_courses"/>
+    <addaction name="actionPRAGMA_foreign_keys"/>
+    <addaction name="actionListing_des_courses"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -760,6 +764,26 @@
    </property>
    <property name="toolTip">
     <string>Supprimer toutes les courses d'une meme date</string>
+   </property>
+  </action>
+  <action name="actionCompter_le_nombre_de_tours">
+   <property name="text">
+    <string>Compter le nombre de tours</string>
+   </property>
+  </action>
+  <action name="actionCompter_le_nombre_de_courses">
+   <property name="text">
+    <string>Compter le nombre de courses</string>
+   </property>
+  </action>
+  <action name="actionPRAGMA_foreign_keys">
+   <property name="text">
+    <string>PRAGMA foreign_keys</string>
+   </property>
+  </action>
+  <action name="actionListing_des_courses">
+   <property name="text">
+    <string>Listing des courses</string>
    </property>
   </action>
  </widget>

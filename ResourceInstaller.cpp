@@ -29,11 +29,11 @@ bool ResourceInstaller::CheckSettings(void) const
             db.setDatabaseName(dbPath);
             db.open();
 
-            db.driver()->beginTransaction();
+            //db.driver()->beginTransaction();
             db.exec("PRAGMA foreign_keys=ON");
             db.exec("PRAGMA journal_mode=MEMORY");
             db.exec("PRAGMA synchronous=OFF");
-            db.driver()->commitTransaction();
+            //db.driver()->commitTransaction();
             return true;
         }
     }
@@ -66,17 +66,18 @@ void ResourceInstaller::installDatabase(const QString &name) const
 
     if (db.open())
     {
-        db.driver()->beginTransaction();
         db.exec("PRAGMA foreign_keys=on");
         db.exec("PRAGMA journal_mode=MEMORY");
         db.exec("PRAGMA synchronous=OFF");
+
+        db.driver()->beginTransaction();
         db.exec("create table COMPETITION ( name VARCHAR(80) PRIMARY KEY, place VARCHAR(80), wheel_radius FLOAT)");
-        db.exec("create table SECTOR ( id INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, ref_compet VARCHAR, min_speed REAL DEFAULT 0 CHECK(min_speed <= max_speed), max_speed REAL DEFAULT 0, start_pos INTEGER, end_pos INTEGER, FOREIGN KEY (ref_compet) REFERENCES COMPETITION(name), FOREIGN KEY (start_pos) REFERENCES POSITION(id), FOREIGN KEY (end_pos) REFERENCES POSITION(id))");
-        db.exec("create table RACE ( id INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, date DATETIME, ref_compet VARCHAR(80), FOREIGN KEY (ref_compet) REFERENCES COMPETITION(name))");
-        db.exec("create table LAP ( num INTEGER, start_time TIME, end_time TIME, distance FLOAT, ref_race INTEGER, FOREIGN KEY (ref_race) REFERENCES RACE(id), PRIMARY KEY (num, ref_race))");
-        db.exec("create table SPEED ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, value FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race))");
-        db.exec("create table ACCELERATION ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, g_long FLOAT, g_lat FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race))");
-        db.exec("create table POSITION ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, latitude FLOAT, longitude FLOAT, altitude FLOAT, eval_speed FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race))");
+        db.exec("create table SECTOR ( id INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, ref_compet VARCHAR, min_speed REAL DEFAULT 0 CHECK(min_speed <= max_speed), max_speed REAL DEFAULT 0, start_pos INTEGER, end_pos INTEGER, FOREIGN KEY (ref_compet) REFERENCES COMPETITION(name) ON DELETE CASCADE, FOREIGN KEY (start_pos) REFERENCES POSITION(id) ON DELETE CASCADE, FOREIGN KEY (end_pos) REFERENCES POSITION(id) ON DELETE CASCADE)");
+        db.exec("create table RACE ( id INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, date DATETIME, ref_compet VARCHAR(80), FOREIGN KEY (ref_compet) REFERENCES COMPETITION(name) ON DELETE CASCADE)");
+        db.exec("create table LAP ( num INTEGER, start_time TIME, end_time TIME, distance FLOAT, ref_race INTEGER, FOREIGN KEY (ref_race) REFERENCES RACE(id) ON DELETE CASCADE, PRIMARY KEY (num, ref_race))");
+        db.exec("create table SPEED ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, value FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE)");
+        db.exec("create table ACCELERATION ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, g_long FLOAT, g_lat FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE)");
+        db.exec("create table POSITION ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, latitude FLOAT, longitude FLOAT, altitude FLOAT, eval_speed FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE)");
         db.driver()->commitTransaction();
     }
     else

@@ -60,7 +60,8 @@ SOURCES += main.cpp\
     Common/LapInformationTreeModel.cpp \
     Common/TreeElement.cpp \
     LapDataCompartor.cpp \
-    Plot/PlotPrintDialog.cpp
+    Plot/PlotPrintDialog.cpp \
+    Utils/QException.cpp
 
 HEADERS  += MainWindow.hpp \
     ResourceInstaller.hpp \
@@ -109,7 +110,8 @@ HEADERS  += MainWindow.hpp \
     Common/LapInformationTreeModel.hpp \
     Common/TreeElement.hpp \
     LapDataCompartor.hpp \
-    Plot/PlotPrintDialog.hpp
+    Plot/PlotPrintDialog.hpp \
+    Utils/QException.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

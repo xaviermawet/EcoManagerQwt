@@ -548,6 +548,8 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
     // Récupération de l'élément sélectionné
     QModelIndex curIndex = this->ui->raceView->selectionModel()->currentIndex();
 
+    if (!curIndex.isValid())
+        return;
 
     // Si l'utilisateur clique droit sur une date
     if (!curIndex.parent().isValid())
@@ -567,15 +569,22 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
     else if (!curIndex.parent().parent().isValid())
     {
         /* ------------------------------------------------------------------ *
-         *                         Get lap identifier                         *
+         *                         Get race identifier                        *
          * ------------------------------------------------------------------ */
-        int ref_race = this->competitionModel->data(curIndex).toInt();
+
+        // Get race id
+        int raceId = this->competitionModel->data(
+                    this->competitionModel->index(
+                        curIndex.row() + 1, 1,curIndex)).toInt();
+
+        // Get race number
+        int raceNum = this->competitionModel->data(curIndex).toInt();
 
         this->ui->actionRaceViewDeleteRace->setText(
-                    tr("Supprimer la course ") + QString::number(ref_race));
+                    tr("Supprimer la course ") + QString::number(raceNum));
         this->ui->actionRaceViewDeleteRace->setVisible(true);
 
-        this->raceViewItemidentifier = QVariant::fromValue(ref_race);
+        this->raceViewItemidentifier = QVariant::fromValue(raceId);
     }
     else
     {
@@ -647,14 +656,7 @@ void MainWindow::on_actionRaceViewRemoveLap_triggered(void)
     QMap<QString, QVariant> trackIdentifier =
             this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
 
-    // Remove the lap from all the view
-    this->currentTracksDisplayed.removeOne(trackIdentifier);
-    if (this->mapFrame->scene()->removeTrack(trackIdentifier))
-        qDebug() << "mapping Supprimé !!!";
-    if (this->distancePlotFrame->scene()->removeCurves(trackIdentifier))
-        qDebug() << "distance supprimé !!!";
-    if (this->timePlotFrame->scene()->removeCurves(trackIdentifier))
-        qDebug() << "time supprimé !!!";
+    this->removeTrackFromAllView(trackIdentifier);
 }
 
 void MainWindow::on_actionRaceViewDeleteRace_triggered(void)
@@ -669,21 +671,7 @@ void MainWindow::on_actionRaceViewDeleteRace_triggered(void)
         return;
     }
 
-    // Récupère l'identifiant du tour sélectionné
-    int ref_race = this->raceViewItemidentifier.value<int>();
-
-    QMessageBox::information(this,"Suppression d'une course",
-                       "Suppression de la course " + QString::number(ref_race));
-
-    /* TODO
-     * ----------
-     * Vérifier qu'aucun tour de cette course est affiché. Si c'est le cas,
-     * les supprimer
-     *
-     * Supprimer la course + tours de la base de données
-     *
-     * Supprimer l'entrée de la raceView
-     */
+    this->deleteRace(this->raceViewItemidentifier.value<int>());
 }
 
 void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
@@ -701,9 +689,19 @@ void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
     // Récupère l'identifiant du tour sélectionné
     QDate date = this->raceViewItemidentifier.value<QDate>();
 
-    QMessageBox::information(this, "Suppression de courses",
-                             "Suppression de toutes les courses à la date du " +
-                             date.toString(Qt::SystemLocaleShortDate));
+    QSqlQuery raceIdAtSpecificDate("SELECT id FROM race WHERE date like ?");
+    raceIdAtSpecificDate.addBindValue(date);
+
+    if (!raceIdAtSpecificDate.exec())
+    {
+        QMessageBox::warning(this, tr("Impossible de supprimer les courses"),
+                             raceIdAtSpecificDate.lastError().text());
+        return;
+    }
+
+    // Supprime toutes les courses à la date donnée
+    while(raceIdAtSpecificDate.next())
+        this->deleteRace(raceIdAtSpecificDate.value(0).toInt());
 }
 
 void MainWindow::loadCompetition(int index)
@@ -963,6 +961,42 @@ void MainWindow::displayLapInformation(float lowerTimeValue,
                 ref_race, ref_lap, lapDataList);
 
     this->ui->raceTable->expandAll();
+}
+
+void MainWindow::deleteRace(int raceId)
+{
+    /* ---------------------------------------------------------------------- *
+     *                       Delete race from data base                       *
+     * ---------------------------------------------------------------------- */
+    QSqlQuery deleteRaceQuery("DELETE FROM race WHERE id = ?");
+    deleteRaceQuery.addBindValue(raceId);
+
+    QSqlDatabase::database().driver()->beginTransaction();
+
+    if (!deleteRaceQuery.exec())
+    {
+        // Restore data
+        QSqlDatabase::database().driver()->rollbackTransaction();
+
+        QMessageBox::warning(this, tr("Impossible de supprimer la course "),
+                             deleteRaceQuery.lastError().text());
+        return;
+    }
+
+    QSqlDatabase::database().driver()->commitTransaction();
+
+    /* ---------------------------------------------------------------------- *
+     *                          Update the race list                          *
+     * ---------------------------------------------------------------------- */
+    this->reloadRaceView();
+
+    /* ---------------------------------------------------------------------- *
+     *     Supprime les éventuels tours de la course qui seraient affichés    *
+     * ---------------------------------------------------------------------- */
+
+    for (int i(0); i < this->currentTracksDisplayed.count(); ++i)
+        if (this->currentTracksDisplayed.at(i)["race"].toInt() == raceId)
+            this->removeTrackFromAllView(this->currentTracksDisplayed.at(i--));
 }
 
 void MainWindow::centerOnScreen(void)
@@ -1577,4 +1611,97 @@ void MainWindow::closeEvent(QCloseEvent* event)
     this->writeSettings("MainWindow");
 
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::on_actionCompter_le_nombre_de_tours_triggered()
+{
+    QSqlQuery cptTours2("SELECT COUNT(*) FROM LAP");
+    if (!cptTours2.exec())
+    {
+        qDebug() << "Erreur compte tours : " << cptTours2.lastError();
+        return;
+    }
+
+    if (cptTours2.next())
+        qDebug() << "Nombre de tours dans la db = " << cptTours2.value(0).toString();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+}
+
+void MainWindow::on_actionCompter_le_nombre_de_courses_triggered()
+{
+    QSqlQuery cptRace("SELECT COUNT(*) FROM race");
+    if (!cptRace.exec())
+    {
+        qDebug() << "Erreur compte race : " << cptRace.lastError();
+        return;
+    }
+
+    if (cptRace.next())
+        qDebug() << "Nombre de race dans la db = " << cptRace.value(0).toString();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+}
+
+void MainWindow::on_actionPRAGMA_foreign_keys_triggered()
+{
+    QSqlQuery query("PRAGMA foreign_keys");
+    if (!query.exec())
+    {
+        qDebug() << "Erreur PRAGMA foreign_keys : " << query.lastError();
+        return;
+    }
+
+    if (query.next())
+        qDebug() << "PRAGMA foreign_keys = " << query.value(0).toBool();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+
+    // PRAGMA foreign_keys = ON;
+    QSqlQuery set("PRAGMA foreign_keys = ON");
+    if (!set.exec())
+    {
+        qDebug() << "Erreur PRAGMA foreign_keys = ON : " << set.lastError();
+        return;
+    }
+
+    if (!query.exec())
+    {
+        qDebug() << "Erreur PRAGMA foreign_keys : " << query.lastError();
+        return;
+    }
+
+    if (query.next())
+        qDebug() << "PRAGMA foreign_keys = " << query.value(0).toBool();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+}
+
+void MainWindow::removeTrackFromAllView(QMap<QString, QVariant> const& trackId)
+{
+    if (this->mapFrame->scene()->removeTrack(trackId))
+        qDebug() << "mapping Supprimé !!!";
+    if (this->distancePlotFrame->scene()->removeCurves(trackId))
+        qDebug() << "distance supprimé !!!";
+    if (this->timePlotFrame->scene()->removeCurves(trackId))
+        qDebug() << "time supprimé !!!";
+
+    this->currentTracksDisplayed.removeOne(trackId);
+}
+
+void MainWindow::on_actionListing_des_courses_triggered()
+{
+    QSqlQuery set("SELECT * FROM RACE");
+    if (!set.exec())
+    {
+        qDebug() << "Erreur listing : " << set.lastError();
+        return;
+    }
+
+    while(set.next())
+    {
+        qDebug() << "-----------------------------------";
+        qDebug() << "id = " << set.value(0).toInt();
+        qDebug() << "num = " << set.value(1).toInt();
+    }
 }
