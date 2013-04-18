@@ -1,12 +1,3 @@
-/*
- * Pour les menus contextuels --> Créer les actions dans le designer et suivre
- * la démarche proposée sur le site :
- * http://www.developpez.net/forums/d719698/c-cpp/bibliotheques/qt/qtreeview-menu-contextuel/
- */
-
-/* Modification du GroupingTreeModel afin de pouvoir à nouveau sélectionner n'importe quel élément dans la treeView
- */
-
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
 
@@ -106,7 +97,11 @@ class MainWindow : public QMainWindow
 
         void on_actionListing_des_courses_triggered();
 
-    private:
+        void on_actionListing_des_competitions_triggered();
+
+        void on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered();
+
+private:
 
         void centerOnScreen(void);
         void createRaceView(void);

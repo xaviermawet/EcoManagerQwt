@@ -307,6 +307,8 @@
     <addaction name="actionCompter_le_nombre_de_courses"/>
     <addaction name="actionPRAGMA_foreign_keys"/>
     <addaction name="actionListing_des_courses"/>
+    <addaction name="actionListing_des_competitions"/>
+    <addaction name="actionCompter_tous_les_tuples_de_toutes_les_tables"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -784,6 +786,16 @@
   <action name="actionListing_des_courses">
    <property name="text">
     <string>Listing des courses</string>
+   </property>
+  </action>
+  <action name="actionListing_des_competitions">
+   <property name="text">
+    <string>Listing des competitions</string>
+   </property>
+  </action>
+  <action name="actionCompter_tous_les_tuples_de_toutes_les_tables">
+   <property name="text">
+    <string>Compter tous les tuples de toutes les tables</string>
    </property>
   </action>
  </widget>

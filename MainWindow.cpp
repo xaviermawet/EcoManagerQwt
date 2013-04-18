@@ -686,11 +686,17 @@ void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
         return;
     }
 
-    // Récupère l'identifiant du tour sélectionné
+    // Récupère la date et le nom de la compétition
     QDate date = this->raceViewItemidentifier.value<QDate>();
+    QString competitionName = this->competitionBox->currentText();
 
-    QSqlQuery raceIdAtSpecificDate("SELECT id FROM race WHERE date like ?");
+    QSqlQuery raceIdAtSpecificDate("SELECT race.id "
+                                   "FROM race, competition "
+                                   "WHERE race.ref_compet = competition.name "
+                                   "AND race.date like ? "
+                                   "AND competition.name like ?");
     raceIdAtSpecificDate.addBindValue(date);
+    raceIdAtSpecificDate.addBindValue(competitionName);
 
     if (!raceIdAtSpecificDate.exec())
     {
@@ -1703,5 +1709,47 @@ void MainWindow::on_actionListing_des_courses_triggered()
         qDebug() << "-----------------------------------";
         qDebug() << "id = " << set.value(0).toInt();
         qDebug() << "num = " << set.value(1).toInt();
+    }
+}
+
+void MainWindow::on_actionListing_des_competitions_triggered()
+{
+    QSqlQuery listing("SELECT name FROM COMPETITION");
+    if (!listing.exec())
+    {
+        qDebug() << "Erreur listing competition : " << listing.lastError().text();
+    }
+
+    qDebug() << "----------- COMPETITIONS ------------------------";
+    while(listing.next())
+        qDebug() << listing.value(0).toString();
+}
+
+void MainWindow::on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered()
+{
+    QSqlQuery tableNames("select tbl_name from sqlite_master;");
+    if(!tableNames.exec())
+    {
+        qDebug() << "Erreur lors du listing des tables : " << tableNames.lastError().text();
+        return;
+    }
+
+    // Affichage du nom de toutes les tables
+    qDebug() << "Toutes les tables de la base de données : ";
+    qDebug() << "-----------------------------------------------";
+    while(tableNames.next())
+    {
+        QString tableName = tableNames.value(0).toString();
+        QSqlQuery cpt("SELECT COUNT(*) FROM " + tableName);
+
+        if (!cpt.exec())
+        {
+            qDebug() << tableName << " impossible de compter le nombre de tuples : "
+                     << cpt.lastError().text();
+            return;
+        }
+
+        if (cpt.next())
+            qDebug() << tableName << " a " << cpt.value(0).toInt() << " tuples";
     }
 }
