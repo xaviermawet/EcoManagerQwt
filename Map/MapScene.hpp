@@ -56,6 +56,7 @@ class MapScene : public QGraphicsScene
         void clearSectors(void);
         void clear(void);
         void enableTrackAcceptHoverEvents(bool enable);
+        int  sectorCount(void) const;
 
     private:
 

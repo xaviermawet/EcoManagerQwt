@@ -410,6 +410,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionDeleteCurrentCompetition"/>
    <addaction name="actionDelimitingSectors"/>
    <addaction name="actionConfiguredLayout1"/>
    <addaction name="actionConfiguredLayout2"/>
@@ -796,6 +797,21 @@
   <action name="actionCompter_tous_les_tuples_de_toutes_les_tables">
    <property name="text">
     <string>Compter tous les tuples de toutes les tables</string>
+   </property>
+  </action>
+  <action name="actionDeleteCurrentCompetition">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/closeBox.png</normaloff>:/Resources/Icons/closeBox.png</iconset>
+   </property>
+   <property name="text">
+    <string>Supprimer la compétition courante</string>
+   </property>
+   <property name="toolTip">
+    <string>Supprimer la compétition courante ainsi que toutes les courses associées</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
  </widget>

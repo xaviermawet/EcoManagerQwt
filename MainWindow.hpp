@@ -26,6 +26,8 @@ namespace Ui {
 class MainWindow;
 }
 
+typedef QMap<QString, QVariant> TrackIdentifier;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -76,6 +78,7 @@ class MainWindow : public QMainWindow
         void on_actionRaceViewExportLapDataInCSV_triggered(void);
         void on_actionRaceViewDeleteRace_triggered(void);
         void on_actionRaceViewDeleteRacesAtSpecificDate_triggered(void);
+        void on_actionDeleteCurrentCompetition_triggered(void);
 
         // Personal slots
         void loadCompetition(int index);
@@ -88,6 +91,7 @@ class MainWindow : public QMainWindow
                                    const QVariant &trackId);
 
         void deleteRace(int raceId);
+        void deleteRaces(QVariantList listRaceId);
 
         void on_actionCompter_le_nombre_de_tours_triggered();
 
@@ -127,7 +131,7 @@ private:
 
         QComboBox* competitionBox;
         QString currentCompetition;
-        QList< QMap<QString, QVariant> > currentTracksDisplayed;
+        QList<TrackIdentifier> currentTracksDisplayed;
 
         // Mapping
         MapFrame* mapFrame;

@@ -33,5 +33,6 @@
         <file>Resources/Icons/location.png</file>
         <file>Resources/Icons/add.png</file>
         <file>Resources/Icons/less.png</file>
+        <file>Resources/Icons/closeBox.png</file>
     </qresource>
 </RCC>

@@ -491,6 +491,11 @@ void MapScene::enableTrackAcceptHoverEvents(bool enable)
     this->_trackAcceptHoverEvents = enable;
 }
 
+int MapScene::sectorCount(void) const
+{
+    return this->_sectors.count();
+}
+
 void MapScene::addSectorItem(SectorItem* sect, int index)
 {
     sect->setZValue(-1);

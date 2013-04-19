@@ -392,6 +392,15 @@ void MainWindow::on_actionClearAllData_triggered(void)
 
     // Remove laps information from the table
     this->on_actionLapDataEraseTable_triggered();
+
+    this->mapFrame->scene()->clearSectors(); // clear sectors
+
+    // clear the sector view
+    if (this->sectorModel)
+    {
+        this->sectorModel->clear();
+        this->ui->sectorView->update();
+    }
 }
 
 void MainWindow::on_raceTable_customContextMenuRequested(const QPoint &pos)
@@ -560,8 +569,10 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
         QDate date = this->competitionModel->data(curIndex).toDate();
 
         this->ui->actionRaceViewDeleteRacesAtSpecificDate->setText(
-                    tr("Supprimer les courses à la date du ") +
+                    tr("Supprimer les courses effectuées à ") +
+                    this->currentCompetition + " le " +
                     date.toString(Qt::SystemLocaleShortDate));
+
         this->ui->actionRaceViewDeleteRacesAtSpecificDate->setVisible(true);
 
         this->raceViewItemidentifier = QVariant::fromValue(date);
@@ -688,7 +699,6 @@ void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
 
     // Récupère la date et le nom de la compétition
     QDate date = this->raceViewItemidentifier.value<QDate>();
-    QString competitionName = this->competitionBox->currentText();
 
     QSqlQuery raceIdAtSpecificDate("SELECT race.id "
                                    "FROM race, competition "
@@ -696,7 +706,7 @@ void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
                                    "AND race.date like ? "
                                    "AND competition.name like ?");
     raceIdAtSpecificDate.addBindValue(date);
-    raceIdAtSpecificDate.addBindValue(competitionName);
+    raceIdAtSpecificDate.addBindValue(this->currentCompetition);
 
     if (!raceIdAtSpecificDate.exec())
     {
@@ -706,8 +716,37 @@ void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
     }
 
     // Supprime toutes les courses à la date donnée
+    QVariantList racesId;
     while(raceIdAtSpecificDate.next())
-        this->deleteRace(raceIdAtSpecificDate.value(0).toInt());
+        racesId << raceIdAtSpecificDate.value(0).toInt();
+
+    this->deleteRaces(racesId);
+}
+
+void MainWindow::on_actionDeleteCurrentCompetition_triggered(void)
+{
+    QSqlQuery deleteCompetition;
+    deleteCompetition.prepare("DELETE FROM competition WHERE name LIKE ?");
+    deleteCompetition.addBindValue(this->currentCompetition);
+
+    QSqlDatabase::database().driver()->beginTransaction();
+
+    if(!deleteCompetition.exec())
+    {
+        QSqlDatabase::database().driver()->beginTransaction();
+
+        QMessageBox::information(this, tr("Erreur Suppression"),
+                                 tr("Impossible de supprimer la compétition ")
+                                 + this->currentCompetition +
+                                 deleteCompetition.lastError().text());
+        return;
+    }
+
+    QSqlDatabase::database().driver()->commitTransaction();
+
+    // Met à jour le combobox avec toutes les compétition et supprimera tout ce qui est affiché
+    this->competitionNameModel->select();
+    this->ui->sectorView->setVisible(false);
 }
 
 void MainWindow::loadCompetition(int index)
@@ -715,14 +754,6 @@ void MainWindow::loadCompetition(int index)
     this->currentCompetition = competitionNameModel->record(index).value(0).toString();
 
     this->on_actionClearAllData_triggered(); // Clear all tracks information of each view
-    this->mapFrame->scene()->clearSectors(); // clear sectors
-
-    // clear the sector view
-    if (this->sectorModel)
-    {
-        this->sectorModel->clear();
-        this->ui->sectorView->update();
-    }
 
     // Load races information
     this->reloadRaceView();
@@ -1000,9 +1031,61 @@ void MainWindow::deleteRace(int raceId)
      *     Supprime les éventuels tours de la course qui seraient affichés    *
      * ---------------------------------------------------------------------- */
 
-    for (int i(0); i < this->currentTracksDisplayed.count(); ++i)
-        if (this->currentTracksDisplayed.at(i)["race"].toInt() == raceId)
-            this->removeTrackFromAllView(this->currentTracksDisplayed.at(i--));
+//    for (int i(0); i < this->currentTracksDisplayed.count(); ++i)
+//        if (this->currentTracksDisplayed.at(i)["race"].toInt() == raceId)
+//            this->removeTrackFromAllView(this->currentTracksDisplayed.at(i--));
+
+    foreach (TrackIdentifier trackId, this->currentTracksDisplayed)
+        if(trackId["race"].toInt() == raceId)
+            this->removeTrackFromAllView(trackId);
+
+//    this->mapFrame->scene()->clearSectors();
+//    this->loadSectors(this->currentCompetition);
+}
+
+void MainWindow::deleteRaces(QVariantList listRaceId)
+{
+    /* ---------------------------------------------------------------------- *
+     *                       Delete races from data base                       *
+     * ---------------------------------------------------------------------- */
+    QSqlQuery deleteRacesQuery;
+    deleteRacesQuery.prepare("DELETE FROM race WHERE id = ?");
+    deleteRacesQuery.addBindValue(listRaceId);
+
+    QSqlDatabase::database().driver()->beginTransaction();
+
+    if (!deleteRacesQuery.execBatch())
+    {
+        // Restore data
+        QSqlDatabase::database().driver()->rollbackTransaction();
+
+        QMessageBox::warning(this, tr("Impossible de supprimer la course "),
+                             deleteRacesQuery.lastQuery() +
+                             deleteRacesQuery.lastError().text());
+        return;
+    }
+
+    QSqlDatabase::database().driver()->commitTransaction();
+
+    /* ---------------------------------------------------------------------- *
+     *                          Update the race list                          *
+     * ---------------------------------------------------------------------- */
+    this->reloadRaceView();
+
+    /* ---------------------------------------------------------------------- *
+     *     Supprime les éventuels tours de la course qui seraient affichés    *
+     * ---------------------------------------------------------------------- */
+
+    foreach (TrackIdentifier trackId, this->currentTracksDisplayed)
+        if (listRaceId.contains(trackId["race"]))
+            this->removeTrackFromAllView(trackId);
+
+//    for (int i(0); i < this->currentTracksDisplayed.count(); ++i)
+//        if (this->currentTracksDisplayed.at(i)["race"].toInt() == raceId)
+//            this->removeTrackFromAllView(this->currentTracksDisplayed.at(i--));
+
+//    this->mapFrame->scene()->clearSectors();
+//    this->loadSectors(this->currentCompetition);
 }
 
 void MainWindow::centerOnScreen(void)
@@ -1500,7 +1583,12 @@ void MainWindow::reloadRaceView(void)
     getAllLaps.addBindValue(this->currentCompetition);
 
     if (!getAllLaps.exec())
+    {
+        QMessageBox::information(
+                    this, tr("Impossible de charger la compétition ")
+                    + this->currentCompetition, getAllLaps.lastError().text());
         return;
+    }
 
     model->setQuery(getAllLaps);
 
