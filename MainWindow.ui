@@ -299,16 +299,14 @@
      <addaction name="actionExportConfigurationModule"/>
      <addaction name="actionExportData"/>
     </widget>
+    <addaction name="actionNewProject"/>
+    <addaction name="actionOpenProject"/>
+    <addaction name="actionSaveProjectAs"/>
+    <addaction name="separator"/>
     <addaction name="actionImport"/>
     <addaction name="menuExport"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
-    <addaction name="actionCompter_le_nombre_de_tours"/>
-    <addaction name="actionCompter_le_nombre_de_courses"/>
-    <addaction name="actionPRAGMA_foreign_keys"/>
-    <addaction name="actionListing_des_courses"/>
-    <addaction name="actionListing_des_competitions"/>
-    <addaction name="actionCompter_tous_les_tuples_de_toutes_les_tables"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -383,10 +381,23 @@
     <addaction name="menuLapDataTable"/>
     <addaction name="actionClearAllData"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionCompter_le_nombre_de_tours"/>
+    <addaction name="actionCompter_le_nombre_de_courses"/>
+    <addaction name="actionPRAGMA_foreign_keys"/>
+    <addaction name="actionListing_des_courses"/>
+    <addaction name="actionListing_des_competitions"/>
+    <addaction name="actionCompter_tous_les_tuples_de_toutes_les_tables"/>
+    <addaction name="actionRestaurer_base_de_donn_es"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuDisplay"/>
    <addaction name="menuAbout"/>
+   <addaction name="menuDebug"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="maximumSize">
@@ -812,6 +823,47 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionNewProject">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/document.png</normaloff>:/Resources/Icons/document.png</iconset>
+   </property>
+   <property name="text">
+    <string>Nouveau projet</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOpenProject">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/folder.png</normaloff>:/Resources/Icons/folder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Ouvrir un projet</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSaveProjectAs">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/diskette.png</normaloff>:/Resources/Icons/diskette.png</iconset>
+   </property>
+   <property name="text">
+    <string>Enregistrer le projet en tant que ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionRestaurer_base_de_donn_es">
+   <property name="text">
+    <string>Restaurer base de données</string>
    </property>
   </action>
  </widget>

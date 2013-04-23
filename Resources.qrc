@@ -34,5 +34,7 @@
         <file>Resources/Icons/add.png</file>
         <file>Resources/Icons/less.png</file>
         <file>Resources/Icons/closeBox.png</file>
+        <file>Resources/Icons/folder.png</file>
+        <file>Resources/Icons/document.png</file>
     </qresource>
 </RCC>

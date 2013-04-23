@@ -36,6 +36,8 @@ bool ResourceInstaller::CheckSettings(void) const
             //db.driver()->commitTransaction();
             return true;
         }
+
+        qDebug() << "la base de donnée n'existe plus ...";
     }
 
     return false;

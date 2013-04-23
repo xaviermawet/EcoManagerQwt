@@ -191,22 +191,12 @@ void GroupingTreeModel::setSourceModel(QAbstractTableModel* model, const QList<i
    QList<QVariant> fields;
    int count(model->columnCount());
 
-   qDebug() << "setSourceModel >> Il y a " << QString::number(count) << " colonnes";
-
    foreach (int i, grCols)
-   {
-       qDebug() << QString::number(i);
        fields << model->headerData(i, Qt::Horizontal, Qt::DisplayRole);
-   }
 
    for (int i(0); i < count; i++)
-   {
        if (!grCols.contains(i))
-       {
-           qDebug() << QString::number(i);
            fields << model->headerData(i, Qt::Horizontal, Qt::DisplayRole);
-       }
-   }
 
    Group root;
    Group* curGroup = &root;

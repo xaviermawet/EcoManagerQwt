@@ -2,15 +2,25 @@
 #include "ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow)
+    QMainWindow(parent), ui(new Ui::MainWindow),
+    competitionBox(NULL), mapFrame(NULL), distancePlotFrame(NULL),
+    timePlotFrame(NULL), megaSquirtPlotFrame(NULL), sectorModel(NULL),
+    competitionNameModel(NULL), competitionModel(NULL),
+    raceInformationTableModel(NULL)
 {
+    QCoreApplication::setOrganizationName("EcoMotion");
+    QCoreApplication::setApplicationName("EcoManager2013");
+
     // GUI Configuration
     this->ui->setupUi(this);
 
-    // Check if the database exists otherwise the database is created
-    ResourceInstaller dbInstaller("EcoMotion", "EcoManager2013");
-    if (!dbInstaller.CheckSettings())
-        dbInstaller.InstallSettings(QDir::current(), "EcoMotion2013.db");
+    // Reharge le dernier "projet" s'il existe tjrs
+    if (!DataBaseManager::restorePreviousDataBase())
+    {
+        this->ui->actionImport->setVisible(false);
+        this->ui->menuExport->menuAction()->setVisible(false);
+    }
+
 
     // Building of the parts of the MainWindow
     this->createRaceView();
@@ -398,6 +408,7 @@ void MainWindow::on_actionClearAllData_triggered(void)
     // clear the sector view
     if (this->sectorModel)
     {
+        this->ui->sectorView->setVisible(false);
         this->sectorModel->clear();
         this->ui->sectorView->update();
     }
@@ -725,6 +736,9 @@ void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
 
 void MainWindow::on_actionDeleteCurrentCompetition_triggered(void)
 {
+    if (this->currentCompetition.isEmpty())
+        return;
+
     QSqlQuery deleteCompetition;
     deleteCompetition.prepare("DELETE FROM competition WHERE name LIKE ?");
     deleteCompetition.addBindValue(this->currentCompetition);
@@ -1840,4 +1854,70 @@ void MainWindow::on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered
         if (cpt.next())
             qDebug() << tableName << " a " << cpt.value(0).toInt() << " tuples";
     }
+}
+
+void MainWindow::on_actionNewProject_triggered()
+{
+    QString dbFilePath = QFileDialog::getSaveFileName(
+          this, tr("Choisissez l'endroit ou sauvegarder les données du projet"),
+                QDir::homePath(), tr("Projet EcoManager (*.db)"));
+
+    if(dbFilePath.isEmpty()) // User canceled
+        return;
+
+    this->updateDataBase(dbFilePath, DataBaseManager::createDataBase);
+}
+
+void MainWindow::on_actionOpenProject_triggered()
+{
+    QString dbFilePath = QFileDialog::getOpenFileName(
+                this, tr("Ouvrir un projet EcoMotion"), QDir::homePath(),
+                tr("Projet EcoManager (*.db)"));
+
+    if (dbFilePath.isEmpty()) // User canceled
+        return;
+
+    this->updateDataBase(dbFilePath, DataBaseManager::openExistingDataBase);
+}
+
+void MainWindow::updateDataBase(QString const& dbFilePath,
+                               bool(*dataBaseAction)(QString const&))
+{
+    /* ---------------------------------------------------------------------- *
+     * Plusieurs modèles (2) sont basé sur les tables, il faut donc les       *
+     * supprimer en premier                                                   *
+     * ---------------------------------------------------------------------- */
+    this->ui->sectorView->setVisible(false);
+    delete this->sectorModel;
+    this->sectorModel = NULL;
+
+    delete this->competitionNameModel;
+    this->competitionNameModel = NULL;
+
+    /* ---------------------------------------------------------------------- *
+     *                      action sur la base de données                     *
+     * ---------------------------------------------------------------------- */
+    bool success = (*dataBaseAction)(dbFilePath);
+
+    this->ui->actionImport->setVisible(success);
+    this->ui->menuExport->menuAction()->setVisible(success);
+    this->on_actionClearAllData_triggered();
+
+    if(!success)
+        return;
+
+    QFileInfo dbFile(QSqlDatabase::database().databaseName());
+    this->setWindowTitle(tr("EcoManager - ") + dbFile.baseName());
+
+    /* ---------------------------------------------------------------------- *
+     *    Rétablir la liste des compétitions en fonction de la nouvelle db    *
+     * ---------------------------------------------------------------------- */
+    this->competitionNameModel = new QSqlTableModel(this);
+    this->competitionNameModel->setTable("COMPETITION");
+    this->competitionNameModel->removeRows(1, 2);
+    this->competitionBox->setModel(this->competitionNameModel);
+    this->competitionNameModel->select();
+    this->reloadRaceView();
+
+    //this->loadSectors(this->currentCompetition); // Si il y en a d'associer, affiche les secteurs
 }

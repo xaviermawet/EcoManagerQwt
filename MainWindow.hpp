@@ -18,6 +18,7 @@
 #include "LapInformationProxyModel.hpp"
 #include "Common/LapInformationTreeModel.hpp"
 #include "LapDataCompartor.hpp"
+#include "Utils/DataBaseManager.hpp"
 
 #include <QtGui>
 #include <QtSql>
@@ -105,6 +106,10 @@ class MainWindow : public QMainWindow
 
         void on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered();
 
+        void on_actionNewProject_triggered();
+
+        void on_actionOpenProject_triggered();
+
 private:
 
         void centerOnScreen(void);
@@ -122,6 +127,9 @@ private:
         void loadSectors(const QString& competitionName);
         void highlightPointInAllView(const QModelIndex& index);
         void removeTrackFromAllView(QMap<QString, QVariant> const& trackId);
+
+        void updateDataBase(QString const& dbFilePath,
+                           bool(*dataBaseAction)(QString const&));
 
     protected:
 
