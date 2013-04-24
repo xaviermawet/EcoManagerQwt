@@ -1002,82 +1002,12 @@ void MainWindow::updateSector(QString competName, int sectNum,
 
 void MainWindow::displayLapInformation(float timeValue, const QVariant &trackId)
 {
-    // Get the race number and the lap number from the trackId
-    QMap<QString, QVariant> trackIdentifier =
-            qvariant_cast< QMap<QString, QVariant> >(trackId);
-    int ref_race = trackIdentifier["race"].toInt();
-    int ref_lap  = trackIdentifier["lap"].toInt();
-
-    /* tiemeValue passé en paramètre est exprimé en secondes mais les timestamp
-     * sauvées dans la base de données sont en millisecondes */
-    int timestamp = timeValue * 1000;
-    qDebug() << "timeValue = " << timeValue;
-    qDebug() << "timestamp = " << timestamp;
-
-    // Récupérer les informations de temps et de vitesses
-    QSqlQuery query;
-    query.prepare("select timestamp, value from SPEED where timestamp <= ? and ref_lap_race = ? and ref_lap_num = ? order by timestamp");
-    query.addBindValue(timestamp);
-    query.addBindValue(ref_race);
-    query.addBindValue(ref_lap);
-
-    if (!query.exec())
-    {
-        QString errorMsg("Impossible de récupérer les données numériques "
-                         "associées à votre sélection pour le tour " +
-                         QString::number(ref_lap) + " de la course " +
-                         QString::number(ref_race));
-        QMessageBox::warning(this, tr("Erreur de récupération de données"),
-                             tr(errorMsg.toStdString().c_str()));
-        return;
-    }
-
-    double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
-    double time(0),  lastTime(0);
-    double speed(0), lastSpeed(0);
-    double pos(wheelPerimeter),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
-
-    // Boucle de calcul de la distance parcourue jusqu'au temps timeValue
-    while(query.next())
-    {
-        lastTime = time;
-        lastSpeed = speed;
-        lastPos = pos;
-
-        time  = query.value(0).toFloat() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
-        speed = query.value(1).toDouble();
-
-        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
-        pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
-
-        //qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
-    }
-
-    // Calcul de l'accélération
-    qreal diff = (speed -lastSpeed) / 3.6; // vitesse en m/s
-    qreal acc = diff / (time - lastTime);
-
-    QList<QVariant> lapData;
-    lapData.append(QVariant());
-    lapData.append(timestamp); // Tps (ms)
-    lapData.append(time);      // Tps (s)
-    lapData.append(pos);       // Dist (m)
-    lapData.append(speed);     // V (km\h)
-    lapData.append(qAbs(acc) > 2 ? "NS" : QString::number(acc)); // Acc (m\s²)
-    lapData.append("RPM");     // RPM
-    lapData.append("PW");      // PW
-
-    this->raceInformationTableModel->addRaceInformation(ref_race, ref_lap, lapData);
-    this->ui->raceTable->expandAll();
+    this->displayLapInformation(timeValue, timeValue, trackId);
 }
 
-void MainWindow::displayLapInformation(float lowerTimeValue,
-                                       float upperTimeValue,
-                                       const QVariant &trackId)
+void MainWindow::displayLapInformation(
+        float lowerTimeValue, float upperTimeValue, const QVariant &trackId)
 {
-    // Remove laps information from the table
-    //this->raceInformationTableModel->removeRows(0, this->raceInformationTableModel->rowCount());
-
     // Get the race number and the lap number from the trackId
     QMap<QString, QVariant> trackIdentifier =
             qvariant_cast< QMap<QString, QVariant> >(trackId);
@@ -1125,8 +1055,6 @@ void MainWindow::displayLapInformation(float lowerTimeValue,
 
         int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
         pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
-
-        //qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
 
         // Données a afficher dans le tableau
         if(time >= lowerTimeValue)
