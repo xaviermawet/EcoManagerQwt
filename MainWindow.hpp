@@ -124,6 +124,8 @@ class MainWindow : public QMainWindow
         void updateDataBase(QString const& dbFilePath,
                            bool(*dataBaseAction)(QString const&));
 
+        double getCurrentCompetitionWheelPerimeter(void) const;
+
     protected:
 
         virtual void closeEvent(QCloseEvent* event);

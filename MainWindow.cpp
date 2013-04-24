@@ -1032,9 +1032,10 @@ void MainWindow::displayLapInformation(float timeValue, const QVariant &trackId)
         return;
     }
 
+    double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
     double time(0),  lastTime(0);
     double speed(0), lastSpeed(0);
-    double pos(1.5),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
+    double pos(wheelPerimeter),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
 
     // Boucle de calcul de la distance parcourue jusqu'au temps timeValue
     while(query.next())
@@ -1046,8 +1047,8 @@ void MainWindow::displayLapInformation(float timeValue, const QVariant &trackId)
         time  = query.value(0).toFloat() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
         speed = query.value(1).toDouble();
 
-        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / 1.5;
-        pos = lastPos + multipleWheelPerimeter * 1.5;
+        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
+        pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
 
         //qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
     }
@@ -1107,29 +1108,29 @@ void MainWindow::displayLapInformation(float lowerTimeValue,
         return;
     }
 
+    double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
     double time(0),  lastTime(0);
     double speed(0), lastSpeed(0);
-    double pos(1.5),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
+    double pos(wheelPerimeter),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
     QList< QList<QVariant> > lapDataList;
 
     while(query.next())
     {
-        lastTime = time;
+        lastTime  = time;
         lastSpeed = speed;
-        lastPos = pos;
+        lastPos   = pos;
 
         time  = query.value(0).toFloat() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
         speed = query.value(1).toDouble();
 
-        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / 1.5;
-        pos = lastPos + multipleWheelPerimeter * 1.5;
+        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
+        pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
 
         //qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
 
         // Données a afficher dans le tableau
         if(time >= lowerTimeValue)
         {
-            // Calcul de l'accélération FIXME : ne pas oublier de vérifier si c'est pas le premier point, dans ce cas, le calcul de l'accélération est impossible !!!!
             qreal diff = (speed -lastSpeed) / 3.6; // vitesse en m/s
             qreal acc  = diff / (time - lastTime);
 
@@ -1268,7 +1269,8 @@ void MainWindow::createToolsBar(void)
 
     this->competitionNameModel = new QSqlTableModel(this);
     this->competitionNameModel->setTable("COMPETITION");
-    this->competitionNameModel->removeRows(1, 2);
+    //this->competitionNameModel->removeRows(1, 2);
+    this->competitionNameModel->removeRow(2); // Lieu
 
     // Create a comboBox used to selecting a competition
     this->competitionBox = new QComboBox();
@@ -1510,8 +1512,10 @@ void MainWindow::displayDataLap(void)
             QList<IndexedPosition> dAccPoints;      // Liste des points de l'accélération par rapport à la distance
             QList<IndexedPosition> tAccPoints;      // Liste des points de l'accélération par rapport au temps
             QPointF lastSpeed(0,0); // Modifié
+
+            double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
             int count = 0;
-            double lastPos = 1.5;
+            double lastPos = wheelPerimeter;
 
             while (speedQuery.next())
             {
@@ -1532,8 +1536,8 @@ void MainWindow::displayDataLap(void)
 
 //                    if (qAbs(acc) < 2 && (time - lastSpeed.x()) < 1)
 //                    {
-                        int multipleWheelPerimeter = ceil(((speed + lastSpeed.y()) / (2 * 3.6)) * (time - lastSpeed.x())) / 1.5;
-                        pos = lastPos + multipleWheelPerimeter * 1.5;
+                        int multipleWheelPerimeter = ceil(((speed + lastSpeed.y()) / (2 * 3.6)) * (time - lastSpeed.x())) / wheelPerimeter;
+                        pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
 
                         //qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
 
@@ -1888,10 +1892,17 @@ void MainWindow::updateDataBase(QString const& dbFilePath,
      * ---------------------------------------------------------------------- */
     this->competitionNameModel = new QSqlTableModel(this);
     this->competitionNameModel->setTable("COMPETITION");
-    this->competitionNameModel->removeRows(1, 2);
+    //this->competitionNameModel->removeRows(1, 2);
+    this->competitionNameModel->removeRow(1); // Lieu
     this->competitionBox->setModel(this->competitionNameModel);
     this->competitionNameModel->select();
     this->reloadRaceView();
+}
+
+double MainWindow::getCurrentCompetitionWheelPerimeter(void) const
+{
+    return this->competitionNameModel->index(
+                this->competitionBox->currentIndex(), 2).data().toDouble();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
