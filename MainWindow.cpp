@@ -21,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
         this->ui->menuExport->menuAction()->setVisible(false);
     }
 
-
     // Building of the parts of the MainWindow
     this->createRaceView();
     this->createRaceTable();
@@ -181,8 +180,7 @@ void MainWindow::on_actionExportData_triggered(void)
 }
 
 /* Event that occured when the user double click on a race tree view item
- * Only lap can be double-clicked
- */
+ * Only lap can be double-clicked */
 void MainWindow::on_raceView_doubleClicked(const QModelIndex& index)
 {
     Q_UNUSED(index);
@@ -190,14 +188,10 @@ void MainWindow::on_raceView_doubleClicked(const QModelIndex& index)
     // Check if a valid row has been double clicked
     QModelIndexList rowsSelected = this->ui->raceView->selectionModel()->selectedRows();
     if (rowsSelected.count() <= 0)
-    {
         QMessageBox::information(this, tr("Erreur"),
                                  tr("Vous devez double-cliquer sur un tour"));
-    }
     else
-    {
         this->displayDataLap();
-    }
 }
 
 // chooseSampleLap
@@ -329,13 +323,8 @@ void MainWindow::on_actionSaveCurrentLayout_triggered(void)
                 this, tr("Sauvegarde de la disposition courante"),
                 tr("Choisissez l'emplacement dans lequel sauver la disposition "
                    "courante"), listSavedLayouts, 0, false, &ok);
-
     if (!ok)
-    {
-        QMessageBox::warning(this, tr("Action annulée"),
-                             tr("La sauvegarde de la disposition courante à été annulée"));
         return;
-    }
 
     // Sauvegarde des paramètres d'affichage
     this->writeSettings(layoutSelected);
@@ -489,10 +478,8 @@ void MainWindow::on_menuLapDataTable_aboutToShow(void)
 
 void MainWindow::on_actionLapDataSelectAll_triggered(bool checked)
 {
-    if (checked)
-        this->ui->raceTable->selectAll();
-    else
-        this->ui->raceTable->clearSelection();
+    checked ? this->ui->raceTable->selectAll() :
+              this->ui->raceTable->clearSelection();
 }
 
 void MainWindow::on_actionLapDataDrawSectors_triggered(void)
@@ -645,12 +632,7 @@ void MainWindow::on_actionRaceViewExportLapDataInCSV_triggered(void)
     /* Vérifie que l'identifiant de l'élément séléctionné dans la liste des
      * courses est bien celui d'un tour. A savoir un QMap<QString, QVariant> */
     if(!this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
-    {
-        qDebug() << "Impossible de convertir le raceViewItemidentifier en "
-                    "QMap<QString, QVariant>. Le QVariant contient surement "
-                    "une valeur d'un autre type";
         return;
-    }
 
     // Récupère l'identifiant du tour sélectionné
     QMap<QString, QVariant> trackIdentifier =
@@ -761,6 +743,165 @@ void MainWindow::on_actionDeleteCurrentCompetition_triggered(void)
     // Met à jour le combobox avec toutes les compétition et supprimera tout ce qui est affiché
     this->competitionNameModel->select();
     this->ui->sectorView->setVisible(false);
+}
+
+void MainWindow::on_actionNewProject_triggered(void)
+{
+    QString dbFilePath = QFileDialog::getSaveFileName(
+          this, tr("Choisissez l'endroit ou sauvegarder les données du projet"),
+                QDir::homePath(), tr("Projet EcoManager (*.db)"));
+
+    if(dbFilePath.isEmpty()) // User canceled
+        return;
+
+    this->updateDataBase(dbFilePath, DataBaseManager::createDataBase);
+}
+
+void MainWindow::on_actionOpenProject_triggered(void)
+{
+    QString dbFilePath = QFileDialog::getOpenFileName(
+                this, tr("Ouvrir un projet EcoMotion"), QDir::homePath(),
+                tr("Projet EcoManager (*.db)"));
+
+    if (dbFilePath.isEmpty()) // User canceled
+        return;
+
+    this->updateDataBase(dbFilePath, DataBaseManager::openExistingDataBase);
+}
+
+void MainWindow::on_actionCompter_le_nombre_de_tours_triggered(void)
+{
+    QSqlQuery cptTours2("SELECT COUNT(*) FROM LAP");
+    if (!cptTours2.exec())
+    {
+        qDebug() << "Erreur compte tours : " << cptTours2.lastError();
+        return;
+    }
+
+    if (cptTours2.next())
+        qDebug() << "Nombre de tours dans la db = " << cptTours2.value(0).toString();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+}
+
+void MainWindow::on_actionCompter_le_nombre_de_courses_triggered(void)
+{
+    QSqlQuery cptRace("SELECT COUNT(*) FROM race");
+    if (!cptRace.exec())
+    {
+        qDebug() << "Erreur compte race : " << cptRace.lastError();
+        return;
+    }
+
+    if (cptRace.next())
+        qDebug() << "Nombre de race dans la db = " << cptRace.value(0).toString();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+}
+
+void MainWindow::on_actionPRAGMA_foreign_keys_triggered(void)
+{
+    QSqlQuery query("PRAGMA foreign_keys");
+    if (!query.exec())
+    {
+        qDebug() << "Erreur PRAGMA foreign_keys : " << query.lastError();
+        return;
+    }
+
+    if (query.next())
+        qDebug() << "PRAGMA foreign_keys = " << query.value(0).toBool();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+
+    // PRAGMA foreign_keys = ON;
+    QSqlQuery set("PRAGMA foreign_keys = ON");
+    if (!set.exec())
+    {
+        qDebug() << "Erreur PRAGMA foreign_keys = ON : " << set.lastError();
+        return;
+    }
+
+    if (!query.exec())
+    {
+        qDebug() << "Erreur PRAGMA foreign_keys : " << query.lastError();
+        return;
+    }
+
+    if (query.next())
+        qDebug() << "PRAGMA foreign_keys = " << query.value(0).toBool();
+    else
+        qDebug() << "La requete n'a retourné aucun résultat ...";
+}
+
+void MainWindow::removeTrackFromAllView(QMap<QString, QVariant> const& trackId)
+{
+    if (this->mapFrame->scene()->removeTrack(trackId))
+        qDebug() << "mapping Supprimé !!!";
+    if (this->distancePlotFrame->scene()->removeCurves(trackId))
+        qDebug() << "distance supprimé !!!";
+    if (this->timePlotFrame->scene()->removeCurves(trackId))
+        qDebug() << "time supprimé !!!";
+
+    this->currentTracksDisplayed.removeOne(trackId);
+}
+
+void MainWindow::on_actionListing_des_courses_triggered(void)
+{
+    QSqlQuery set("SELECT * FROM RACE");
+    if (!set.exec())
+    {
+        qDebug() << "Erreur listing : " << set.lastError();
+        return;
+    }
+
+    while(set.next())
+    {
+        qDebug() << "-----------------------------------";
+        qDebug() << "id = " << set.value(0).toInt();
+        qDebug() << "num = " << set.value(1).toInt();
+    }
+}
+
+void MainWindow::on_actionListing_des_competitions_triggered(void)
+{
+    QSqlQuery listing("SELECT name FROM COMPETITION");
+    if (!listing.exec())
+    {
+        qDebug() << "Erreur listing competition : " << listing.lastError().text();
+    }
+
+    qDebug() << "----------- COMPETITIONS ------------------------";
+    while(listing.next())
+        qDebug() << listing.value(0).toString();
+}
+
+void MainWindow::on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered(void)
+{
+    QSqlQuery tableNames("select tbl_name from sqlite_master;");
+    if(!tableNames.exec())
+    {
+        qDebug() << "Erreur lors du listing des tables : " << tableNames.lastError().text();
+        return;
+    }
+
+    // Affichage du nom de toutes les tables
+    qDebug() << "Toutes les tables de la base de données : ";
+    qDebug() << "-----------------------------------------------";
+    while(tableNames.next())
+    {
+        QString tableName = tableNames.value(0).toString();
+        QSqlQuery cpt("SELECT COUNT(*) FROM " + tableName);
+
+        if (!cpt.exec())
+        {
+            qDebug() << tableName << " impossible de compter le nombre de tuples : "
+                     << cpt.lastError().text();
+            return;
+        }
+
+        if (cpt.next())
+            qDebug() << tableName << " a " << cpt.value(0).toInt() << " tuples";
+    }
 }
 
 void MainWindow::loadCompetition(int index)
@@ -1713,173 +1854,6 @@ void MainWindow::highlightPointInAllView(const QModelIndex &index)
     this->distancePlotFrame->scene()->highlightPoint(time, trackId);
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-    // Save the state of the mainWindow and its widgets
-    this->writeSettings("MainWindow");
-
-    QMainWindow::closeEvent(event);
-}
-
-void MainWindow::on_actionCompter_le_nombre_de_tours_triggered()
-{
-    QSqlQuery cptTours2("SELECT COUNT(*) FROM LAP");
-    if (!cptTours2.exec())
-    {
-        qDebug() << "Erreur compte tours : " << cptTours2.lastError();
-        return;
-    }
-
-    if (cptTours2.next())
-        qDebug() << "Nombre de tours dans la db = " << cptTours2.value(0).toString();
-    else
-        qDebug() << "La requete n'a retourné aucun résultat ...";
-}
-
-void MainWindow::on_actionCompter_le_nombre_de_courses_triggered()
-{
-    QSqlQuery cptRace("SELECT COUNT(*) FROM race");
-    if (!cptRace.exec())
-    {
-        qDebug() << "Erreur compte race : " << cptRace.lastError();
-        return;
-    }
-
-    if (cptRace.next())
-        qDebug() << "Nombre de race dans la db = " << cptRace.value(0).toString();
-    else
-        qDebug() << "La requete n'a retourné aucun résultat ...";
-}
-
-void MainWindow::on_actionPRAGMA_foreign_keys_triggered()
-{
-    QSqlQuery query("PRAGMA foreign_keys");
-    if (!query.exec())
-    {
-        qDebug() << "Erreur PRAGMA foreign_keys : " << query.lastError();
-        return;
-    }
-
-    if (query.next())
-        qDebug() << "PRAGMA foreign_keys = " << query.value(0).toBool();
-    else
-        qDebug() << "La requete n'a retourné aucun résultat ...";
-
-    // PRAGMA foreign_keys = ON;
-    QSqlQuery set("PRAGMA foreign_keys = ON");
-    if (!set.exec())
-    {
-        qDebug() << "Erreur PRAGMA foreign_keys = ON : " << set.lastError();
-        return;
-    }
-
-    if (!query.exec())
-    {
-        qDebug() << "Erreur PRAGMA foreign_keys : " << query.lastError();
-        return;
-    }
-
-    if (query.next())
-        qDebug() << "PRAGMA foreign_keys = " << query.value(0).toBool();
-    else
-        qDebug() << "La requete n'a retourné aucun résultat ...";
-}
-
-void MainWindow::removeTrackFromAllView(QMap<QString, QVariant> const& trackId)
-{
-    if (this->mapFrame->scene()->removeTrack(trackId))
-        qDebug() << "mapping Supprimé !!!";
-    if (this->distancePlotFrame->scene()->removeCurves(trackId))
-        qDebug() << "distance supprimé !!!";
-    if (this->timePlotFrame->scene()->removeCurves(trackId))
-        qDebug() << "time supprimé !!!";
-
-    this->currentTracksDisplayed.removeOne(trackId);
-}
-
-void MainWindow::on_actionListing_des_courses_triggered()
-{
-    QSqlQuery set("SELECT * FROM RACE");
-    if (!set.exec())
-    {
-        qDebug() << "Erreur listing : " << set.lastError();
-        return;
-    }
-
-    while(set.next())
-    {
-        qDebug() << "-----------------------------------";
-        qDebug() << "id = " << set.value(0).toInt();
-        qDebug() << "num = " << set.value(1).toInt();
-    }
-}
-
-void MainWindow::on_actionListing_des_competitions_triggered()
-{
-    QSqlQuery listing("SELECT name FROM COMPETITION");
-    if (!listing.exec())
-    {
-        qDebug() << "Erreur listing competition : " << listing.lastError().text();
-    }
-
-    qDebug() << "----------- COMPETITIONS ------------------------";
-    while(listing.next())
-        qDebug() << listing.value(0).toString();
-}
-
-void MainWindow::on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered()
-{
-    QSqlQuery tableNames("select tbl_name from sqlite_master;");
-    if(!tableNames.exec())
-    {
-        qDebug() << "Erreur lors du listing des tables : " << tableNames.lastError().text();
-        return;
-    }
-
-    // Affichage du nom de toutes les tables
-    qDebug() << "Toutes les tables de la base de données : ";
-    qDebug() << "-----------------------------------------------";
-    while(tableNames.next())
-    {
-        QString tableName = tableNames.value(0).toString();
-        QSqlQuery cpt("SELECT COUNT(*) FROM " + tableName);
-
-        if (!cpt.exec())
-        {
-            qDebug() << tableName << " impossible de compter le nombre de tuples : "
-                     << cpt.lastError().text();
-            return;
-        }
-
-        if (cpt.next())
-            qDebug() << tableName << " a " << cpt.value(0).toInt() << " tuples";
-    }
-}
-
-void MainWindow::on_actionNewProject_triggered()
-{
-    QString dbFilePath = QFileDialog::getSaveFileName(
-          this, tr("Choisissez l'endroit ou sauvegarder les données du projet"),
-                QDir::homePath(), tr("Projet EcoManager (*.db)"));
-
-    if(dbFilePath.isEmpty()) // User canceled
-        return;
-
-    this->updateDataBase(dbFilePath, DataBaseManager::createDataBase);
-}
-
-void MainWindow::on_actionOpenProject_triggered()
-{
-    QString dbFilePath = QFileDialog::getOpenFileName(
-                this, tr("Ouvrir un projet EcoMotion"), QDir::homePath(),
-                tr("Projet EcoManager (*.db)"));
-
-    if (dbFilePath.isEmpty()) // User canceled
-        return;
-
-    this->updateDataBase(dbFilePath, DataBaseManager::openExistingDataBase);
-}
-
 void MainWindow::updateDataBase(QString const& dbFilePath,
                                bool(*dataBaseAction)(QString const&))
 {
@@ -1918,6 +1892,12 @@ void MainWindow::updateDataBase(QString const& dbFilePath,
     this->competitionBox->setModel(this->competitionNameModel);
     this->competitionNameModel->select();
     this->reloadRaceView();
+}
 
-    //this->loadSectors(this->currentCompetition); // Si il y en a d'associer, affiche les secteurs
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    // Save the state of the mainWindow and its widgets
+    this->writeSettings("MainWindow");
+
+    QMainWindow::closeEvent(event);
 }

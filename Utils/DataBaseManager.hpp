@@ -1,3 +1,13 @@
+/* NOTE:
+ *
+ * QSqlQuery
+ *-----------
+ * If you only need to move forward through the results (e.g., by using next()),
+ * you can use setForwardOnly(), which will save a significant amount of memory
+ * overhead and improve performance on some databases.
+ *
+ */
+
 #ifndef __DATABASEMANAGER_HPP__
 #define __DATABASEMANAGER_HPP__
 

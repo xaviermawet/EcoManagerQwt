@@ -1,7 +1,6 @@
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
 
-#include "ResourceInstaller.hpp"
 #include "Map/MapScene.hpp"
 #include "Map/MapFrame.hpp"
 #include "Plot/PlotFrame.hpp"
@@ -80,6 +79,16 @@ class MainWindow : public QMainWindow
         void on_actionRaceViewDeleteRace_triggered(void);
         void on_actionRaceViewDeleteRacesAtSpecificDate_triggered(void);
         void on_actionDeleteCurrentCompetition_triggered(void);
+        void on_actionNewProject_triggered(void);
+        void on_actionOpenProject_triggered(void);
+
+        // for debug purpose --- should be deleted at the end
+        void on_actionCompter_le_nombre_de_tours_triggered(void);
+        void on_actionCompter_le_nombre_de_courses_triggered(void);
+        void on_actionPRAGMA_foreign_keys_triggered(void);
+        void on_actionListing_des_courses_triggered(void);
+        void on_actionListing_des_competitions_triggered(void);
+        void on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered(void);
 
         // Personal slots
         void loadCompetition(int index);
@@ -94,23 +103,7 @@ class MainWindow : public QMainWindow
         void deleteRace(int raceId);
         void deleteRaces(QVariantList listRaceId);
 
-        void on_actionCompter_le_nombre_de_tours_triggered();
-
-        void on_actionCompter_le_nombre_de_courses_triggered();
-
-        void on_actionPRAGMA_foreign_keys_triggered();
-
-        void on_actionListing_des_courses_triggered();
-
-        void on_actionListing_des_competitions_triggered();
-
-        void on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered();
-
-        void on_actionNewProject_triggered();
-
-        void on_actionOpenProject_triggered();
-
-private:
+    private:
 
         void centerOnScreen(void);
         void createRaceView(void);

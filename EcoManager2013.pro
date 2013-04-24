@@ -14,7 +14,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    ResourceInstaller.cpp \
     CompetitionEntryDialog.cpp \
     Map/SampleLapViewer.cpp \
     Map/MapView.cpp \
@@ -43,9 +42,6 @@ SOURCES += main.cpp\
     Common/HierarchicalProxyModel.cpp \
     Common/GroupProxyModel.cpp \
     Common/GroupingTreeModel.cpp \
-    Utils/CSVParser.cpp \
-    Utils/CSVParser2.cpp \
-    Utils/Exception.cpp \
     CompetitionProxyModel.cpp \
     Plot/Scale.cpp \
     Plot/HorizontalScale.cpp \
@@ -62,10 +58,10 @@ SOURCES += main.cpp\
     LapDataCompartor.cpp \
     Plot/PlotPrintDialog.cpp \
     Utils/QException.cpp \
-    Utils/DataBaseManager.cpp
+    Utils/DataBaseManager.cpp \
+    Utils/QCSVParser.cpp
 
 HEADERS  += MainWindow.hpp \
-    ResourceInstaller.hpp \
     CompetitionEntryDialog.hpp \
     Map/SampleLapViewer.hpp \
     Map/MapView.hpp \
@@ -94,9 +90,6 @@ HEADERS  += MainWindow.hpp \
     Common/HierarchicalProxyModel.hpp \
     Common/GroupProxyModel.hpp \
     Common/GroupingTreeModel.hpp \
-    Utils/CSVParser.hpp \
-    Utils/CSVParser2.hpp \
-    Utils/Exception.hpp \
     CompetitionProxyModel.hpp \
     Plot/Scale.hpp \
     Plot/HorizontalScale.hpp \
@@ -113,7 +106,8 @@ HEADERS  += MainWindow.hpp \
     LapDataCompartor.hpp \
     Plot/PlotPrintDialog.hpp \
     Utils/QException.hpp \
-    Utils/DataBaseManager.hpp
+    Utils/DataBaseManager.hpp \
+    Utils/QCSVParser.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \
