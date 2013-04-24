@@ -9,7 +9,8 @@
 
 #include "QException.hpp"
 
-#define DEFAULT_BEHAVIOR QString::KeepEmptyParts
+#define DEFAULT_BEHAVIOR    QString::SkipEmptyParts
+#define DEFAULT_SEPARATOR   ';'
 
 // TYPE DEFINITIONS
 typedef QVector<QString> QCSVRow;
@@ -20,18 +21,18 @@ class QCSVParser
 {
     public:
 
-        QCSVParser(void);
         explicit QCSVParser(const QString& filename,
-                            const QChar& separator = ',',
+                            const QChar& separator = DEFAULT_SEPARATOR,
                             QString::SplitBehavior behavior = DEFAULT_BEHAVIOR);
         explicit QCSVParser(QFile& file,
-                            const QChar& separator = ',',
+                            const QChar& separator = DEFAULT_SEPARATOR,
                             QString::SplitBehavior behavior = DEFAULT_BEHAVIOR);
         ~QCSVParser(void);
 
-        void parse(const QString& filename, const QChar& separator = ',',
+        void parse(const QString& filename,
+                   const QChar& separator = DEFAULT_SEPARATOR,
                    QString::SplitBehavior behavior = DEFAULT_BEHAVIOR);
-        void parse(QFile& file, const QChar& separator = ',',
+        void parse(QFile& file, const QChar& separator = DEFAULT_SEPARATOR,
                    QString::SplitBehavior behavior = DEFAULT_BEHAVIOR);
         void save(void) const;
 

@@ -361,7 +361,7 @@
      <addaction name="actionLapDataComparaison"/>
      <addaction name="actionLapDataDrawSectors"/>
      <addaction name="actionLapDataDisplayInAllViews"/>
-     <addaction name="actionLapDataRemoveFromAllViews"/>
+     <addaction name="actionLapDataExportToCSV"/>
      <addaction name="separator"/>
      <addaction name="actionLapDataEraseTable"/>
      <addaction name="actionLapDataTableResizeToContents"/>
@@ -723,13 +723,16 @@
     <string>Afficher dans toutes les vues</string>
    </property>
   </action>
-  <action name="actionLapDataRemoveFromAllViews">
+  <action name="actionLapDataExportToCSV">
    <property name="icon">
     <iconset resource="Resources.qrc">
-     <normaloff>:/Resources/Icons/less.png</normaloff>:/Resources/Icons/less.png</iconset>
+     <normaloff>:/Resources/Icons/upload.png</normaloff>:/Resources/Icons/upload.png</iconset>
    </property>
    <property name="text">
-    <string>Retirer les données de toutes les vues</string>
+    <string>Exporter dans un fichier CSV</string>
+   </property>
+   <property name="toolTip">
+    <string>Exporter les données dans un fichier CSV</string>
    </property>
   </action>
   <action name="actionLapDataDrawSectors">

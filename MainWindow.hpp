@@ -18,9 +18,11 @@
 #include "Common/LapInformationTreeModel.hpp"
 #include "LapDataCompartor.hpp"
 #include "Utils/DataBaseManager.hpp"
+#include "Utils/QCSVParser.hpp"
 
 #include <QtGui>
 #include <QtSql>
+#include <float.h>
 
 namespace Ui {
 class MainWindow;
@@ -72,6 +74,7 @@ class MainWindow : public QMainWindow
         void on_actionLapDataSelectAll_triggered(bool checked);
         void on_actionLapDataDrawSectors_triggered(void);
         void on_actionLapDataDisplayInAllViews_triggered(void);
+        void on_actionLapDataExportToCSV_triggered(void);
         void on_menuEditRaceView_aboutToShow(void);
         void on_actionRaceViewDisplayLap_triggered(void);
         void on_actionRaceViewRemoveLap_triggered(void);
@@ -125,6 +128,14 @@ class MainWindow : public QMainWindow
                            bool(*dataBaseAction)(QString const&));
 
         double getCurrentCompetitionWheelPerimeter(void) const;
+
+        // TODO : Jeter une exception avec le message d'erreur au lieu d'un bool
+        bool getAllDataFromSpeed(
+                const TrackIdentifier& trackId, float lowerTimeValue,
+                float upperTimeValue, QList< QList<QVariant> >& data);
+
+        void exportLapDataToCSV(const TrackIdentifier& trackId,
+                                float lowerTimeValue, float upperTimeValue);
 
     protected:
 

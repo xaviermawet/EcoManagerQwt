@@ -1,11 +1,5 @@
 #include "QCSVParser.hpp"
 
-QCSVParser::QCSVParser() :
-    _fileName(), _separator(), _behavior(DEFAULT_BEHAVIOR)
-{
-
-}
-
 QCSVParser::QCSVParser(const QString &filename, const QChar &separator,
                        QString::SplitBehavior behavior) :
     _fileName(filename), _separator(separator), _behavior(behavior)
@@ -214,13 +208,13 @@ QCSVColumn& QCSVParser::operator [](int column)
 
 void QCSVParser::writeRow(QTextStream& out, const QCSVRow& row) const
 {
-    /*
     for (int i(0); i < row.count() - 1; ++i)
         out << row.at(i) << this->_separator;
-    out << row.at(row.count() - 1);
-    */
+    out << row.at(row.count() - 1) << endl;
 
+    /*
     for (int i(0); i < row.count(); ++i)
         out << row.at(i) << this->_separator;
     out << endl;
+    */
 }

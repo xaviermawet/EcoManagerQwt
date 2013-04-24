@@ -467,7 +467,7 @@ void MainWindow::on_menuLapDataTable_aboutToShow(void)
     this->ui->actionLapDataDisplayInAllViews->setVisible(multipleRowsSelected);
 
     // Retirer les données sélectionnées (du tableau et des vues)
-    this->ui->actionLapDataRemoveFromAllViews->setVisible(multipleRowsSelected);
+    this->ui->actionLapDataExportToCSV->setVisible(comparaisonVisible);
 
     /* On ne porpose de faire une comparaison entre deux données du tableau
      * si et seulement si ce sont des données issues d'une meme course et
@@ -537,6 +537,43 @@ void MainWindow::on_actionLapDataDisplayInAllViews_triggered(void)
     // Mise en évidence de tous les points sélectionnés dans toutes les vues
     foreach (QModelIndex index, rowsSelectedIndexes)
         this->highlightPointInAllView(index);
+}
+
+void MainWindow::on_actionLapDataExportToCSV_triggered(void)
+{
+    QModelIndexList rowsSelectedIndexes =
+            this->ui->raceTable->selectionModel()->selectedRows();
+
+    if (rowsSelectedIndexes.count() != 2)
+        return;
+
+    int lapNum, raceNum;
+    QModelIndex LapNumModelIndex;
+    QModelIndex RaceNumModelIndex;
+
+    // Get lap and race num for the first selected item
+    LapNumModelIndex  = rowsSelectedIndexes.at(0).parent();
+    RaceNumModelIndex = LapNumModelIndex.parent();
+
+    lapNum = this->raceInformationTableModel->data(
+                this->raceInformationTableModel->index(LapNumModelIndex.row(),
+                                                 0, RaceNumModelIndex)).toInt();
+    raceNum = this->raceInformationTableModel->data(
+                this->raceInformationTableModel->index(RaceNumModelIndex.row(),
+                                                       0)).toInt();
+
+    // Create trackidentifier
+    TrackIdentifier trackId;
+    trackId["race"] = raceNum;
+    trackId["lap"]  = lapNum;
+
+    float time1 = this->raceInformationTableModel->rowData(
+                rowsSelectedIndexes.at(0)).at(2).toFloat();
+
+    float time2 = this->raceInformationTableModel->rowData(
+                rowsSelectedIndexes.at(1)).at(2).toFloat();
+
+    this->exportLapDataToCSV(trackId, qMin(time1, time2), qMax(time1, time2));
 }
 
 void MainWindow::on_menuEditRaceView_aboutToShow(void)
@@ -635,13 +672,10 @@ void MainWindow::on_actionRaceViewExportLapDataInCSV_triggered(void)
         return;
 
     // Récupère l'identifiant du tour sélectionné
-    QMap<QString, QVariant> trackIdentifier =
+    TrackIdentifier trackIdentifier =
             this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
 
-    QMessageBox::information(
-                this, "exportation des données", "exportation des données pour "
-                "la course " + QString::number(trackIdentifier["race"].toInt())
-            + " tour " + QString::number(trackIdentifier["lap"].toInt()));
+    this->exportLapDataToCSV(trackIdentifier, 0, 10000);
 }
 
 void MainWindow::on_actionRaceViewRemoveLap_triggered(void)
@@ -1014,68 +1048,17 @@ void MainWindow::displayLapInformation(
     int ref_race = trackIdentifier["race"].toInt();
     int ref_lap  = trackIdentifier["lap"].toInt();
 
-    qDebug() << "Afficher les données pour  Race = " << ref_race << " LAP = " << ref_lap;
-
-    /* upperTimeValue passé en paramètre est exprimé en secondes mais les
-     * timestamp sauvées dans la base de données sont en millisecondes */
-    int upperTimeStamp = upperTimeValue * 1000;
-
-    // Récupérer les informations de temps et de vitesses
-    QSqlQuery query;
-    query.prepare("select timestamp, value from SPEED where timestamp <= ? and ref_lap_race = ? and ref_lap_num = ? order by timestamp");
-    query.addBindValue(upperTimeStamp);
-    query.addBindValue(ref_race);
-    query.addBindValue(ref_lap);
-
-    if (!query.exec())
-    {
-        QString errorMsg("Impossible de récupérer les données numériques "
-                         "associées à votre sélection pour le tour " +
-                         QString::number(ref_lap) + " de la course " +
-                         QString::number(ref_race));
-        QMessageBox::warning(this, tr("Erreur de récupération de données"),
-                             tr(errorMsg.toStdString().c_str()));
-        return;
-    }
-
-    double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
-    double time(0),  lastTime(0);
-    double speed(0), lastSpeed(0);
-    double pos(wheelPerimeter),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
+    // Calcul de tous les paramètres (vitesses, distances, ...)
     QList< QList<QVariant> > lapDataList;
+    if (!this->getAllDataFromSpeed(trackIdentifier, lowerTimeValue,
+                                   upperTimeValue, lapDataList))
+        return;
 
-    while(query.next())
-    {
-        lastTime  = time;
-        lastSpeed = speed;
-        lastPos   = pos;
+    qDebug() << "On a bien récupéré toutes les données calculées : " << lapDataList.count();
 
-        time  = query.value(0).toFloat() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
-        speed = query.value(1).toDouble();
-
-        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
-        pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
-
-        // Données a afficher dans le tableau
-        if(time >= lowerTimeValue)
-        {
-            qreal diff = (speed -lastSpeed) / 3.6; // vitesse en m/s
-            qreal acc  = diff / (time - lastTime);
-
-            QList<QVariant> lapData;
-            lapData.append(QVariant());
-            lapData.append(time * 1000); // Tps (ms)
-            lapData.append(time);        // Tps (s)
-            lapData.append(pos);         // Dist (m)
-            lapData.append(speed);       // V (km\h)
-            lapData.append(qAbs(acc) > 2 ? "NS" : QString::number(acc)); // Acc (m\s²)
-            lapData.append("RPM");       // RPM
-            lapData.append("PW");        // PW
-
-            // Ajout de la ligne de données à la liste
-            lapDataList.append(lapData);
-        }
-    }
+    // Ajout d'une première donnée vide à chaque élément
+    for(int i(0); i < lapDataList.count(); ++i)
+        lapDataList[i].insert(0, QVariant());
 
     // Ajout des données dans le tableau
     this->raceInformationTableModel->addMultipleRaceInformation(
@@ -1831,6 +1814,133 @@ double MainWindow::getCurrentCompetitionWheelPerimeter(void) const
 {
     return this->competitionNameModel->index(
                 this->competitionBox->currentIndex(), 2).data().toDouble();
+}
+
+bool MainWindow::getAllDataFromSpeed(
+        const TrackIdentifier& trackId, float lowerTimeValue,
+        float upperTimeValue, QList< QList<QVariant> >& data)
+{
+    // Get the race number and the lap number from the trackId
+    int ref_race = trackId["race"].toInt();
+    int ref_lap  = trackId["lap"].toInt();
+
+    qDebug() << "Calcul de toutes les données pour le tour " << ref_lap << " de la course " << ref_race;
+    qDebug() << "lower = " << lowerTimeValue;
+    qDebug() << "upper = " << upperTimeValue;
+
+    /* upperTimeValue passé en paramètre est exprimé en secondes mais les
+     * timestamp sauvées dans la base de données sont en millisecondes */
+    int upperTimeStamp = upperTimeValue * 1000;
+
+    // Récupérer les informations de temps et de vitesses
+    QSqlQuery query;
+    query.prepare("select timestamp, value from SPEED where timestamp <= ? and ref_lap_race = ? and ref_lap_num = ? order by timestamp");
+    query.addBindValue(upperTimeStamp);
+    query.addBindValue(ref_race);
+    query.addBindValue(ref_lap);
+
+    if (!query.exec())
+    {
+        QString errorMsg("Impossible de récupérer les données numériques "
+                         "associées à votre sélection pour le tour " +
+                         QString::number(ref_lap) + " de la course " +
+                         QString::number(ref_race));
+        QMessageBox::warning(this, tr("Erreur de récupération de données"),
+                             tr(errorMsg.toStdString().c_str()));
+        return false;
+    }
+
+    double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
+    double time(0),  lastTime(0);
+    double speed(0), lastSpeed(0);
+    double pos(wheelPerimeter),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
+
+    while(query.next())
+    {
+        lastTime  = time;
+        lastSpeed = speed;
+        lastPos   = pos;
+
+        time  = query.value(0).toFloat() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
+        speed = query.value(1).toDouble();
+
+        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
+        pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
+
+        // Données a afficher dans le tableau
+        if(time >= lowerTimeValue)
+        {
+            qreal diff = (speed -lastSpeed) / 3.6; // vitesse en m/s
+            qreal acc  = diff / (time - lastTime);
+
+            QList<QVariant> lapData;
+            lapData.append(time * 1000); // Tps (ms)
+            lapData.append(time);        // Tps (s)
+            lapData.append(pos);         // Dist (m)
+            lapData.append(speed);       // V (km\h)
+            lapData.append(qAbs(acc) > 2 ? "NS" : QString::number(acc)); // Acc (m\s²)
+            lapData.append("RPM");       // RPM
+            lapData.append("PW");        // PW
+
+            // Ajout de la ligne de données à la liste
+            data.append(lapData);
+        }
+    }
+
+    qDebug() << "Nombre de données calculées = " << data.count();
+
+    return true;
+}
+
+void MainWindow::exportLapDataToCSV(const TrackIdentifier &trackId,
+                                    float lowerTimeValue, float upperTimeValue)
+{
+    qDebug() << "lower = " << lowerTimeValue;
+
+    // Demander le fichier ou sauver les données
+    QString filepath = QFileDialog::getSaveFileName(
+                this, tr("Choisir où sauvegarder les données du tour"),
+                QDir::homePath(), tr("Fichier CSV (*.csv)"));
+
+    if (filepath.isEmpty()) // User canceled
+        return;
+
+    // Supprime le fichier s'il existe
+    QFile file(filepath);
+    if(file.exists())
+        file.remove();
+
+    // Calcule toutes les données à mettre dans le fichier csv
+    QList< QList<QVariant> > lapdata;
+    if (!this->getAllDataFromSpeed(
+                trackId, lowerTimeValue, upperTimeValue, lapdata))
+    {
+        QMessageBox::warning(this, tr("Impossible d'exporter les données"),
+                             tr("Erreur lors de la récupération des données"));
+        return;
+    }
+
+    // Converti toutes les données QVariant en QString
+    QList<QCSVRow> data;
+    foreach (QList<QVariant> dataRow, lapdata)
+    {
+        QCSVRow row;
+        foreach (QVariant variantData, dataRow)
+            row.append(variantData.toString());
+
+        data.append(row);
+    }
+
+    // Sauvegarde toutes les données dans le fichier csv
+    QCSVRow header;
+    header << "Temps (ms)" << "Temps (s)" << "Distance (m)" << "V (km\\h)"
+           << "Accélération (m\\s²)" << "RPM" << "PW";
+
+    QCSVParser csvParser(filepath);
+    csvParser.addRow(header);
+    for(int i(0); i < data.count(); ++i)
+        csvParser.addRow(data.at(i));
+    csvParser.save();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
