@@ -1420,6 +1420,8 @@ void MainWindow::displayDataLap(void)
         {
             QList<IndexedPosition> distSpeedPoints; // liste des points de la vitesse par rapport à la distance
             QList<IndexedPosition> timeSpeedPoints; // Liste des points de la vitesse par rapport au temps
+//            QList<IndexedPosition> distSpeedPoints2; // liste des points de la vitesse par rapport à la distance
+//            QList<IndexedPosition> timeSpeedPoints2; // Liste des points de la vitesse par rapport au temps
             QList<IndexedPosition> dAccPoints;      // Liste des points de l'accélération par rapport à la distance
             QList<IndexedPosition> tAccPoints;      // Liste des points de l'accélération par rapport au temps
             QPointF lastSpeed(0,0); // Modifié
@@ -1504,8 +1506,32 @@ void MainWindow::displayDataLap(void)
                 timePlotFrame->addCurve(lineZero);
             }
 */
+
+//            QList<QList<QVariant> > lapdata;
+//            this->getAllDataFromSpeed(trackIdentifier, 0, 10000, lapdata);
+
+//            for(int i(0); i < lapdata.count(); ++i)
+//            {
+//                QList<QVariant> data = lapdata.at(i);
+
+//                IndexedPosition dPoint, tPoint;
+//                dPoint.setIndex(data.at(1).toFloat()); // Tps (s)
+//                tPoint.setIndex(data.at(1).toFloat()); // Tps (s)
+
+//                dPoint.setX(data.at(2).toFloat()); // Dist (m)
+//                dPoint.setY(data.at(3).toFloat() + 1); // V (km\h)
+
+//                tPoint.setX(data.at(1).toFloat()); // Tps (s)
+//                tPoint.setY(data.at(3).toFloat() + 1); // V (km\h)
+
+//                distSpeedPoints2 << dPoint;
+//                timeSpeedPoints2 << tPoint;
+//            }
+
             this->distancePlotFrame->scene()->addCurve(distSpeedPoints, trackIdentifier);//this->distancePlotFrame->addCurve(distSpeedPoints, trackIdentifier);
             this->timePlotFrame->scene()->addCurve(timeSpeedPoints, trackIdentifier);//this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
+//            this->distancePlotFrame->scene()->addCurve(distSpeedPoints2, trackIdentifier);//this->distancePlotFrame->addCurve(distSpeedPoints, trackIdentifier);
+//            this->timePlotFrame->scene()->addCurve(timeSpeedPoints2, trackIdentifier);//this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
 
 //            bool accelerationPositiv = false;
 
@@ -1839,6 +1865,11 @@ bool MainWindow::getAllDataFromSpeed(
     query.addBindValue(ref_race);
     query.addBindValue(ref_lap);
 
+    /* If you only need to move forward through the results (e.g., by using next()),
+     * you can use setForwardOnly(), which will save a significant amount of memory
+     * overhead and improve performance on some databases. */
+    query.setForwardOnly(true);
+
     if (!query.exec())
     {
         QString errorMsg("Impossible de récupérer les données numériques "
@@ -1853,7 +1884,7 @@ bool MainWindow::getAllDataFromSpeed(
     double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
     double time(0),  lastTime(0);
     double speed(0), lastSpeed(0);
-    double pos(wheelPerimeter),   lastPos(0); // FIXME : remplacer par la valeur entrée pour le périmètre
+    double pos(wheelPerimeter),   lastPos(0);
 
     while(query.next())
     {
@@ -1895,8 +1926,6 @@ bool MainWindow::getAllDataFromSpeed(
 void MainWindow::exportLapDataToCSV(const TrackIdentifier &trackId,
                                     float lowerTimeValue, float upperTimeValue)
 {
-    qDebug() << "lower = " << lowerTimeValue;
-
     // Demander le fichier ou sauver les données
     QString filepath = QFileDialog::getSaveFileName(
                 this, tr("Choisir où sauvegarder les données du tour"),
