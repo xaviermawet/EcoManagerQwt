@@ -60,7 +60,9 @@ SOURCES += main.cpp\
     Utils/QException.cpp \
     Utils/DataBaseManager.cpp \
     Utils/QCSVParser.cpp \
-    DBModule/DataBaseImportModule.cpp
+    DBModule/DataBaseImportModule.cpp \
+    Megasquirt/MSDataConverter.cpp \
+    Megasquirt/MSManager.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -109,7 +111,9 @@ HEADERS  += MainWindow.hpp \
     Utils/QException.hpp \
     Utils/DataBaseManager.hpp \
     Utils/QCSVParser.hpp \
-    DBModule/DataBaseImportModule.hpp
+    DBModule/DataBaseImportModule.hpp \
+    Megasquirt/MSDataConverter.hpp \
+    Megasquirt/MSManager.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

@@ -308,7 +308,7 @@ void DataBaseImportModule::loadGPSData(const QString& GPSFilePath, Race &race)
 }
 
 void DataBaseImportModule::loadSpeedData(
-        const QString &speedFilePath, Race &race)
+        const QString &speedFilePath, Race& race)
 {
     qDebug() << "Start loading speed data ...";
 
@@ -388,4 +388,14 @@ void DataBaseImportModule::loadSpeedData(
     query.addBindValue(refNums);
 
     DataBaseManager::execBatch(query, QSqlQuery::ValuesAsColumns);
+}
+
+void DataBaseImportModule::loadMegasquirtData(
+        const QString &megasquirtFilePath, Race &race)
+{
+    qDebug() << "Start loading Megasquirt data...";
+
+    QFile msFile(megasquirtFilePath);
+    if(!msFile.open(QIODevice::ReadOnly))
+        throw QException(tr("Impossible d'ouvrir le fichier ") + megasquirtFilePath);
 }

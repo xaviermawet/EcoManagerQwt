@@ -93,7 +93,7 @@ void MainWindow::on_actionQuit_triggered(void)
 }
 
 // importData
-void MainWindow::on_actionImport_triggered(void)
+void MainWindow::on_actionImport_triggered_old(void)
 {
     QString raceDataDirPath = QFileDialog::getExistingDirectory(this,
               tr("Sélectionnez le dossier contenant les données de la course"));
@@ -133,7 +133,7 @@ void MainWindow::on_actionImport_triggered(void)
     }
 }
 
-void MainWindow::on_actionImport_triggered_old(void)
+void MainWindow::on_actionImport_triggered(void)
 {
     // Select the directory that content race data and enter race information
     CompetitionEntryDialog dial;
@@ -793,6 +793,16 @@ void MainWindow::on_actionRaceViewDeleteRacesAtSpecificDate_triggered()
 void MainWindow::on_actionDeleteCurrentCompetition_triggered(void)
 {
     if (this->currentCompetition.isEmpty())
+        return;
+
+    // Confirmation
+    int confirmation = QMessageBox::warning(
+                this, tr("Confirmation de suppression"),
+                tr("Êtes vous sur de vouloir supprimer la compétition ")
+                + this->currentCompetition + "?",
+                QMessageBox::Yes, QMessageBox::No);
+
+    if(confirmation != QMessageBox::Yes)
         return;
 
     QSqlQuery deleteCompetition;
