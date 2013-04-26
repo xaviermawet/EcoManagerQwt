@@ -128,16 +128,11 @@
         </widget>
         <widget class="QTabWidget" name="plotsTabWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tabDistance">
           <attribute name="title">
            <string>Distance</string>
-          </attribute>
-         </widget>
-         <widget class="QWidget" name="tabDistance">
-          <attribute name="title">
-           <string>Distance 2</string>
           </attribute>
          </widget>
          <widget class="QWidget" name="tabTime">

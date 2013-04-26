@@ -6,7 +6,8 @@
 #include "Plot/PlotFrame.hpp"
 #include "Plot/HorizontalScale.hpp"
 #include "Plot/VerticalScale.hpp"
-#include "DBModule/ImportModule.hpp"
+#include "DBModule/ImportModule.hpp" // ----- a supprimer apres
+#include "DBModule/DataBaseImportModule.hpp"
 #include "CompetitionEntryDialog.hpp"
 #include "CompetitionProxyModel.hpp"
 #include "Common/GroupingTreeModel.hpp"
@@ -47,6 +48,7 @@ class MainWindow : public QMainWindow
         void on_actionAboutQt_triggered(void);
         void on_actionQuit_triggered(void);
         void on_actionImport_triggered(void);
+        void on_actionImport_triggered_old(void);
         void on_actionAboutEcoManager2013_triggered(void);
         void on_actionExportConfigurationModule_triggered(void);
         void on_actionExportData_triggered(void);

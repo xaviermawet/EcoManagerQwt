@@ -5,6 +5,7 @@
 #include "GeoCoordinate.hpp"
 #include "LapDetector.hpp"
 #include "../RaceViewer.hpp"
+#include "../Utils/DataBaseManager.hpp"
 #include <QtGui>
 #include <QtSql>
 

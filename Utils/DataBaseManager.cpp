@@ -50,6 +50,43 @@ bool DataBaseManager::openExistingDataBase(const QDir &destDir,
     return DataBaseManager::openExistingDataBase(destDir.filePath(dbName));
 }
 
+void DataBaseManager::execTransaction(QSqlQuery &query)
+{
+    QSqlDriver* sqlDriver = QSqlDatabase::database().driver();
+
+    sqlDriver->beginTransaction();
+
+    if(!query.exec())
+    {
+        sqlDriver->rollbackTransaction();
+        throw QException(QObject::tr("la requête a échouée : ")
+                         + query.lastQuery() + query.lastError().text());
+    }
+
+    // Try to commit transaction
+    if(!sqlDriver->commitTransaction())
+        throw QException(QObject::tr("la validation des données à échouée"));
+}
+
+void DataBaseManager::execBatch(QSqlQuery &query,
+                                QSqlQuery::BatchExecutionMode mode)
+{
+    QSqlDriver* sqlDriver = QSqlDatabase::database().driver();
+
+    sqlDriver->beginTransaction();
+
+    if(!query.execBatch(mode))
+    {
+        sqlDriver->rollbackTransaction();
+        throw QException(QObject::tr("la requête a échouée : ")
+                         + query.lastQuery() + query.lastError().text());
+    }
+
+    // Try to commit transaction
+    if(!sqlDriver->commitTransaction())
+        throw QException(QObject::tr("la validation des données à échouée"));
+}
+
 bool DataBaseManager::openDataBase(const QString& dataBaseFilePath)
 {
     // Close previous connection if exists

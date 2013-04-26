@@ -59,7 +59,8 @@ SOURCES += main.cpp\
     Plot/PlotPrintDialog.cpp \
     Utils/QException.cpp \
     Utils/DataBaseManager.cpp \
-    Utils/QCSVParser.cpp
+    Utils/QCSVParser.cpp \
+    DBModule/DataBaseImportModule.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -107,7 +108,8 @@ HEADERS  += MainWindow.hpp \
     Plot/PlotPrintDialog.hpp \
     Utils/QException.hpp \
     Utils/DataBaseManager.hpp \
-    Utils/QCSVParser.hpp
+    Utils/QCSVParser.hpp \
+    DBModule/DataBaseImportModule.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

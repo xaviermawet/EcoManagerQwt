@@ -95,6 +95,46 @@ void MainWindow::on_actionQuit_triggered(void)
 // importData
 void MainWindow::on_actionImport_triggered(void)
 {
+    QString raceDataDirPath = QFileDialog::getExistingDirectory(this,
+              tr("Sélectionnez le dossier contenant les données de la course"));
+
+    if (raceDataDirPath.isEmpty()) // User canceled
+        return;
+
+    try
+    {
+        // Manage data importation
+        DataBaseImportModule raceDataImporter;
+        raceDataImporter.checkFolderContent(raceDataDirPath);
+
+        // Set import settings
+        CompetitionEntryDialog dial;
+        if(dial.exec() != QDialog::Accepted) // User canceled
+            return;
+
+        if(dial.isNewlyCreated())
+            // Create new entry for the competition in the database
+            raceDataImporter.createCompetition(dial.competitionName(),
+                                               dial.wheelRadius() / 100.0,
+                                               dial.place());
+
+        Race newRace(dial.competitionName());
+        newRace.setDate(dial.date());
+
+        // Add race data to the data base
+        raceDataImporter.addRace(newRace, raceDataDirPath);
+
+        // Update combobox taht contains the list of competition names
+        this->competitionNameModel->select();
+    }
+    catch(QException const& ex)
+    {
+        QMessageBox::warning(this, tr("Importation annulée"), ex.what());
+    }
+}
+
+void MainWindow::on_actionImport_triggered_old(void)
+{
     // Select the directory that content race data and enter race information
     CompetitionEntryDialog dial;
     QString raceDirectoryPath = QFileDialog::getExistingDirectory(this);
@@ -763,7 +803,7 @@ void MainWindow::on_actionDeleteCurrentCompetition_triggered(void)
 
     if(!deleteCompetition.exec())
     {
-        QSqlDatabase::database().driver()->beginTransaction();
+        QSqlDatabase::database().driver()->rollbackTransaction();
 
         QMessageBox::information(this, tr("Erreur Suppression"),
                                  tr("Impossible de supprimer la compétition ")
@@ -1670,6 +1710,8 @@ void MainWindow::connectSignals(void)
 
 void MainWindow::reloadRaceView(void)
 {
+    qDebug() << "reloadRaceView";
+
     QSqlQueryModel* model = new QSqlQueryModel(this);
     QSqlQuery getAllLaps;
     getAllLaps.prepare("select date, race.num, lap.num, race.id, lap.num "
