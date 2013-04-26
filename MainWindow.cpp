@@ -183,33 +183,41 @@ void MainWindow::on_actionAboutEcoManager2013_triggered(void)
 
 void MainWindow::on_actionExportConfigurationModule_triggered(void)
 {
-    QFileDialog dirChooser(this);
-    dirChooser.setFileMode(QFileDialog::DirectoryOnly);
-
-    if (dirChooser.exec() == QFileDialog::Accepted)
+    try
     {
-        QStringList dirsPaths = dirChooser.selectedFiles();
-        QDir selectedDir(dirsPaths.at(0));
+        // Get all competition names from database
+        QSqlQuery query("SELECT name FROM COMPETITION");
+        if(!query.exec())
+            throw QException(tr("Impossible de récupérer la liste des compétitions"));
 
-        QStringList choices;
-        QSqlQuery query("select name from COMPETITION");
-        query.exec();
+        QStringList competitionNames;
+        while(query.next())
+            competitionNames << query.value(0).toString();
 
-        while (query.next())
-            choices << query.value(0).toString();
+        if (competitionNames.count() == 0)
+            throw QException(tr("Le projet ne contient aucune compétition"));
 
-        QString nameCompet;
-        bool ok;
+        // Get destination directory
+        QString destDirPath = QFileDialog::getExistingDirectory(this,
+           tr("Sélectionnez le dossier dans lequel exporter les données secteurs"),
+           QDir::homePath());
 
-        do
-        {
-            nameCompet = QInputDialog::getItem(this, tr("Nom de la compétition"),
-                                               QString(), choices, 0, false, &ok);
-        }
-        while (! ok && nameCompet.isEmpty());
+        if(destDirPath.isEmpty()) // User canceled
+            return;
 
-        if (ok)
-            ExportModule::buildSectorOutput(nameCompet, selectedDir);
+        // Select a competition
+        bool ok(false);
+        QString competitionName = QInputDialog::getItem(
+                    this, tr("Nom de la compétition"),
+                    tr("Choisissez une compétition : "), competitionNames,
+                    0, false, &ok);
+
+        if (ok && !competitionName.isEmpty())
+            ExportModule::buildSectorOutput(competitionName, destDirPath);
+    }
+    catch(QException const& ex)
+    {
+        QMessageBox::warning(this, tr("Exportation impossible"), ex.what());
     }
 }
 
