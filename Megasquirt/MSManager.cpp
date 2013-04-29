@@ -149,8 +149,26 @@ const MSDataConverter& MSManager::operator [](int fieldIndice) const
     return this->dataConverter(fieldIndice);
 }
 
-void MSManager::datToCSV(const QString& datFile, const QString& CSVFile,
-                         const QStringList& fields) const
+void MSManager::datToCSV(const QString &datFile, const QString &CSVFile,
+                         const QStringList &fields) const
+{
+    // Remove oldest megasquirt csv file if exists
+    QFile msCSVFile(CSVFile);
+    if (msCSVFile.exists())
+        msCSVFile.remove();
+
+    // Create parser
+    QCSVParser parser(CSVFile, ';');
+
+    // Get data
+    this->datToCSV(datFile, parser, fields);
+
+    // Save data
+    parser.save();
+}
+
+void MSManager::datToCSV(const QString &datFile, QCSVParser &parser,
+                         const QStringList &fields) const
 {
     // File *.dat : read binaries data from a stream
     QFile fileDAT(datFile);
@@ -161,22 +179,15 @@ void MSManager::datToCSV(const QString& datFile, const QString& CSVFile,
     // Bytes order is QDataStream::BigEndian by default
     QDataStream in(&fileDAT);
 
-    // Remove oldest megasquirt csv file if exists
-    QFile msCSVFile(CSVFile);
-    if (msCSVFile.exists())
-        msCSVFile.remove();
-
-    QCSVParser parser(CSVFile, ';');
     QCSVRow row;
-
-    quint32 time;
+    quint32 secondsSinceEpoch, nanoSeconds;
     unsigned char buffer[DATA_SIZE];
     unsigned long  uvar;
     signed   long  svar;
     double         value;
 
     /* Add CSV headers */
-    row.append("times");
+    row << "secondsSinceEpoch" << "nanoSeconds";
     row << fields.toVector();
     parser.addRow(row);
 
@@ -184,13 +195,17 @@ void MSManager::datToCSV(const QString& datFile, const QString& CSVFile,
     {
         row.clear();
 
-        /* times */
-        in >> time;
-        row << QString::number(qFromBigEndian<quint32>(time));
+        // the number of seconds since epoch
+        in >> secondsSinceEpoch;
+        row << QString::number(qFromBigEndian<quint32>(secondsSinceEpoch));
 
-        /* Megasquirt */
+        // the number of nanoseconds to add
+        in >> nanoSeconds;
+        row << QString::number(qFromBigEndian<quint32>(nanoSeconds));
+
+        // Megasquirt data conversion
         if (in.readRawData((char*)buffer, DATA_SIZE) < DATA_SIZE)
-            throw QException(QObject::tr("Erreur read ms data"));
+            throw QException(QObject::tr("Trame Megasquirt de taille invalide"));
 
         foreach (QString field, fields)
         {
@@ -242,48 +257,57 @@ void MSManager::datToCSV(const QString& datFile, const QString& CSVFile,
 
     } while (!fileDAT.atEnd());
 
-    // Sauvegarder le csv
-    parser.save();
+    fileDAT.close();
 }
 
 //void MSManager::datToCSV(const QString& datFile, const QString& CSVFile,
-//                             const QList<QString>& fieldList) const
+//                         const QStringList& fields) const
 //{
-//    // File *.dat : read binary data from a stream
+//    // File *.dat : read binaries data from a stream
 //    QFile fileDAT(datFile);
 //    if (!fileDAT.open(QIODevice::ReadOnly))
-//        throw QException(QObject::tr("Impossible d'ouvrir le fichier *.dat"));
+//        throw QException(QObject::tr("Impossible d'ouvrir le fichier") +
+//                         datFile);
 
-//    // By default, byteOrder is set to QDataStream::BigEndian
+//    // Bytes order is QDataStream::BigEndian by default
 //    QDataStream in(&fileDAT);
+
+//    // Remove oldest megasquirt csv file if exists
+//    QFile msCSVFile(CSVFile);
+//    if (msCSVFile.exists())
+//        msCSVFile.remove();
 
 //    QCSVParser parser(CSVFile, ';');
 //    QCSVRow row;
 
-//    quint32 time;
+//    quint32 secondsSinceEpoch, nanoSeconds;
 //    unsigned char buffer[DATA_SIZE];
 //    unsigned long  uvar;
 //    signed   long  svar;
 //    double         value;
 
 //    /* Add CSV headers */
-//    row.append("times");
-//    row << fieldList.toVector();
+//    row << "secondsSinceEpoch" << "nanoSeconds";
+//    row << fields.toVector();
 //    parser.addRow(row);
 
 //    do
 //    {
 //        row.clear();
 
-//        /* times */
-//        in >> time;
-//        row << QString::number(qFromBigEndian<quint32>(time));
+//        // Secondes depuis l'époque
+//        in >> secondsSinceEpoch;
+//        row << QString::number(qFromBigEndian<quint32>(secondsSinceEpoch));
 
-//        /* Megasquirt */
+//        // Nano secondes à ajouter aux secondes
+//        in >> nanoSeconds;
+//        row << QString::number(qFromBigEndian<quint32>(nanoSeconds));
+
+//        // Conversion des données Megasquirt
 //        if (in.readRawData((char*)buffer, DATA_SIZE) < DATA_SIZE)
-//            throw QException(QObject::tr("Erreur read ms data"));
+//            throw QException(QObject::tr("Trame Megasquirt de taille invalide"));
 
-//        foreach (QString field, fieldList)
+//        foreach (QString field, fields)
 //        {
 //            MSDataConverter dataconvert = this->dataConverter(field);
 //            uvar = svar = 0;

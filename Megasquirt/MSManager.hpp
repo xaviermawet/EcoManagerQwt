@@ -33,6 +33,8 @@ class MSManager
         // File operations
         void datToCSV(QString const& datFile, QString const& CSVFile,
                       QStringList const& fields = QStringList()) const;
+        void datToCSV(const QString &datFile, QCSVParser& parser,
+                      const QStringList &fields) const;
 
     protected:
 

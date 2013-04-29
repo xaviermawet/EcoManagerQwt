@@ -9,14 +9,17 @@
 #include "../Utils/QException.hpp"
 #include "../Utils/QCSVParser.hpp"
 #include "../Utils/DataBaseManager.hpp"
+#include "../Megasquirt/MSManager.hpp"
 
-#define GPS_KEY         "GPS"
-#define SPEED_KEY       "SPEED"
-#define MEGASQUIRT_KEY  "MEGASQUIRT"
+#define GPS_KEY             "GPS"
+#define SPEED_KEY           "SPEED"
+#define MEGASQUIRT_DAT_KEY  "MEGASQUIRT_DAT"
+#define MEGASQUIRT_CSV_KEY  "MEGASQUIRT_CSV"
 
-#define DEFAULT_GPS_FILENAME        "gps.csv"
-#define DEFAULT_SPEED_FILENAME      "speed.csv"
-#define DEFAULT_MEGASQUIRT_FILENAME "megasquirt.dat"
+#define DEFAULT_GPS_FILENAME            "gps.csv"
+#define DEFAULT_SPEED_FILENAME          "speed.csv"
+#define DEFAULT_MEGASQUIRT_DAT_FILENAME "megasquirt.dat"
+#define DEFAULT_MEGASQUIRT_CSV_FILENAME "megasquirt.csv"
 
 class DataBaseImportModule : public QObject
 {
@@ -45,13 +48,16 @@ class DataBaseImportModule : public QObject
 
         void loadGPSData(QString const& GPSFilePath, Race &race);
         void loadSpeedData(QString const& speedFilePath, Race &race);
-        void loadMegasquirtData(QString const& megasquirtFilePath, Race& race);
+        void loadMegasquirtData(QString const& megasquirtDATFilePath,
+                                QString const& megasquirtCSVFilePath,
+                                Race& race);
 
     protected:
 
         QString _gpsFileName;
         QString _speedFileName;
-        QString _MegasquirtFileName;
+        QString _MegasquirtDATFileName;
+        QString _MegasquirtCSVFileName;
 };
 
 #endif /* __DATABASEIMPORTMODULE_HPP__ */

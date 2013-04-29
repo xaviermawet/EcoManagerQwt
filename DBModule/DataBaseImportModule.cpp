@@ -30,8 +30,8 @@ void DataBaseImportModule::checkFolderContent(const QDir &dataDirectory) throw(Q
                          tr(" est manquant"));
 
     // MEGASQUIRT
-    if(!dataDirectory.exists(this->_MegasquirtFileName))
-        throw QException(tr("Le fichier ") + this->_MegasquirtFileName +
+    if(!dataDirectory.exists(this->_MegasquirtDATFileName))
+        throw QException(tr("Le fichier ") + this->_MegasquirtDATFileName +
                          tr(" est manquant"));
 }
 
@@ -63,11 +63,16 @@ void DataBaseImportModule::addRace(Race &race, const QDir &dataDirectory) throw(
 
     try
     {
-        /* A partir d'ici, une entrée pour la course exist dans la base de
+        /* A partir d'ici, une entrée pour la course existe dans la base de
          * données. Mais s'il y a une erreur lors de l'ajout de données
-         * (GPS ou SPEED), il faut supprimer l'entrée pour la course */
+         * (GPS ou SPEED ou Megasquirt), il faut supprimer l'entrée pour la
+         * course et tous les autres tuples qui référencient cette course */
         this->loadGPSData(dataDirectory.filePath(this->_gpsFileName), race);
         this->loadSpeedData(dataDirectory.filePath(this->_speedFileName), race);
+        this->loadMegasquirtData(
+                    dataDirectory.filePath(this->_MegasquirtDATFileName),
+                    dataDirectory.filePath(this->_MegasquirtCSVFileName),
+                    race);
     }
     catch(QException const& ex)
     {
@@ -90,9 +95,13 @@ void DataBaseImportModule::loadConfiguration(void)
         settings.setValue(SPEED_KEY, DEFAULT_SPEED_FILENAME);
     this->_speedFileName = settings.value(SPEED_KEY).toString();
 
-    if(!settings.contains(MEGASQUIRT_KEY))
-        settings.setValue(MEGASQUIRT_KEY, DEFAULT_MEGASQUIRT_FILENAME);
-    this->_MegasquirtFileName = settings.value(MEGASQUIRT_KEY).toString();
+    if(!settings.contains(MEGASQUIRT_DAT_KEY))
+        settings.setValue(MEGASQUIRT_DAT_KEY, DEFAULT_MEGASQUIRT_DAT_FILENAME);
+    this->_MegasquirtDATFileName = settings.value(MEGASQUIRT_DAT_KEY).toString();
+
+    if(!settings.contains(MEGASQUIRT_CSV_KEY))
+        settings.setValue(MEGASQUIRT_CSV_KEY, DEFAULT_MEGASQUIRT_CSV_FILENAME);
+    this->_MegasquirtCSVFileName = settings.value(MEGASQUIRT_CSV_KEY).toString();
 
     settings.endGroup();
 }
@@ -172,6 +181,8 @@ int DataBaseImportModule::createLap(
 
 void DataBaseImportModule::loadGPSData(const QString& GPSFilePath, Race &race)
 {
+    qDebug() << "Chargement des données GPS...";
+
     QFile GPSFile(GPSFilePath);
     if(!GPSFile.open(QIODevice::ReadOnly))
         throw QException(tr("Impossible d'ouvrir le fichier ") + GPSFilePath);
@@ -310,7 +321,7 @@ void DataBaseImportModule::loadGPSData(const QString& GPSFilePath, Race &race)
 void DataBaseImportModule::loadSpeedData(
         const QString &speedFilePath, Race& race)
 {
-    qDebug() << "Start loading speed data ...";
+    qDebug() << "Chargement des données de vitesse ...";
 
     QFile speedFile(speedFilePath);
     if (!speedFile.open(QIODevice::ReadOnly))
@@ -391,11 +402,19 @@ void DataBaseImportModule::loadSpeedData(
 }
 
 void DataBaseImportModule::loadMegasquirtData(
-        const QString &megasquirtFilePath, Race &race)
+        const QString &megasquirtDATFilePath,
+        const QString &megasquirtCSVFilePath,
+        Race &race)
 {
-    qDebug() << "Start loading Megasquirt data...";
+    qDebug() << "Chargement des données Megasquirt...";
 
-    QFile msFile(megasquirtFilePath);
+    QFile msFile(megasquirtDATFilePath);
     if(!msFile.open(QIODevice::ReadOnly))
-        throw QException(tr("Impossible d'ouvrir le fichier ") + megasquirtFilePath);
+        throw QException(tr("Impossible d'ouvrir le fichier ") + megasquirtDATFilePath);
+
+    // Conversion des données Megasquirt dans un fichier CSV
+    MSManager manager;
+    manager.datToCSV(megasquirtDATFilePath,
+                     megasquirtCSVFilePath,
+                     manager.fields());
 }

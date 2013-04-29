@@ -15,50 +15,50 @@ GeoCoordinate::GeoCoordinate() : mtime(0, 0) {
 
 GeoCoordinate::GeoCoordinate(QString frame) : mtime(0, 0)
 {
-//    mvalid = true;
-//    mspeed = 0.0;
-//    alt = 0.0;
-
-//    qlonglong timestamp = frame.section(";", 1, 1).toULongLong() * 1000
-//                        + (frame.section(";", -1, -1).toULongLong() * 0.000001);
-//    QDateTime dt = QDateTime::fromMSecsSinceEpoch(timestamp);
-//    mtime = dt.time();
-
-//    if (frame.startsWith("$GPGGA"))
-//    {
-//        processGGAFrame(frame.section(";", 0, 0));
-//        mgoodtype = true;
-//    }
-//    else if (frame.startsWith("$GPRMC"))
-//    {
-//        processRMCFrame(frame.section(";", 0, 0));
-//        mgoodtype = true;
-//    }
-//    else
-//    {
-//        mvalid = false;
-//        mgoodtype = false;
-//    }
-
-
     mvalid = true;
     mspeed = 0.0;
     alt = 0.0;
 
-    qlonglong timestamp = frame.section(",", -1, -1).toULongLong() / (1000 * 1000);
+    qlonglong timestamp = frame.section(";", 1, 1).toULongLong() * 1000
+                        + (frame.section(";", -1, -1).toULongLong() * 0.000001);
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(timestamp);
     mtime = dt.time();
 
-    if (frame.startsWith("$GPGGA")) {
-        processGGAFrame(frame.section(",", 0, -2));
+    if (frame.startsWith("$GPGGA"))
+    {
+        processGGAFrame(frame.section(";", 0, 0));
         mgoodtype = true;
-    } else if (frame.startsWith("$GPRMC")) {
-        processRMCFrame(frame.section(",", 0, -2));
+    }
+    else if (frame.startsWith("$GPRMC"))
+    {
+        processRMCFrame(frame.section(";", 0, 0));
         mgoodtype = true;
-    } else {
+    }
+    else
+    {
         mvalid = false;
         mgoodtype = false;
     }
+
+
+//    mvalid = true;
+//    mspeed = 0.0;
+//    alt = 0.0;
+
+//    qlonglong timestamp = frame.section(",", -1, -1).toULongLong() / (1000 * 1000);
+//    QDateTime dt = QDateTime::fromMSecsSinceEpoch(timestamp);
+//    mtime = dt.time();
+
+//    if (frame.startsWith("$GPGGA")) {
+//        processGGAFrame(frame.section(",", 0, -2));
+//        mgoodtype = true;
+//    } else if (frame.startsWith("$GPRMC")) {
+//        processRMCFrame(frame.section(",", 0, -2));
+//        mgoodtype = true;
+//    } else {
+//        mvalid = false;
+//        mgoodtype = false;
+//    }
 }
 
 void GeoCoordinate::processGGAFrame(QString gga) {

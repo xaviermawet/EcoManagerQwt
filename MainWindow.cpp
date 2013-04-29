@@ -93,7 +93,7 @@ void MainWindow::on_actionQuit_triggered(void)
 }
 
 // importData
-void MainWindow::on_actionImport_triggered_old(void)
+void MainWindow::on_actionImport_triggered(void)
 {
     QString raceDataDirPath = QFileDialog::getExistingDirectory(this,
               tr("Sélectionnez le dossier contenant les données de la course"));
@@ -133,7 +133,7 @@ void MainWindow::on_actionImport_triggered_old(void)
     }
 }
 
-void MainWindow::on_actionImport_triggered(void)
+void MainWindow::on_actionImport_triggered_old(void)
 {
     // Select the directory that content race data and enter race information
     CompetitionEntryDialog dial;
@@ -649,6 +649,9 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
         /* ------------------------------------------------------------------ *
          *                         Get date identifier                        *
          * ------------------------------------------------------------------ */
+
+        qDebug() << "On a cliqué droit sur une date ...";
+
         QDate date = this->competitionModel->data(curIndex).toDate();
 
         this->ui->actionRaceViewDeleteRacesAtSpecificDate->setText(
@@ -666,13 +669,21 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
          *                         Get race identifier                        *
          * ------------------------------------------------------------------ */
 
+        qDebug() << "On a cliqué droit sur une course ...";
+
         // Get race id
+//        int raceId = this->competitionModel->data(
+//                    this->competitionModel->index(
+//                        curIndex.row() + 1, 1,curIndex)).toInt();
+
         int raceId = this->competitionModel->data(
-                    this->competitionModel->index(
-                        curIndex.row() + 1, 1,curIndex)).toInt();
+                    this->competitionModel->index(0, 1, curIndex)).toInt();
 
         // Get race number
         int raceNum = this->competitionModel->data(curIndex).toInt();
+
+        qDebug() << "Race id = " << raceId;
+        qDebug() << "Race number = " << raceNum;
 
         this->ui->actionRaceViewDeleteRace->setText(
                     tr("Supprimer la course ") + QString::number(raceNum));
@@ -685,6 +696,9 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
         /* ------------------------------------------------------------------ *
          *                        Get track identifier                        *
          * ------------------------------------------------------------------ */
+
+        qDebug() << "On a cliqué droit sur un tour ...";
+
         int ref_race = competitionModel->data(
                     competitionModel->index(curIndex.row(), 1,
                                             curIndex.parent())).toInt();
@@ -1130,8 +1144,11 @@ void MainWindow::deleteRace(int raceId)
     /* ---------------------------------------------------------------------- *
      *                       Delete race from data base                       *
      * ---------------------------------------------------------------------- */
-    QSqlQuery deleteRaceQuery("DELETE FROM race WHERE id = ?");
+    QSqlQuery deleteRaceQuery("DELETE FROM RACE WHERE id = ?");
     deleteRaceQuery.addBindValue(raceId);
+
+    qDebug() << "Requete de suppression = " << deleteRaceQuery.lastQuery();
+    qDebug() << "id de la course = " << raceId;
 
     QSqlDatabase::database().driver()->beginTransaction();
 
