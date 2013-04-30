@@ -408,13 +408,41 @@ void DataBaseImportModule::loadMegasquirtData(
 {
     qDebug() << "Chargement des données Megasquirt...";
 
-    QFile msFile(megasquirtDATFilePath);
-    if(!msFile.open(QIODevice::ReadOnly))
-        throw QException(tr("Impossible d'ouvrir le fichier ") + megasquirtDATFilePath);
+    /* ---------------------------------------------------------------------- *
+     *                     Create csv file from dat file                      *
+     * ---------------------------------------------------------------------- */
 
-    // Conversion des données Megasquirt dans un fichier CSV
+    // Remove oldest megasquirt csv file if exists
+    QFile msCSVFile(megasquirtCSVFilePath);
+    if (msCSVFile.exists())
+        msCSVFile.remove();
+
+    // Create parser
+    QCSVParser parser(megasquirtCSVFilePath, ';');
+
+    // Conversion des données Megasquirt
     MSManager manager;
-    manager.datToCSV(megasquirtDATFilePath,
-                     megasquirtCSVFilePath,
-                     manager.fields());
+    manager.datToCSV(megasquirtDATFilePath, parser, manager.fields());
+
+    // Save data
+    parser.save();
+
+    /* ---------------------------------------------------------------------- *
+     *                     add megasquirt data in database                    *
+     * ---------------------------------------------------------------------- */
+
+    QSqlQuery query;
+    query.prepare("insert into MEGASQUIRT values (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+    QList<QVariantList> columns;
+
+    for(int i(0); i < parser.columnCount(); ++i)
+        columns << DataBaseManager::toVariantList(parser.column(i).toList());
+
+    qDebug() << "Nombre de colonnes à inserer dans la base = " << columns.count();
+
+    foreach (QVariantList column, columns)
+        query.addBindValue(column);
+
+    DataBaseManager::execBatch(query);
 }

@@ -1,3 +1,8 @@
+/* TODO :
+ * ------------------------
+ * Quand on delete une competition, il n'y a pas de "reloadRaceView"
+ * donc on voit tjs la liste des courses ... pas bon ça
+ */
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
 
@@ -108,7 +113,9 @@ class MainWindow : public QMainWindow
         void deleteRace(int raceId);
         void deleteRaces(QVariantList listRaceId);
 
-    private:
+        void on_actionExecuter_une_requete_triggered(void);
+
+private:
 
         void centerOnScreen(void);
         void createRaceView(void);

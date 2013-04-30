@@ -1014,6 +1014,9 @@ void MainWindow::loadCompetition(int index)
 {
     this->currentCompetition = competitionNameModel->record(index).value(0).toString();
 
+    if(this->currentCompetition.isEmpty())
+        return;
+
     this->on_actionClearAllData_triggered(); // Clear all tracks information of each view
 
     // Load races information
@@ -2055,4 +2058,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
     this->writeSettings("MainWindow");
 
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::on_actionExecuter_une_requete_triggered(void)
+{
+    QString stringQuery = QInputDialog::getText(
+                this, "Executer une requete", "Entrez votre requete");
+
+    if(stringQuery.isEmpty())
+        return;
+
+    try
+    {
+        QSqlQuery query(stringQuery);
+        DataBaseManager::execTransaction(query);
+
+        while (query.next())
+            qDebug() << query.value(0).toString();
+    }
+    catch(QException const& ex)
+    {
+        QMessageBox::warning(this, "Erreur de requete", ex.what());
+    }
 }

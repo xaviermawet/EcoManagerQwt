@@ -27,6 +27,18 @@ class DataBaseManager
                               QSqlQuery::BatchExecutionMode mode
                               = QSqlQuery::ValuesAsRows);
 
+        /* to bind value to a previously prepared query parameters
+         * have to be lists of variants */
+        template <typename T>
+        static QVariantList toVariantList( const QList<T> &list )
+        {
+            QVariantList newList;
+            foreach( const T &item, list )
+                newList << item;
+
+            return newList;
+        }
+
     private:
 
         static bool openDataBase(QString const& dataBaseFilePath);

@@ -182,9 +182,14 @@ void MSManager::datToCSV(const QString &datFile, QCSVParser &parser,
     QCSVRow row;
     quint32 secondsSinceEpoch, nanoSeconds;
     unsigned char buffer[DATA_SIZE];
-    unsigned long  uvar;
-    signed   long  svar;
+    unsigned char   u08;
+    signed char     s08;
+    unsigned short  u16;
+    signed short    s16;
+    unsigned long   u32;
+    signed long     s32;
     double         value;
+
 
     /* Add CSV headers */
     row << "secondsSinceEpoch" << "nanoSeconds";
@@ -210,39 +215,38 @@ void MSManager::datToCSV(const QString &datFile, QCSVParser &parser,
         foreach (QString field, fields)
         {
             MSDataConverter dataconvert = this->dataConverter(field);
-            uvar = svar = 0;
             value = 0.0;
 
             /* data extraction from buffer */
             switch (dataconvert.type())
             {
                 case MSDataConverter::U08:
-                    memcpy(&uvar, buffer + dataconvert.offset(), 1);
-                    value = (double)uvar;
+                    memcpy(&u08, buffer + dataconvert.offset(), 1);
+                    value = (double)u08;
                     break;
                 case MSDataConverter::U16:
-                    memcpy(&uvar, buffer + dataconvert.offset(), 2);
-                    uvar  = qFromBigEndian<quint16>((uchar*)&uvar); // MegaSquirt is big endian
-                    value = (double)uvar;
+                    memcpy(&u16, buffer + dataconvert.offset(), 2);
+                    u16  = qFromBigEndian<quint16>((uchar*)&u16); // MegaSquirt is big endian
+                    value = (double)u16;
                     break;
                 case MSDataConverter::U32:
-                    memcpy(&uvar, buffer + dataconvert.offset(), 4);
-                    uvar  = qFromBigEndian<quint32>((uchar*)&uvar); // MegaSquirt is big endian
-                    value = (double)uvar;
+                    memcpy(&u32, buffer + dataconvert.offset(), 4);
+                    u32  = qFromBigEndian<quint32>((uchar*)&u32); // MegaSquirt is big endian
+                    value = (double)u32;
                     break;
                 case MSDataConverter::S08:
-                    memcpy(&svar, buffer + dataconvert.offset(), 1);
-                    value = (double)svar;
+                    memcpy(&s08, buffer + dataconvert.offset(), 1);
+                    value = (double)s08;
                     break;
                 case MSDataConverter::S16:
-                    memcpy(&svar, buffer + dataconvert.offset(), 2);
-                    svar  = qFromBigEndian<quint16>((uchar*)&svar); // MegaSquirt is big endian
-                    value = (double)svar;
+                    memcpy(&s16, buffer + dataconvert.offset(), 2);
+                    s16  = qFromBigEndian<quint16>((uchar*)&s16); // MegaSquirt is big endian
+                    value = (double)s16;
                     break;
                 case MSDataConverter::S32:
-                    memcpy(&svar, buffer + dataconvert.offset(), 4);
-                    svar  = qFromBigEndian<quint32>((uchar*)&svar); // MegaSquirt is big endian
-                    value = (double)svar;
+                    memcpy(&s32, buffer + dataconvert.offset(), 4);
+                    s32  = qFromBigEndian<quint32>((uchar*)&s32); // MegaSquirt is big endian
+                    value = (double)s32;
                     break;
             }
 

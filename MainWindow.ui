@@ -392,6 +392,8 @@
     <addaction name="actionListing_des_competitions"/>
     <addaction name="actionCompter_tous_les_tuples_de_toutes_les_tables"/>
     <addaction name="actionRestaurer_base_de_donn_es"/>
+    <addaction name="separator"/>
+    <addaction name="actionExecuter_une_requete"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -867,6 +869,11 @@
   <action name="actionRestaurer_base_de_donn_es">
    <property name="text">
     <string>Restaurer base de données</string>
+   </property>
+  </action>
+  <action name="actionExecuter_une_requete">
+   <property name="text">
+    <string>executer une requete</string>
    </property>
   </action>
  </widget>

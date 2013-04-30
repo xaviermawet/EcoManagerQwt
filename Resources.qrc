@@ -37,4 +37,7 @@
         <file>Resources/Icons/folder.png</file>
         <file>Resources/Icons/document.png</file>
     </qresource>
+    <qresource prefix="/sql">
+        <file alias="schemaTable">Resources/SQL/DB.sql</file>
+    </qresource>
 </RCC>

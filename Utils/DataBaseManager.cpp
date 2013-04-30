@@ -149,15 +149,29 @@ bool DataBaseManager::installDataBase(QString const& dataBaseFilePath)
      * ---------------------------------------------------------------------- */
     QSqlDatabase db = QSqlDatabase::database();
 
+    // Use a script to create tables
+    QFile schemaFile(":/sql/schemaTable"); // Resource file
+
+    // get all table creation script
+    schemaFile.open(QFile::ReadOnly);
+    QStringList schemaTableList = QString(schemaFile.readAll()).split(";", QString::SkipEmptyParts);
+
     db.driver()->beginTransaction();
 
-    db.exec("create table COMPETITION ( name VARCHAR(80) PRIMARY KEY, place VARCHAR(80), wheel_radius FLOAT)");
-    db.exec("create table SECTOR ( id INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, ref_compet VARCHAR, min_speed REAL DEFAULT 0 CHECK(min_speed <= max_speed), max_speed REAL DEFAULT 0, start_pos INTEGER, end_pos INTEGER, FOREIGN KEY (ref_compet) REFERENCES COMPETITION(name) ON DELETE CASCADE, FOREIGN KEY (start_pos) REFERENCES POSITION(id) ON DELETE CASCADE, FOREIGN KEY (end_pos) REFERENCES POSITION(id) ON DELETE CASCADE)");
-    db.exec("create table RACE ( id INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, date DATETIME, ref_compet VARCHAR(80), FOREIGN KEY (ref_compet) REFERENCES COMPETITION(name) ON DELETE CASCADE)");
-    db.exec("create table LAP ( num INTEGER, start_time TIME, end_time TIME, distance FLOAT, ref_race INTEGER, FOREIGN KEY (ref_race) REFERENCES RACE(id) ON DELETE CASCADE, PRIMARY KEY (num, ref_race))");
-    db.exec("create table SPEED ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, value FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE)");
-    db.exec("create table ACCELERATION ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, g_long FLOAT, g_lat FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE)");
-    db.exec("create table POSITION ( id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TIME, latitude FLOAT, longitude FLOAT, altitude FLOAT, eval_speed FLOAT, ref_lap_num INTEGER, ref_lap_race  INTEGER, FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE)");
+    // Create all table from script
+    foreach(const QString schemaTable, schemaTableList)
+    {
+        if(!schemaTable.trimmed().isEmpty())
+        {
+            qDebug() << "Creation d'une table --------------------------------";
+            qDebug() << schemaTable;
+            db.exec(schemaTable);
+        }
+    }
 
-    return db.driver()->commitTransaction();
+    bool commitSucced = db.driver()->commitTransaction();
+
+    schemaFile.close();
+
+    return commitSucced;
 }
