@@ -1936,12 +1936,12 @@ bool MainWindow::getAllDataFromSpeed(
 
     /* upperTimeValue passé en paramètre est exprimé en secondes mais les
      * timestamp sauvées dans la base de données sont en millisecondes */
-    int upperTimeStamp = upperTimeValue * 1000;
+    //int upperTimeStamp = upperTimeValue * 1000;
 
     // Récupérer les informations de temps et de vitesses
     QSqlQuery query;
     query.prepare("select timestamp, value from SPEED where timestamp <= ? and ref_lap_race = ? and ref_lap_num = ? order by timestamp");
-    query.addBindValue(upperTimeStamp);
+    query.addBindValue(upperTimeValue * 1000);
     query.addBindValue(ref_race);
     query.addBindValue(ref_lap);
 
@@ -1952,12 +1952,12 @@ bool MainWindow::getAllDataFromSpeed(
 
     if (!query.exec())
     {
-        QString errorMsg("Impossible de récupérer les données numériques "
-                         "associées à votre sélection pour le tour " +
-                         QString::number(ref_lap) + " de la course " +
+        QString errorMsg(tr("Impossible de récupérer les données numériques "
+                         "associées à votre sélection pour le tour ") +
+                         QString::number(ref_lap) + tr(" de la course ") +
                          QString::number(ref_race));
         QMessageBox::warning(this, tr("Erreur de récupération de données"),
-                             tr(errorMsg.toStdString().c_str()));
+                             errorMsg);
         return false;
     }
 
@@ -1972,7 +1972,7 @@ bool MainWindow::getAllDataFromSpeed(
         lastSpeed = speed;
         lastPos   = pos;
 
-        time  = query.value(0).toFloat() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
+        time  = query.value(0).toDouble() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
         speed = query.value(1).toDouble();
 
         int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
@@ -1990,8 +1990,8 @@ bool MainWindow::getAllDataFromSpeed(
             lapData.append(pos);         // Dist (m)
             lapData.append(speed);       // V (km\h)
             lapData.append(qAbs(acc) > 2 ? "NS" : QString::number(acc)); // Acc (m\s²)
-            lapData.append("RPM");       // RPM
-            lapData.append("PW");        // PW
+//            lapData.append("RPM");       // RPM
+//            lapData.append("PW");        // PW
 
             // Ajout de la ligne de données à la liste
             data.append(lapData);
@@ -1999,6 +1999,50 @@ bool MainWindow::getAllDataFromSpeed(
     }
 
     qDebug() << "Nombre de données calculées = " << data.count();
+
+    /* ---------------------------------------------------------------------- *
+     *                Ajout des tours moteur et du pulse width                *
+     * ---------------------------------------------------------------------- */
+
+    QSqlQuery megasquirtQuery;
+    megasquirtQuery.prepare(
+                "SELECT timestamp, rpm, pulseWidth1 "
+                "FROM megasquirt "
+                "where timestamp >= ? "
+                    "and timestamp <= ? "
+                    "and ref_lap_race = ? "
+                    "and ref_lap_num = ? "
+                    "order by timestamp");
+    megasquirtQuery.addBindValue(lowerTimeValue * 1000);
+    megasquirtQuery.addBindValue(upperTimeValue * 1000);
+    megasquirtQuery.addBindValue(ref_race);
+    megasquirtQuery.addBindValue(ref_lap);
+
+    if (!megasquirtQuery.exec())
+    {
+        QString errorMsg(tr("Impossible de récupérer les données moteur "
+                         "associées à votre sélection pour le tour ") +
+                         QString::number(ref_lap) + tr(" de la course ") +
+                         QString::number(ref_race) +
+                         megasquirtQuery.lastError().text());
+        QMessageBox::warning(this, tr("Erreur de récupération de données"),
+                             errorMsg);
+        return false;
+    }
+
+    /* ---------------------------------------------------------------------- *
+     *                   Ajout des données dans le tableau                    *
+     * ---------------------------------------------------------------------- */
+
+    int i(1);
+    while(megasquirtQuery.next())
+    {
+        double MSTimeStamp = megasquirtQuery.value(0).toDouble();
+        for(;i < data.count() && data[i].at(0).toDouble() < MSTimeStamp; ++i);
+
+        data[i - 1] << megasquirtQuery.value(1)  // RPM
+                    << megasquirtQuery.value(2); // PW
+    }
 
     return true;
 }

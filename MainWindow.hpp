@@ -2,6 +2,9 @@
  * ------------------------
  * Quand on delete une competition, il n'y a pas de "reloadRaceView"
  * donc on voit tjs la liste des courses ... pas bon ça
+ *
+ * dans la méthode getAllDataFromSpeed, dans le message d'erreur en cas
+ * d'echeque de la requete, afficher le msg d'erreur sql
  */
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
