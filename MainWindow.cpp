@@ -2162,3 +2162,51 @@ void MainWindow::on_actionExecuter_une_requete_triggered(void)
         QMessageBox::warning(this, "Erreur de requete", ex.what());
     }
 }
+
+void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
+{
+    if(!this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
+    {
+        QMessageBox::warning(this, tr("Action impossible"),
+                             tr("Vous devez sélectionner un tour dans la liste des courses"));
+        return;
+    }
+
+    TrackIdentifier trackIdentifier =
+            this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
+
+    QSqlQuery query("SELECT timestamp, " + this->ui->megaSquirtComboBox->currentText() + " "
+                    "FROM megasquirt "
+                    "WHERE ref_lap_race = ? and ref_lap_num = ? order by timestamp");
+    //query.addBindValue(this->ui->megaSquirtComboBox->currentText());
+    query.addBindValue(trackIdentifier["race"].toInt());
+    query.addBindValue(trackIdentifier["lap"].toInt());
+
+    if (!query.exec())
+    {
+        QMessageBox::warning(this, tr("Impossible de tracer la courbe"),
+                             tr("Erreur de récupération des données megasquirt ")
+                             + query.lastError().text());
+        return;
+    }
+
+    // Création des points de la courbe
+    QList<IndexedPosition> megasquirtCurvePoints;
+    while(query.next())
+    {
+        IndexedPosition point;
+        double time = query.value(0).toFloat() / 1000;
+
+        point.setIndex(time);
+        point.setX(time);
+        point.setY(query.value(1).toFloat());
+
+        qDebug() << "X = " << point.x() << " Y = " << point.y();
+        qDebug() << query.value(1);
+
+        megasquirtCurvePoints << point;
+    }
+
+    this->megaSquirtPlotFrame->scene()->addCurve(megasquirtCurvePoints,
+                                                 trackIdentifier);
+}

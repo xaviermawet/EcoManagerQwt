@@ -122,6 +122,8 @@ class MainWindow : public QMainWindow
 
         void on_actionExecuter_une_requete_triggered(void);
 
+        void on_megasquirtAddCurvePushButton_clicked(void);
+
     private:
 
         void centerOnScreen(void);

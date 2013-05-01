@@ -493,5 +493,5 @@ void DataBaseImportModule::loadMegasquirtData(
     foreach (QVariantList column, columns)
         query.addBindValue(column);
 
-    DataBaseManager::execBatch(query);
+    DataBaseManager::execBatch(query, QSqlQuery::ValuesAsColumns);
 }
