@@ -5,6 +5,9 @@
  *
  * dans la méthode getAllDataFromSpeed, dans le message d'erreur en cas
  * d'echeque de la requete, afficher le msg d'erreur sql
+ *
+ * utiliser DataBaseManager::execBatch() et DataBaseManager::execTransaction()
+ * partout là ou c'est possible
  */
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
@@ -79,6 +82,7 @@ class MainWindow : public QMainWindow
         void on_actionClearAllData_triggered(void);
         void on_raceTable_customContextMenuRequested(const QPoint &pos);
         void on_actionLapDataComparaison_triggered(void);
+        void on_raceView_pressed(const QModelIndex &index);
         void on_raceTable_doubleClicked(const QModelIndex &index);
         void on_menuLapDataTable_aboutToShow(void);
         void on_actionLapDataSelectAll_triggered(bool checked);
@@ -118,7 +122,7 @@ class MainWindow : public QMainWindow
 
         void on_actionExecuter_une_requete_triggered(void);
 
-private:
+    private:
 
         void centerOnScreen(void);
         void createRaceView(void);

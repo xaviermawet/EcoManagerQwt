@@ -227,6 +227,76 @@ void MainWindow::on_actionExportData_triggered(void)
                              "Exportation de données ...");
 }
 
+void MainWindow::on_raceView_pressed(const QModelIndex& index)
+{
+    /* The signal is only emitted when the index is valid */
+
+    // Date clicked
+    if (!index.parent().isValid())
+    {
+        /* ------------------------------------------------------------------ *
+         *                         Get date identifier                        *
+         * ------------------------------------------------------------------ */
+
+        QDate date = this->competitionModel->data(
+                    this->competitionModel->index(index.row(), 0,
+                                                  index.parent())).toDate();
+
+        this->raceViewItemidentifier = QVariant::fromValue(date);
+
+        qDebug() << "Date = " << date.toString(Qt::SystemLocaleShortDate);
+    }
+    else if (!index.parent().parent().isValid())
+    {
+        /* ------------------------------------------------------------------ *
+         *                         Get race identifier                        *
+         * ------------------------------------------------------------------ */
+
+        // Get race id
+        int raceId = this->competitionModel->data(
+                        this->competitionModel->index(0, 1, index)).toInt();
+
+        this->raceViewItemidentifier = QVariant::fromValue(raceId);
+
+        qDebug() << "Course : Race id = " << raceId
+                 << " race num = " << this->competitionModel->data(index).toInt();
+    }
+    else
+    {
+        /* ------------------------------------------------------------------ *
+         *                        Get track identifier                        *
+         * ------------------------------------------------------------------ */
+
+        int ref_race = competitionModel->data(
+                    competitionModel->index(index.row(), 1,
+                                            index.parent())).toInt();
+        int ref_lap = competitionModel->data(
+                    competitionModel->index(index.row(), 2,
+                                            index.parent())).toInt();
+
+        QMap<QString, QVariant> trackIdentifier;
+        trackIdentifier["race"] = ref_race;
+        trackIdentifier["lap"] = ref_lap;
+
+        this->raceViewItemidentifier = QVariant::fromValue(trackIdentifier);
+
+        qDebug() << "Tour : race id = " << ref_race << " lap = " << ref_lap;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+    // TODO : ce qui suit est un test et doit etre supprimé par la suite
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    if(this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
+        qDebug() << "C'est un tour !!!";
+
+    if(this->raceViewItemidentifier.canConvert<int>())
+        qDebug() << "C'est un course !!!";
+
+    if(this->raceViewItemidentifier.canConvert<QDate>())
+        qDebug() << "C'est une date !!!";
+}
+
 /* Event that occured when the user double click on a race tree view item
  * Only lap can be double-clicked */
 void MainWindow::on_raceView_doubleClicked(const QModelIndex& index)
@@ -637,14 +707,7 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
     if(this->ui->raceView->selectionModel() == NULL)
         return;
 
-    // Récupération de l'élément sélectionné
-    QModelIndex curIndex = this->ui->raceView->selectionModel()->currentIndex();
-
-    if (!curIndex.isValid())
-        return;
-
-    // Si l'utilisateur clique droit sur une date
-    if (!curIndex.parent().isValid())
+    if (this->raceViewItemidentifier.canConvert<QDate>())
     {
         /* ------------------------------------------------------------------ *
          *                         Get date identifier                        *
@@ -652,7 +715,7 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
 
         qDebug() << "On a cliqué droit sur une date ...";
 
-        QDate date = this->competitionModel->data(curIndex).toDate();
+        QDate date = this->raceViewItemidentifier.value<QDate>();
 
         this->ui->actionRaceViewDeleteRacesAtSpecificDate->setText(
                     tr("Supprimer les courses effectuées à ") +
@@ -660,10 +723,8 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
                     date.toString(Qt::SystemLocaleShortDate));
 
         this->ui->actionRaceViewDeleteRacesAtSpecificDate->setVisible(true);
-
-        this->raceViewItemidentifier = QVariant::fromValue(date);
     }
-    else if (!curIndex.parent().parent().isValid())
+    else if (this->raceViewItemidentifier.canConvert<int>())
     {
         /* ------------------------------------------------------------------ *
          *                         Get race identifier                        *
@@ -671,27 +732,19 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
 
         qDebug() << "On a cliqué droit sur une course ...";
 
-        // Get race id
-//        int raceId = this->competitionModel->data(
-//                    this->competitionModel->index(
-//                        curIndex.row() + 1, 1,curIndex)).toInt();
-
-        int raceId = this->competitionModel->data(
-                    this->competitionModel->index(0, 1, curIndex)).toInt();
+        // Récupération de l'élément sélectionné
+        QModelIndex curIndex = this->ui->raceView->selectionModel()->currentIndex();
+        if (!curIndex.isValid())
+            return;
 
         // Get race number
         int raceNum = this->competitionModel->data(curIndex).toInt();
 
-        qDebug() << "Race id = " << raceId;
-        qDebug() << "Race number = " << raceNum;
-
         this->ui->actionRaceViewDeleteRace->setText(
                     tr("Supprimer la course ") + QString::number(raceNum));
         this->ui->actionRaceViewDeleteRace->setVisible(true);
-
-        this->raceViewItemidentifier = QVariant::fromValue(raceId);
     }
-    else
+    else if(this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
     {
         /* ------------------------------------------------------------------ *
          *                        Get track identifier                        *
@@ -699,16 +752,8 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
 
         qDebug() << "On a cliqué droit sur un tour ...";
 
-        int ref_race = competitionModel->data(
-                    competitionModel->index(curIndex.row(), 1,
-                                            curIndex.parent())).toInt();
-        int ref_lap = competitionModel->data(
-                    competitionModel->index(curIndex.row(), 2,
-                                            curIndex.parent())).toInt();
-
-        QMap<QString, QVariant> trackIdentifier;
-        trackIdentifier["race"] = ref_race;
-        trackIdentifier["lap"] = ref_lap;
+        TrackIdentifier trackIdentifier =
+                this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
 
         bool lapAlreadyDisplayed = this->currentTracksDisplayed.contains(
                     trackIdentifier);
@@ -716,8 +761,6 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
         this->ui->actionRaceViewDisplayLap->setVisible(!lapAlreadyDisplayed);
         this->ui->actionRaceViewRemoveLap->setVisible(lapAlreadyDisplayed);
         this->ui->actionRaceViewExportLapDataInCSV->setVisible(true);
-
-        this->raceViewItemidentifier = QVariant::fromValue(trackIdentifier);
     }
 }
 
@@ -1359,16 +1402,10 @@ void MainWindow::createMegaSquirtZone(void)
     // Add the plot frame to the megaSquirt splitter
     this->ui->megaSquirtSplitter->addWidget(this->megaSquirtPlotFrame);
 
-    // Build model (model) for the comboBoxes (view/controler)
-    QStringList megaSquirtParamList;
-    megaSquirtParamList << "RPM" << "Batt V" << "PW" << "Gammae" << "Gair";
-    QStringListModel* megaSquirtParamModel = new QStringListModel(megaSquirtParamList);
 
-    // Apply the model to each comboBox
-    this->ui->megaSquirtComboBox1->setModel(megaSquirtParamModel);
-    this->ui->megaSquirtComboBox2->setModel(megaSquirtParamModel);
-    this->ui->megaSquirtComboBox3->setModel(megaSquirtParamModel);
-    this->ui->megaSquirtComboBox4->setModel(megaSquirtParamModel);
+    // Get Megasquirt parameters list
+    MSManager megasquirtManager;
+    this->ui->megaSquirtComboBox->addItems(megasquirtManager.fields());
 }
 
 void MainWindow::createRaceTable(void)

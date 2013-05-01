@@ -128,7 +128,7 @@
         </widget>
         <widget class="QTabWidget" name="plotsTabWidget">
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="tabDistance">
           <attribute name="title">
@@ -164,7 +164,10 @@
              </property>
              <widget class="QGroupBox" name="megaSquirtGroupBox">
               <property name="title">
-               <string>Paramètres</string>
+               <string>Paramètres Megasquirt</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
               </property>
               <property name="flat">
                <bool>false</bool>
@@ -196,16 +199,14 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QComboBox" name="megaSquirtComboBox1"/>
+                <widget class="QComboBox" name="megaSquirtComboBox"/>
                </item>
                <item>
-                <widget class="QComboBox" name="megaSquirtComboBox2"/>
-               </item>
-               <item>
-                <widget class="QComboBox" name="megaSquirtComboBox3"/>
-               </item>
-               <item>
-                <widget class="QComboBox" name="megaSquirtComboBox4"/>
+                <widget class="QPushButton" name="megasquirtAddCurvePushButton">
+                 <property name="text">
+                  <string>Ajouter la courbe</string>
+                 </property>
+                </widget>
                </item>
                <item>
                 <spacer name="verticalSpacer_2">
