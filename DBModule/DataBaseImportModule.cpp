@@ -432,17 +432,74 @@ void DataBaseImportModule::loadMegasquirtData(
      * ---------------------------------------------------------------------- */
 
     QSqlQuery query;
-    query.prepare("insert into MEGASQUIRT values (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    query.prepare("insert into MEGASQUIRT values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+    QVariantList timestamps;
+    QVariantList refRaces;
+    QVariantList refNums;
 
     QList<QVariantList> columns;
 
-    for(int i(0); i < parser.columnCount(); ++i)
-        columns << DataBaseManager::toVariantList(parser.column(i).toList());
+    qint64 nsSinceEpoch;
+    QDateTime dt;
+    int raceId(race.id());
+    int prevNumLap(-2);
+    int numLap;
+    QTime lapTimeOrigin(0, 0);
+    int toursRefuses(0);
+
+    /* ---------------------------------------------------------------------- *
+     *  Boucle de calcul pour le timestamp et la référence du numéro du tour  *
+     * ---------------------------------------------------------------------- */
+
+    for(int rowNum(1); rowNum < parser.rowCount(); ++rowNum)
+    {
+        nsSinceEpoch = parser.row(rowNum).at(0).toULongLong() * 1000000000
+                     + parser.row(rowNum).at(1).toULongLong();
+        dt = QDateTime::fromMSecsSinceEpoch(nsSinceEpoch / (1000 * 1000));
+
+        //qDebug() << dt;
+
+        numLap = race.numLap(dt.time());
+
+        if(numLap == -1)
+        {
+            qDebug() << "tour refusé !!!!!";
+            ++toursRefuses;
+            continue;
+        }
+
+        // Si on change de tour
+        if(numLap != prevNumLap)
+        {
+            prevNumLap = numLap;
+            lapTimeOrigin = race.lap(numLap).first;
+        }
+
+        timestamps << lapTimeOrigin.msecsTo(dt.time());
+        refRaces   << raceId;
+        refNums    << numLap;
+    }
+
+    columns << timestamps << refRaces << refNums;
+
+    // Faut enlever id auto-incrément, secondes et nanosecondes
+    // Faut ajouter timestamp, ref_lap_num et ref_lap_race
+
+    /* ---------------------------------------------------------------------- *
+     *                   Récupération des données Megasquirt                  *
+     * ---------------------------------------------------------------------- */
+
+    for(int i(2); i < parser.columnCount(); ++i) // Saute les sec et nanosec
+        columns << DataBaseManager::toVariantList(parser.column(i).mid(toursRefuses));
 
     qDebug() << "Nombre de colonnes à inserer dans la base = " << columns.count();
 
     foreach (QVariantList column, columns)
+    {
+        qDebug() << "Nombre de tuples dans la colonne = " << column.count();
         query.addBindValue(column);
+    }
 
     DataBaseManager::execBatch(query);
 }

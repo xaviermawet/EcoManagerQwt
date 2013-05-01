@@ -81,9 +81,12 @@ create table ACCELERATION
 
 create table MEGASQUIRT
 (
-    id integer primary key AUTOINCREMENT,
-    secondes        DOUBLE,
-    nanosecondes    DOUBLE,
+    timestamp 		TIME,    	-- Temps depuis le début du tour
+    ref_lap_num 	INTEGER,	-- reférence du tour
+    ref_lap_race	INTEGER,	-- référence de la course
+
+    -- Données d'une trame Megasquirt
+
     seconds 		DOUBLE,
     pulseWidth1		DOUBLE,
     pulseWidth2		DOUBLE,
