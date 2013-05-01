@@ -483,9 +483,6 @@ void DataBaseImportModule::loadMegasquirtData(
 
     columns << timestamps << refNums << refRaces;
 
-    // Faut enlever id auto-incrément, secondes et nanosecondes
-    // Faut ajouter timestamp, ref_lap_num et ref_lap_race
-
     /* ---------------------------------------------------------------------- *
      *                   Récupération des données Megasquirt                  *
      * ---------------------------------------------------------------------- */
@@ -493,13 +490,8 @@ void DataBaseImportModule::loadMegasquirtData(
     for(int i(2); i < parser.columnCount(); ++i) // Saute les sec et nanosec
         columns << DataBaseManager::toVariantList(parser.column(i).mid(toursRefuses));
 
-    qDebug() << "Nombre de colonnes à inserer dans la base = " << columns.count();
-
     foreach (QVariantList column, columns)
-    {
-        qDebug() << "Nombre de tuples dans la colonne = " << column.count();
         query.addBindValue(column);
-    }
 
     DataBaseManager::execBatch(query);
 }
