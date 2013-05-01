@@ -481,7 +481,7 @@ void DataBaseImportModule::loadMegasquirtData(
         refNums    << numLap;
     }
 
-    columns << timestamps << refRaces << refNums;
+    columns << timestamps << refNums << refRaces;
 
     // Faut enlever id auto-incrément, secondes et nanosecondes
     // Faut ajouter timestamp, ref_lap_num et ref_lap_race

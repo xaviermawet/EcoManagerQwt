@@ -178,12 +178,8 @@ create table MEGASQUIRT
     rpmdot			DOUBLE,
     gpioport0		DOUBLE,
     gpioport1		DOUBLE,
-    gpioport2		DOUBLE
-);
+    gpioport2		DOUBLE,
 
-create table personne
-(
-    id integer primary key AUTOINCREMENT,
-    nom varchar(80),
-    prenom varchar(80)
+    FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE,
+    PRIMARY KEY (timestamp, ref_lap_num, ref_lap_race)
 );
