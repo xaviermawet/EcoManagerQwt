@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1005</width>
-    <height>404</height>
+    <width>854</width>
+    <height>325</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,7 +57,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="raceLabel">
+         <widget class="QLabel" name="racesLabel">
           <property name="text">
            <string>Course(s)</string>
           </property>
@@ -173,20 +173,8 @@
                <bool>false</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
                <item>
-                <spacer name="verticalSpacer">
+                <spacer name="verticalSpacer_2">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
                  </property>
@@ -199,6 +187,44 @@
                 </spacer>
                </item>
                <item>
+                <layout class="QGridLayout" name="gridLayout">
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="lapLabel">
+                   <property name="text">
+                    <string>Tour :</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="raceLabel">
+                   <property name="text">
+                    <string>Course :</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="raceNumberLabel">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLabel" name="lapNumberLabel">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
                 <widget class="QComboBox" name="megaSquirtComboBox"/>
                </item>
                <item>
@@ -209,7 +235,7 @@
                 </widget>
                </item>
                <item>
-                <spacer name="verticalSpacer_2">
+                <spacer name="verticalSpacer">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
                  </property>
@@ -281,7 +307,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1005</width>
+     <width>854</width>
      <height>19</height>
     </rect>
    </property>

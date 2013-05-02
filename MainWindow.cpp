@@ -280,7 +280,7 @@ void MainWindow::on_raceView_pressed(const QModelIndex& index)
                                             index.parent())).toInt();
 
         int race_num = competitionModel->data(
-                    competitionModel->index(0, 0,
+                    competitionModel->index(index.parent().row(), 0,
                                             index.parent().parent())).toInt();
 
         QMap<QString, QVariant> trackIdentifier;
@@ -289,6 +289,10 @@ void MainWindow::on_raceView_pressed(const QModelIndex& index)
         trackIdentifier["race_num"] = race_num;
 
         this->raceViewItemidentifier = QVariant::fromValue(trackIdentifier);
+
+        // Update the megasquirt labels for the current trackidentifier
+        this->ui->raceNumberLabel->setText(QString::number(race_num));
+        this->ui->lapNumberLabel->setText(QString::number(ref_lap));
 
         qDebug() << "Tour : race num = "
                  << race_num << " race id = "
