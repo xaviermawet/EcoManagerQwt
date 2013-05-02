@@ -36,6 +36,14 @@
         <file>Resources/Icons/closeBox.png</file>
         <file>Resources/Icons/folder.png</file>
         <file>Resources/Icons/document.png</file>
+        <file>Resources/Icons/Grid-icon.png</file>
+        <file>Resources/Icons/Computer-Hardware-Mouse-icon.png</file>
+        <file>Resources/Icons/Arrows-Down-icon.png</file>
+        <file>Resources/Icons/Arrows-Up-icon.png</file>
+        <file>Resources/Icons/File-Types-Pdf-icon.png</file>
+        <file alias="color">Resources/Icons/Text-Formatting-Bg-color-icon.png</file>
+        <file alias="erase">Resources/Icons/Editing-Erase-icon.png</file>
+        <file alias="focusOn">Resources/Icons/Image-Edition-Tools-Collapse-icon.png</file>
     </qresource>
     <qresource prefix="/sql">
         <file alias="schemaTable">Resources/SQL/DB.sql</file>

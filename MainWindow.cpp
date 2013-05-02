@@ -4,7 +4,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow),
     competitionBox(NULL), mapFrame(NULL), distancePlotFrame(NULL),
-    timePlotFrame(NULL), megaSquirtPlotFrame(NULL), sectorModel(NULL),
+    timePlotFrame(NULL), megasquirtDataPlot(NULL), sectorModel(NULL),
     competitionNameModel(NULL), competitionModel(NULL),
     raceInformationTableModel(NULL)
 {
@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // GUI Configuration
     this->ui->setupUi(this);
+    connect(this->ui->plotsTabWidget, SIGNAL(currentChanged(int)),
+            this, SLOT(updateMenus()));
 
     // Reharge le dernier "projet" s'il existe tjrs
     if (!DataBaseManager::restorePreviousDataBase())
@@ -21,6 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
         this->ui->menuExport->menuAction()->setVisible(false);
     }
 
+    // Display Configuration
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+
     // Building of the parts of the MainWindow
     this->createRaceView();
     this->createRaceTable();
@@ -28,14 +34,13 @@ MainWindow::MainWindow(QWidget *parent) :
     this->createPlotZone();
     this->createMegaSquirtZone();
     this->createToolsBar();
+    this->createPlotLegendContextMenu();
 
     // Connect all the signals
     this->connectSignals();
 
-    // Display Configuration
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
     this->readSettings("MainWindow");
+    this->updateMenus();
     this->centerOnScreen();
 }
 
@@ -274,13 +279,20 @@ void MainWindow::on_raceView_pressed(const QModelIndex& index)
                     competitionModel->index(index.row(), 2,
                                             index.parent())).toInt();
 
+        int race_num = competitionModel->data(
+                    competitionModel->index(0, 0,
+                                            index.parent().parent())).toInt();
+
         QMap<QString, QVariant> trackIdentifier;
         trackIdentifier["race"] = ref_race;
         trackIdentifier["lap"] = ref_lap;
+        trackIdentifier["race_num"] = race_num;
 
         this->raceViewItemidentifier = QVariant::fromValue(trackIdentifier);
 
-        qDebug() << "Tour : race id = " << ref_race << " lap = " << ref_lap;
+        qDebug() << "Tour : race num = "
+                 << race_num << " race id = "
+                 << ref_race << " lap = " << ref_lap;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -1393,15 +1405,16 @@ void MainWindow::createPlotZone(void)
 void MainWindow::createMegaSquirtZone(void)
 {
     // Create MegaSquirt plot frame
-    this->megaSquirtPlotFrame = new PlotFrame;
-    HorizontalScale* timeAxis = new HorizontalScale(Scale::Bottom);
-    timeAxis->setResolution(5);
-    timeAxis->setUnitLabel("t(s)");
-    this->megaSquirtPlotFrame->addHorizontalAxis(timeAxis);
+    this->megasquirtDataPlot = new Plot(tr("Données du Megasquirt"), this);
+    this->megasquirtDataPlot->setAxisTitle(Plot::xBottom, tr("Temps (s)"));
+    this->ui->megaSquirtSplitter->addWidget(this->megasquirtDataPlot);
 
-    // Add the plot frame to the megaSquirt splitter
-    this->ui->megaSquirtSplitter->addWidget(this->megaSquirtPlotFrame);
-
+    // Connect plot signals to slots
+    connect(this->megasquirtDataPlot, SIGNAL(legendChecked(QwtPlotItem*, bool)),
+            this,  SLOT(setPlotCurveVisibile(QwtPlotItem*, bool)));
+    connect(this->megasquirtDataPlot,
+            SIGNAL(legendRightClicked(const QwtPlotItem*,QPoint)),
+            this, SLOT(showLegendContextMenu(const QwtPlotItem*,QPoint)));
 
     // Get Megasquirt parameters list
     MSManager megasquirtManager;
@@ -2027,8 +2040,6 @@ bool MainWindow::getAllDataFromSpeed(
             lapData.append(pos);         // Dist (m)
             lapData.append(speed);       // V (km\h)
             lapData.append(qAbs(acc) > 2 ? "NS" : QString::number(acc)); // Acc (m\s²)
-//            lapData.append("RPM");       // RPM
-//            lapData.append("PW");        // PW
 
             // Ajout de la ligne de données à la liste
             data.append(lapData);
@@ -2178,7 +2189,6 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
     QSqlQuery query("SELECT timestamp, " + this->ui->megaSquirtComboBox->currentText() + " "
                     "FROM megasquirt "
                     "WHERE ref_lap_race = ? and ref_lap_num = ? order by timestamp");
-    //query.addBindValue(this->ui->megaSquirtComboBox->currentText());
     query.addBindValue(trackIdentifier["race"].toInt());
     query.addBindValue(trackIdentifier["lap"].toInt());
 
@@ -2191,22 +2201,232 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
     }
 
     // Création des points de la courbe
-    QList<IndexedPosition> megasquirtCurvePoints;
+    QVector<QPointF> megasquirtCurvePoints;
     while(query.next())
+        megasquirtCurvePoints << QPointF(query.value(0).toFloat() / 1000,
+                                         query.value(1).toFloat());
+
+    QwtPointSeriesData* serieData = new QwtPointSeriesData(
+                megasquirtCurvePoints);
+    QPlotCurve* curve = new QPlotCurve(
+                tr("Course ") + trackIdentifier["race_num"].toString() +
+                tr(" tour ") + trackIdentifier["lap"].toString() +
+                " " + this->ui->megaSquirtComboBox->currentText(), QPen("red"));
+    curve->setData(serieData);
+    curve->attach(this->megasquirtDataPlot);
+    //this->setPlotCurveVisibile(powerCurve, true);
+}
+
+void MainWindow::updateMenus(void)
+{
+    // Get the current plot
+    Plot* plot = this->currentPlot();
+    if (!plot) return;
+
+    // Update menu edit actions
+    this->ui->actionShowGrid->setChecked(plot->isGridVisible());
+    this->ui->actionShowCrossLine->setChecked(plot->isCrossLineVisible());
+    this->ui->actionShowLabelPosition->setChecked(plot->isLabelPositionVisible());
+    this->ui->actionShowLabelPosition->setEnabled(!plot->isCrossLineVisible());
+}
+
+void MainWindow::eraseCurve(void)
+{
+    // if no curve associated to the legend item. This shouldn't happen!
+    if (this->curveAssociatedToLegendItem == NULL)
+        return;
+
+    // Delete the curve associated to the legend item
+    this->curveAssociatedToLegendItem->detach();
+    delete this->curveAssociatedToLegendItem;
+    this->curveAssociatedToLegendItem = NULL;
+
+    // update the plot
+    this->currentPlot()->replot();
+}
+
+void MainWindow::centerOnCurve(void)
+{
+    // if no curve associated to the legend item. This shouldn't happen!
+    if (this->curveAssociatedToLegendItem == NULL)
+        return;
+
+    this->currentPlot()->zoom(this->curveAssociatedToLegendItem);
+}
+
+void MainWindow::changeCurveColor(void)
+{
+    // if no curve associated to the legend item. This shouldn't happen!
+    if (this->curveAssociatedToLegendItem == NULL)
+        return;
+
+    // Select a new color
+    QColor newColor = QColorDialog::getColor(
+                this->curveAssociatedToLegendItem->pen().color(), this,
+                tr("Choisir une nouvelle couleur pour la courbe"));
+
+    // If the user cancels the dialog, an invalid color is returned
+    if (newColor.isValid())
+        this->curveAssociatedToLegendItem->setPen(QPen(newColor));
+}
+
+void MainWindow::renameCurve(void)
+{
+    // if no curve associated to the legend item. This shouldn't happen!
+    if (this->curveAssociatedToLegendItem == NULL)
+        return;
+
+    bool ok(false);
+    QString newName = QInputDialog::getText(
+                this, tr("Renommer une courbe"),
+                tr("Nouveau nom pour la courbe ") +
+                this->curveAssociatedToLegendItem->title().text() + " :",
+                QLineEdit::Normal, QString(), &ok);
+
+    if (!ok) // User canceled
+        return;
+
+    try
     {
-        IndexedPosition point;
-        double time = query.value(0).toFloat() / 1000;
+        if (newName.isEmpty())
+            throw QException(tr("Vous deve rentrer un nom pour la courbe"));
 
-        point.setIndex(time);
-        point.setX(time);
-        point.setY(query.value(1).toFloat());
+        // Check if curve name exists
+        foreach (QwtPlotItem* item, this->currentPlot()->itemList())
+            if (item->title().text() == newName)
+                throw QException(tr("Une autre courbe porte déjà ce nom"));
 
-        qDebug() << "X = " << point.x() << " Y = " << point.y();
-        qDebug() << query.value(1);
-
-        megasquirtCurvePoints << point;
+        // Apply the new name
+        this->curveAssociatedToLegendItem->setTitle(newName);
     }
+    catch(QException const& ex)
+    {
+        QMessageBox::warning(this, tr("Impossible de renommer la courbe"),
+                             ex.what());
+    }
+}
 
-    this->megaSquirtPlotFrame->scene()->addCurve(megasquirtCurvePoints,
-                                                 trackIdentifier);
+void MainWindow::setPlotCurveVisibile(QwtPlotItem* item, bool visible)
+{
+    item->setVisible(visible);
+    QWidget* w = item->plot()->legend()->find(item);
+    if ( w && w->inherits("QwtLegendItem") )
+        ((QwtLegendItem *)w)->setChecked(visible);
+
+    item->plot()->replot();
+}
+
+void MainWindow::showLegendContextMenu(const QwtPlotItem* item,
+                                       const QPoint& pos)
+{
+    // Save the plot curve associated to the legend item
+    this->curveAssociatedToLegendItem = (QPlotCurve*) item;
+    if(!this->curveAssociatedToLegendItem)
+        return;
+
+    // Display custom contextual menu
+    this->legendContextMenu->exec(pos);
+}
+
+Plot* MainWindow::currentPlot(void) const
+{
+//    switch (this->ui->mainTabWidget->currentIndex())
+//    {
+//    case TAB_BENCH_TEST:
+//        switch (this->ui->benchTestTabWidget->currentIndex())
+//        {
+//            case TAB_COUPLE_AND_POWER:
+//                return this->couplePowerPlot;
+//            case TAB_COUPLE_AND_SPECIFIC_POWER:
+//                return this->coupleSpecificPowerPlot;
+//            case TAB_REDUCTION_RATIO:
+//                return this->reductionRatioPlot;
+//            case TAB_WHEEL_SLIPPAGE:
+//                return this->wheelSlippagePlot;
+//            default:
+//                return NULL;
+//        }
+//    case TAB_MEGASQUIRT_DATA:
+//        return this->megasquirtDataPlot;
+//    default:
+//        return NULL;
+//    }
+
+    return this->megasquirtDataPlot;
+}
+
+void MainWindow::createPlotLegendContextMenu(void)
+{
+    // Legend actions
+    this->legendContextMenu = new QMenu(this);
+    this->legendContextMenu->addAction(
+                QIcon("://erase"), tr("Effacer"),this,
+                SLOT(eraseCurve()));
+    this->legendContextMenu->addAction(
+                QIcon("://focusOn"), tr("Centrer sur"), this,
+                SLOT(centerOnCurve()));
+    this->legendContextMenu->addAction(
+                QIcon("://color"), tr("Changer la couleur"), this,
+                SLOT(changeCurveColor()));
+    this->legendContextMenu->addAction(
+                tr("Renommer"), this, SLOT(renameCurve()));
+}
+
+void MainWindow::on_actionShowGrid_triggered(bool visible)
+{
+    this->currentPlot()->setGridVisible(visible);
+}
+
+void MainWindow::on_actionShowCrossLine_triggered(bool visible)
+{
+    this->currentPlot()->setCrossLineVisible(visible);
+    this->updateMenus(); // Because two menu actions must been (un)checked
+}
+
+void MainWindow::on_actionShowLabelPosition_triggered(bool visible)
+{
+    this->currentPlot()->setLabelPositionVisible(visible);
+}
+
+void MainWindow::on_actionIncreaseAccuracy_triggered(void)
+{
+    // Get the current plot
+    Plot* plot = this->currentPlot();
+
+    // Set the maximum number of major scale intervals for a specified axis
+    plot->setAxisMaxMajor(QwtPlot::yLeft,
+                          plot->axisMaxMajor(QwtPlot::yLeft) + 1);
+    plot->setAxisMaxMajor(QwtPlot::yRight,
+                          plot->axisMaxMajor(QwtPlot::yRight) + 1);
+    plot->setAxisMaxMajor(QwtPlot::xBottom,
+                          plot->axisMaxMajor(QwtPlot::xBottom) + 1);
+}
+
+void MainWindow::on_actionReduceAccuracy_triggered(void)
+{
+    // Get the current plot
+    Plot* plot = this->currentPlot();
+
+    // Set the maximum number of major scale intervals for a specified axis
+    plot->setAxisMaxMajor(QwtPlot::yLeft,
+                          plot->axisMaxMajor(QwtPlot::yLeft) - 1);
+    plot->setAxisMaxMajor(QwtPlot::yRight,
+                          plot->axisMaxMajor(QwtPlot::yRight) - 1);
+    plot->setAxisMaxMajor(QwtPlot::xBottom,
+                          plot->axisMaxMajor(QwtPlot::xBottom) - 1);
+}
+
+void MainWindow::on_actionExportToPDF_triggered()
+{
+    QString pdfFile = QFileDialog::getSaveFileName(
+                this, tr("Sauvegarder le graphique"), QDir::homePath(),
+                tr("Portable Document Format (*.pdf)"));
+
+    if (pdfFile.isNull() || pdfFile.isEmpty()) // User canceled
+        return;
+
+    QwtPlotRenderer renderer;
+    renderer.setDiscardFlag(QwtPlotRenderer::DiscardBackground);
+    renderer.renderDocument(this->currentPlot(), pdfFile,
+                            this->currentPlot()->size());
 }

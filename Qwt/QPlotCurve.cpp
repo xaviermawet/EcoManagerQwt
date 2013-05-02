@@ -1,0 +1,16 @@
+#include "QPlotCurve.hpp"
+
+QPlotCurve::QPlotCurve(const QString &title, const QPen &pen) :
+    QPlotCurve(QwtText(title), pen)
+{
+    // Delegating constructors only available with -std=c++11 or -std=gnu++11
+}
+
+QPlotCurve::QPlotCurve(const QwtText &title, const QPen &pen) :
+    QwtPlotCurve(title)
+{
+    this->setPen(pen);
+    this->setRenderHint(QwtPlotItem::RenderAntialiased);
+    this->setItemAttribute(QwtPlotItem::Legend); // true default value
+    //this->setLegendAttribute(LegendShowLine);
+}

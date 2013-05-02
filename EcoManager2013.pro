@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui sql
-
+CONFIG   += qwt
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = EcoManager2013
@@ -62,7 +62,14 @@ SOURCES += main.cpp\
     Utils/QCSVParser.cpp \
     DBModule/DataBaseImportModule.cpp \
     Megasquirt/MSDataConverter.cpp \
-    Megasquirt/MSManager.cpp
+    Megasquirt/MSManager.cpp \
+    Qwt/Plot.cpp \
+    Qwt/AbstractDoubleAxisPlot.cpp \
+    Qwt/DoubleYAxisPlot.cpp \
+    Qwt/DoubleXAxisPlot.cpp \
+    Qwt/PlotMagnifier.cpp \
+    Qwt/Zoomer.cpp \
+    Qwt/QPlotCurve.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -113,7 +120,14 @@ HEADERS  += MainWindow.hpp \
     Utils/QCSVParser.hpp \
     DBModule/DataBaseImportModule.hpp \
     Megasquirt/MSDataConverter.hpp \
-    Megasquirt/MSManager.hpp
+    Megasquirt/MSManager.hpp \
+    Qwt/Plot.hpp \
+    Qwt/AbstractDoubleAxisPlot.hpp \
+    Qwt/DoubleYAxisPlot.hpp \
+    Qwt/DoubleXAxisPlot.hpp \
+    Qwt/PlotMagnifier.hpp \
+    Qwt/Zoomer.hpp \
+    Qwt/QPlotCurve.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

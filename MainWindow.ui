@@ -378,8 +378,22 @@
      <addaction name="actionRaceViewDeleteRace"/>
      <addaction name="actionRaceViewDeleteRacesAtSpecificDate"/>
     </widget>
+    <widget class="QMenu" name="menuGraphic">
+     <property name="title">
+      <string>Graphique courant</string>
+     </property>
+     <addaction name="actionShowGrid"/>
+     <addaction name="actionShowCrossLine"/>
+     <addaction name="actionShowLabelPosition"/>
+     <addaction name="separator"/>
+     <addaction name="actionIncreaseAccuracy"/>
+     <addaction name="actionReduceAccuracy"/>
+     <addaction name="separator"/>
+     <addaction name="actionExportToPDF"/>
+    </widget>
     <addaction name="menuEditRaceView"/>
     <addaction name="menuLapDataTable"/>
+    <addaction name="menuGraphic"/>
     <addaction name="actionClearAllData"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
@@ -692,9 +706,6 @@
    <property name="toolTip">
     <string>Comparer les données sélectionnées</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
    <property name="visible">
     <bool>true</bool>
    </property>
@@ -875,6 +886,95 @@
   <action name="actionExecuter_une_requete">
    <property name="text">
     <string>executer une requete</string>
+   </property>
+  </action>
+  <action name="actionShowGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Grid-icon.png</normaloff>:/Resources/Icons/Grid-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Afficher la &amp;grille</string>
+   </property>
+   <property name="toolTip">
+    <string>Afficher une grille quadrillées dans le graphique </string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionShowCrossLine">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Afficher une &amp;croix à la position de la souris</string>
+   </property>
+   <property name="toolTip">
+    <string>Affiche / Masque une ligne verticale et une ligne horizontale passant par la position de la souris</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionShowLabelPosition">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Computer-Hardware-Mouse-icon.png</normaloff>:/Resources/Icons/Computer-Hardware-Mouse-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Afficher un &amp;label indiquant la position de la souris</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionIncreaseAccuracy">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Arrows-Up-icon.png</normaloff>:/Resources/Icons/Arrows-Up-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Augmenter la précision</string>
+   </property>
+   <property name="toolTip">
+    <string>Augmenter la précision des échelles du graphique</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Up</string>
+   </property>
+  </action>
+  <action name="actionReduceAccuracy">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Arrows-Down-icon.png</normaloff>:/Resources/Icons/Arrows-Down-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Diminuer la précision</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Down</string>
+   </property>
+  </action>
+  <action name="actionExportToPDF">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/File-Types-Pdf-icon.png</normaloff>:/Resources/Icons/File-Types-Pdf-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exporter au format &amp;PDF</string>
+   </property>
+   <property name="toolTip">
+    <string>Exporter le graphique courant dans un fichier au format PDF (Portable Document Format)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

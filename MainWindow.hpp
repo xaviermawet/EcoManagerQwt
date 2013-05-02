@@ -8,6 +8,11 @@
  *
  * utiliser DataBaseManager::execBatch() et DataBaseManager::execTransaction()
  * partout là ou c'est possible
+ *
+ * Mettre a jout le titre du grahique (ou des futurs graphiques) pour y intégrer
+ * le nom de la compétition courante
+ *
+ * Mettre le menu "Graphique courant" directement dans la bar de menu ?
  */
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
@@ -31,6 +36,11 @@
 #include "LapDataCompartor.hpp"
 #include "Utils/DataBaseManager.hpp"
 #include "Utils/QCSVParser.hpp"
+
+// Qwt
+#include <Qwt/Plot.hpp>
+#include <Qwt/QPlotCurve.hpp>
+#include <qwt_plot_renderer.h>
 
 #include <QtGui>
 #include <QtSql>
@@ -121,10 +131,26 @@ class MainWindow : public QMainWindow
         void deleteRaces(QVariantList listRaceId);
 
         void on_actionExecuter_une_requete_triggered(void);
-
         void on_megasquirtAddCurvePushButton_clicked(void);
 
-    private:
+        // Legend actions management
+        void updateMenus(void);
+        void eraseCurve(void);
+        void centerOnCurve(void);
+        void changeCurveColor(void);
+        void renameCurve(void);
+        void setPlotCurveVisibile(QwtPlotItem* item, bool visible);
+        void showLegendContextMenu(QwtPlotItem const* item, QPoint const& pos);
+
+        void on_actionShowGrid_triggered(bool visible);
+        void on_actionShowCrossLine_triggered(bool visible);
+        void on_actionShowLabelPosition_triggered(bool visible);
+        void on_actionIncreaseAccuracy_triggered(void);
+        void on_actionReduceAccuracy_triggered(void);
+
+        void on_actionExportToPDF_triggered();
+
+private:
 
         void centerOnScreen(void);
         void createRaceView(void);
@@ -155,6 +181,10 @@ class MainWindow : public QMainWindow
         void exportLapDataToCSV(const TrackIdentifier& trackId,
                                 float lowerTimeValue, float upperTimeValue);
 
+        // Legend actions management
+        Plot* currentPlot(void) const;
+        void  createPlotLegendContextMenu(void);
+
     protected:
 
         virtual void closeEvent(QCloseEvent* event);
@@ -171,7 +201,11 @@ class MainWindow : public QMainWindow
         // Plot
         PlotFrame* distancePlotFrame;
         PlotFrame* timePlotFrame;
-        PlotFrame* megaSquirtPlotFrame;
+        Plot* megasquirtDataPlot;
+
+        // Plot context Menu
+        QMenu*     legendContextMenu;
+        QPlotCurve* curveAssociatedToLegendItem;
 
         // Models
         QSqlTableModel* sectorModel;
