@@ -106,6 +106,20 @@ void Plot::zoom(const QwtPlotItem* item)
     this->zoom(item->boundingRect());
 }
 
+QPlotCurve* Plot::addCurve(const QString &title, QVector<QPointF> points)
+{
+    if(points.isEmpty())
+        return NULL;
+
+    QwtPointSeriesData* serieData = new QwtPointSeriesData(points);
+
+    QPlotCurve* curve = new QPlotCurve(title, QPen("red"));
+    curve->setData(serieData);
+    curve->attach(this);
+
+    return curve;
+}
+
 bool Plot::isGridVisible(void) const
 {
     return this->_grid->plot() != NULL;

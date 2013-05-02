@@ -2210,15 +2210,12 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
         megasquirtCurvePoints << QPointF(query.value(0).toFloat() / 1000,
                                          query.value(1).toFloat());
 
-    QwtPointSeriesData* serieData = new QwtPointSeriesData(
-                megasquirtCurvePoints);
-    QPlotCurve* curve = new QPlotCurve(
+    QPlotCurve* curve = this->megasquirtDataPlot->addCurve(
                 tr("Course ") + trackIdentifier["race_num"].toString() +
                 tr(" tour ") + trackIdentifier["lap"].toString() +
-                " " + this->ui->megaSquirtComboBox->currentText(), QPen("red"));
-    curve->setData(serieData);
-    curve->attach(this->megasquirtDataPlot);
-    //this->setPlotCurveVisibile(powerCurve, true);
+                " " + this->ui->megaSquirtComboBox->currentText(),
+                megasquirtCurvePoints);
+    this->setPlotCurveVisibile(curve, true);
 }
 
 void MainWindow::updateMenus(void)

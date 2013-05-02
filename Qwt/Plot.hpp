@@ -1,3 +1,9 @@
+/* TODO :
+ * ------------
+ * Ajouter une méthode addCurve qui est la meme que celle qui existe deja mais
+ * qui prend en plus en paramètre un QPen pour la couleur
+ */
+
 #ifndef __PLOT_HPP__
 #define __PLOT_HPP__
 
@@ -11,6 +17,7 @@
 #include <qwt_plot_magnifier.h>
 #include "Zoomer.hpp"
 #include "PlotMagnifier.hpp"
+#include "QPlotCurve.hpp"
 
 /*!
  * \brief Graphique 2D
@@ -52,11 +59,21 @@ class Plot : public QwtPlot
          * \param zoomRectF Zone rectangulaire sur laquelle on désirer zoomer
          */
         void zoom(QRectF const& zoomRectF);
+
         /*!
          * \brief Réalise un zoom sur un élément graphique
          * \param item Elément du graphique sur lequel on désire zoomer
          */
         virtual void zoom(QwtPlotItem const* item);
+
+        /*!
+         * \brief Ajoute une courbe au graphique
+         * \param title Le titre donné à la courbe
+         * \param points Les coordonnées de tous les points de la courbe
+         * \return Un pointeur vers la courbe nouvellement ajoutée
+         */
+        virtual QPlotCurve* addCurve(QString const& title,
+                                     QVector<QPointF> points);
 
         /* ------------------------------------------------------------------ *
          *                              Getters                               *
