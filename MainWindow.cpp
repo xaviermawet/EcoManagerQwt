@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!DataBaseManager::restorePreviousDataBase())
     {
         this->ui->actionImport->setVisible(false);
-        this->ui->menuExport->menuAction()->setVisible(false);
+        this->ui->actionExportSectors->setVisible(false);
     }
 
     // Display Configuration
@@ -186,7 +186,7 @@ void MainWindow::on_actionAboutEcoManager2013_triggered(void)
                              "A propos du project EcoManager 2013 ....");
 }
 
-void MainWindow::on_actionExportConfigurationModule_triggered(void)
+void MainWindow::on_actionExportSectors_triggered(void)
 {
     try
     {
@@ -224,12 +224,6 @@ void MainWindow::on_actionExportConfigurationModule_triggered(void)
     {
         QMessageBox::warning(this, tr("Exportation impossible"), ex.what());
     }
-}
-
-void MainWindow::on_actionExportData_triggered(void)
-{
-    QMessageBox::information(this, "Action Export Data",
-                             "Exportation de données ...");
 }
 
 void MainWindow::on_raceView_pressed(const QModelIndex& index)
@@ -2014,7 +2008,7 @@ void MainWindow::updateDataBase(QString const& dbFilePath,
     bool success = (*dataBaseAction)(dbFilePath);
 
     this->ui->actionImport->setVisible(success);
-    this->ui->menuExport->menuAction()->setVisible(success);
+    this->ui->actionExportSectors->setVisible(success);
     this->on_actionClearAllData_triggered();
 
     if(!success)

@@ -315,23 +315,12 @@
     <property name="title">
      <string>&amp;Fichier</string>
     </property>
-    <widget class="QMenu" name="menuExport">
-     <property name="title">
-      <string>Exporter</string>
-     </property>
-     <property name="icon">
-      <iconset resource="Resources.qrc">
-       <normaloff>:/Resources/Icons/upload.png</normaloff>:/Resources/Icons/upload.png</iconset>
-     </property>
-     <addaction name="actionExportConfigurationModule"/>
-     <addaction name="actionExportData"/>
-    </widget>
     <addaction name="actionNewProject"/>
     <addaction name="actionOpenProject"/>
     <addaction name="actionSaveProjectAs"/>
     <addaction name="separator"/>
     <addaction name="actionImport"/>
-    <addaction name="menuExport"/>
+    <addaction name="actionExportSectors"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -502,14 +491,19 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionExportConfigurationModule">
-   <property name="text">
-    <string>Configuration module</string>
+  <action name="actionExportSectors">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/upload.png</normaloff>:/Resources/Icons/upload.png</iconset>
    </property>
-  </action>
-  <action name="actionExportData">
    <property name="text">
-    <string>Données</string>
+    <string>Exporter la configuration des secteurs</string>
+   </property>
+   <property name="toolTip">
+    <string>Exporter la configuration des vitesses maximales et minimales pour tous les différents secteurs</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionAboutEcoManager2013">

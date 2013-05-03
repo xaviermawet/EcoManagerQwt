@@ -72,8 +72,7 @@ class MainWindow : public QMainWindow
         void on_actionImport_triggered(void);
         void on_actionImport_triggered_old(void);
         void on_actionAboutEcoManager2013_triggered(void);
-        void on_actionExportConfigurationModule_triggered(void);
-        void on_actionExportData_triggered(void);
+        void on_actionExportSectors_triggered(void);
         void on_raceView_doubleClicked(const QModelIndex& index);
         void on_actionDelimitingSectors_triggered(void);
         void on_raceView_customContextMenuRequested(const QPoint &pos);
