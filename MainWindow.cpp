@@ -538,6 +538,28 @@ void MainWindow::on_actionClearAllData_triggered(void)
         this->sectorModel->clear();
         this->ui->sectorView->update();
     }
+
+    // Erase plot crurves from Qwt plot
+    foreach (Plot* plot, this->plots)
+    {
+        foreach (QwtPlotItem* item, plot->itemList())
+        {
+            // if the plot item isn't a curve
+            if (item->rtti() != QwtPlotItem::Rtti_PlotCurve)
+                continue;
+
+            // Delete the curve
+            QPlotCurve* curve = (QPlotCurve*) item;
+            if (curve == NULL) // cast failed
+                continue;
+
+            curve->detach();
+            delete curve;
+        }
+
+        // Refresh the plot to erase curves
+        plot->replot();
+    }
 }
 
 void MainWindow::on_raceTable_customContextMenuRequested(const QPoint &pos)
