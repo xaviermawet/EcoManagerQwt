@@ -51,6 +51,7 @@ class MainWindow;
 }
 
 typedef QMap<QString, QVariant> TrackIdentifier;
+typedef QList<Plot*> PlotList;
 
 class MainWindow : public QMainWindow
 {
@@ -150,7 +151,7 @@ class MainWindow : public QMainWindow
 
         void on_actionExportToPDF_triggered();
 
-private:
+    private:
 
         void centerOnScreen(void);
         void createRaceView(void);
@@ -159,8 +160,10 @@ private:
         void createPlotZone(void);
         void createMegaSquirtZone(void);
         void createRaceTable(void);
-        void readSettings(const QString& settingsGroup);
-        void writeSettings(const QString& settingsGroup) const;
+        void readSettings(void);
+        void writeSettings(void) const;
+        void readLayoutSettings(const QString& settingsGroup);
+        void writeLayoutSettings(const QString& settingsGroup) const;
         void displayDataLap(void);
         void connectSignals(void);
         void reloadRaceView(void);
@@ -202,6 +205,9 @@ private:
         PlotFrame* distancePlotFrame;
         PlotFrame* timePlotFrame;
         Plot* megasquirtDataPlot;
+
+        // List of all Plots
+        PlotList plots;
 
         // Plot context Menu
         QMenu*     legendContextMenu;

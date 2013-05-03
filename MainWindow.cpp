@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Connect all the signals
     this->connectSignals();
 
-    this->readSettings("MainWindow");
+    this->readSettings();
     this->updateMenus();
     this->centerOnScreen();
 }
@@ -92,7 +92,7 @@ void MainWindow::on_actionAboutQt_triggered(void)
 void MainWindow::on_actionQuit_triggered(void)
 {
     // Save the state of the mainWindow and its widgets
-    this->writeSettings("MainWindow");
+    this->writeSettings();
 
     qApp->quit();
 }
@@ -461,7 +461,7 @@ void MainWindow::on_actionSaveCurrentLayout_triggered(void)
         return;
 
     // Sauvegarde des paramètres d'affichage
-    this->writeSettings(layoutSelected);
+    this->writeLayoutSettings(layoutSelected);
     QMessageBox::information(this, tr("Sauvegarde de la disposition courante"),
                              tr("La disposition courante a correctement été "
                                 "sauvée dans ") + layoutSelected);
@@ -469,22 +469,22 @@ void MainWindow::on_actionSaveCurrentLayout_triggered(void)
 
 void MainWindow::on_actionConfiguredLayout1_triggered(void)
 {
-    this->readSettings(this->ui->actionConfiguredLayout1->text());
+    this->readLayoutSettings(this->ui->actionConfiguredLayout1->text());
 }
 
 void MainWindow::on_actionConfiguredLayout2_triggered(void)
 {
-    this->readSettings(this->ui->actionConfiguredLayout2->text());
+    this->readLayoutSettings(this->ui->actionConfiguredLayout2->text());
 }
 
 void MainWindow::on_actionConfiguredLayout3_triggered(void)
 {
-    this->readSettings(this->ui->actionConfiguredLayout3->text());
+    this->readLayoutSettings(this->ui->actionConfiguredLayout3->text());
 }
 
 void MainWindow::on_actionConfiguredLayout4_triggered(void)
 {
-    this->readSettings(this->ui->actionConfiguredLayout4->text());
+    this->readLayoutSettings(this->ui->actionConfiguredLayout4->text());
 }
 
 void MainWindow::on_actionLapDataEraseTable_triggered(void)
@@ -1427,6 +1427,10 @@ void MainWindow::createMegaSquirtZone(void)
             SIGNAL(legendRightClicked(const QwtPlotItem*,QPoint)),
             this, SLOT(showLegendContextMenu(const QwtPlotItem*,QPoint)));
 
+    // Settings management configuration
+    this->megasquirtDataPlot->setObjectName("MegasquirtDataPlot");
+    this->plots.append(this->megasquirtDataPlot);
+
     // Get Megasquirt parameters list
     MSManager megasquirtManager;
     this->ui->megaSquirtComboBox->addItems(megasquirtManager.fields());
@@ -1452,7 +1456,49 @@ void MainWindow::createRaceTable(void)
     this->ui->raceTable->setAlternatingRowColors(true); // Can be done with stylesheet, proxyModel or the mainModel
 }
 
-void MainWindow::readSettings(const QString& settingsGroup)
+void MainWindow::readSettings(void)
+{
+    QSettings settings;
+
+    // Restore plots settings
+    foreach (Plot* plot, this->plots)
+    {
+        settings.beginGroup(plot->objectName());
+        plot->setGridVisible(
+                    settings.value("isGridVisible", true).toBool());
+        plot->setCrossLineVisible(
+                    settings.value("isCrossLineVisible", false).toBool());
+        plot->setLabelPositionVisible(
+                    settings.value("isLabelPositionVisible", true).toBool());
+        settings.endGroup();
+    }
+
+    // Restore MainWindow settings
+    this->readLayoutSettings("MainWindow");
+}
+
+void MainWindow::writeSettings(void) const
+{
+    QSettings settings;
+
+    // Save plots settings
+    foreach (Plot* plot, this->plots)
+    {
+        settings.beginGroup(plot->objectName());
+        settings.setValue("isGridVisible",
+                          plot->isGridVisible());
+        settings.setValue("isCrossLineVisible",
+                          plot->isCrossLineVisible());
+        settings.setValue("isLabelPositionVisible",
+                          plot->isLabelPositionVisible());
+        settings.endGroup();
+    }
+
+    // Save MainWindow settings
+    this->writeLayoutSettings("MainWindow");
+}
+
+void MainWindow::readLayoutSettings(const QString& settingsGroup)
 {
     QSettings settings;
 
@@ -1471,20 +1517,35 @@ void MainWindow::readSettings(const QString& settingsGroup)
                 settings.value("MapPlotAndRaceSplitter").toByteArray());
     this->ui->MapPlotSplitter->restoreState(
                 settings.value("MapPlotSplitter").toByteArray());
+    this->ui->megaSquirtSplitter->restoreState(
+                settings.value("megaSquirtSplitter").toByteArray());
+    this->ui->plotsTabWidget->setCurrentIndex(
+                settings.value("plotsTabWidgetCurrentIndex", 0).toInt());
 
     settings.endGroup();
 }
 
-void MainWindow::writeSettings(const QString& settingsGroup) const
+void MainWindow::writeLayoutSettings(const QString& settingsGroup) const
 {
     QSettings settings;
 
     settings.beginGroup(settingsGroup);
-    settings.setValue("isMaximized", this->isMaximized());
-    settings.setValue("geometry", this->saveGeometry());
-    settings.setValue("mainSplitter", this->ui->mainSplitter->saveState());
-    settings.setValue("MapPlotAndRaceSplitter", this->ui->MapPlotAndRaceSplitter->saveState());
-    settings.setValue("MapPlotSplitter", this->ui->MapPlotSplitter->saveState());
+
+    settings.setValue("isMaximized",
+                      this->isMaximized());
+    settings.setValue("geometry",
+                      this->saveGeometry());
+    settings.setValue("mainSplitter",
+                      this->ui->mainSplitter->saveState());
+    settings.setValue("MapPlotAndRaceSplitter",
+                      this->ui->MapPlotAndRaceSplitter->saveState());
+    settings.setValue("MapPlotSplitter",
+                      this->ui->MapPlotSplitter->saveState());
+    settings.setValue("megaSquirtSplitter",
+                      this->ui->megaSquirtSplitter->saveState());
+    settings.setValue("plotsTabWidgetCurrentIndex",
+                      this->ui->plotsTabWidget->currentIndex());
+
     settings.endGroup();
 }
 
@@ -2155,7 +2216,7 @@ void MainWindow::exportLapDataToCSV(const TrackIdentifier &trackId,
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     // Save the state of the mainWindow and its widgets
-    this->writeSettings("MainWindow");
+    this->writeSettings();
 
     QMainWindow::closeEvent(event);
 }
