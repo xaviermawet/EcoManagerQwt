@@ -1067,10 +1067,11 @@ void MainWindow::loadCompetition(int index)
 {
     this->currentCompetition = competitionNameModel->record(index).value(0).toString();
 
-    if(this->currentCompetition.isEmpty())
-        return;
+//    if(this->currentCompetition.isEmpty())
+//        return;
 
-    this->on_actionClearAllData_triggered(); // Clear all tracks information of each view
+    // Clear all tracks information of each view
+    this->on_actionClearAllData_triggered();
 
     // Load races information
     this->reloadRaceView();
