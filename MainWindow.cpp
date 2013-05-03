@@ -1,3 +1,9 @@
+/* TODO :
+ * -----------------
+ * Lorsque l'on veut ajouter une courbe de données Megasquirt mais qu'il n'y a
+ * pas de données megasquirt associées, le programme plante
+ */
+
 #include "MainWindow.hpp"
 #include "ui_MainWindow.h"
 
@@ -1441,7 +1447,8 @@ void MainWindow::createPlotZone(void)
 void MainWindow::createMegaSquirtZone(void)
 {
     // Create MegaSquirt plot frame
-    this->megasquirtDataPlot = new Plot(tr("Données du Megasquirt"), this);
+    this->megasquirtDataPlot = new AdvancedPlot(tr("Données du Megasquirt"),
+                                                6, this);
     this->megasquirtDataPlot->setAxisTitle(Plot::xBottom, tr("Temps (s)"));
     this->ui->megaSquirtSplitter->addWidget(this->megasquirtDataPlot);
 

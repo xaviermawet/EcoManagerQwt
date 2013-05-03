@@ -106,14 +106,15 @@ void Plot::zoom(const QwtPlotItem* item)
     this->zoom(item->boundingRect());
 }
 
-QPlotCurve* Plot::addCurve(const QString &title, QVector<QPointF> points)
+QPlotCurve* Plot::addCurve(
+        QString const&title, QVector<QPointF> const& points, QPen const& pen)
 {
     if(points.isEmpty())
         return NULL;
 
     QwtPointSeriesData* serieData = new QwtPointSeriesData(points);
 
-    QPlotCurve* curve = new QPlotCurve(title, QPen("red"));
+    QPlotCurve* curve = new QPlotCurve(title, pen);
     curve->setData(serieData);
     curve->attach(this);
 

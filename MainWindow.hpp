@@ -39,7 +39,7 @@
 #include "FileParameterDialog.hpp"
 
 // Qwt
-#include <Qwt/Plot.hpp>
+#include <Qwt/AdvancedPlot.hpp>
 #include <Qwt/QPlotCurve.hpp>
 #include <qwt_plot_renderer.h>
 
@@ -205,7 +205,7 @@ class MainWindow : public QMainWindow
         // Plot
         PlotFrame* distancePlotFrame;
         PlotFrame* timePlotFrame;
-        Plot* megasquirtDataPlot;
+        AdvancedPlot* megasquirtDataPlot;
 
         // List of all Plots
         PlotList plots;

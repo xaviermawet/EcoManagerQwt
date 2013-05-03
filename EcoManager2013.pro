@@ -70,7 +70,8 @@ SOURCES += main.cpp\
     Qwt/PlotMagnifier.cpp \
     Qwt/Zoomer.cpp \
     Qwt/QPlotCurve.cpp \
-    FileParameterDialog.cpp
+    FileParameterDialog.cpp \
+    Qwt/AdvancedPlot.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -129,7 +130,8 @@ HEADERS  += MainWindow.hpp \
     Qwt/PlotMagnifier.hpp \
     Qwt/Zoomer.hpp \
     Qwt/QPlotCurve.hpp \
-    FileParameterDialog.hpp
+    FileParameterDialog.hpp \
+    Qwt/AdvancedPlot.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

@@ -1,9 +1,3 @@
-/* TODO :
- * ------------
- * Ajouter une méthode addCurve qui est la meme que celle qui existe deja mais
- * qui prend en plus en paramètre un QPen pour la couleur
- */
-
 #ifndef __PLOT_HPP__
 #define __PLOT_HPP__
 
@@ -42,6 +36,7 @@ class Plot : public QwtPlot
          * \param parent Widget parent
          */
         explicit Plot(QString const& title, QWidget* parent = NULL);
+
         /*!
          * \brief Constructeur
          * \param title Titre
@@ -70,10 +65,12 @@ class Plot : public QwtPlot
          * \brief Ajoute une courbe au graphique
          * \param title Le titre donné à la courbe
          * \param points Les coordonnées de tous les points de la courbe
+         * \param pen La couleur de la courbe
          * \return Un pointeur vers la courbe nouvellement ajoutée
          */
         virtual QPlotCurve* addCurve(QString const& title,
-                                     QVector<QPointF> points);
+                                     QVector<QPointF> const& points,
+                                     QPen const& pen);
 
         /* ------------------------------------------------------------------ *
          *                              Getters                               *
