@@ -671,6 +671,26 @@ void MainWindow::on_actionLapDataDrawSectors_triggered(void)
                 this->raceInformationTableModel->index(LapNumModelIndex.row(),
                                                  0, RaceNumModelIndex)).toInt();
 
+    // ====================================================================================
+    /* NOTE : Le code qui suit ne devrait pas etre là. Je devrais modifier le
+     * model du tableau afin que chaque élément contienne le race number
+     * (ou uniquement la ligne "course" du tableau. je n'ai donc pas encore
+     * corrigé les problèmes du au fait que j'ai ajouté un champ dans le trackid
+     */
+    QSqlQuery query("SELECT num FROM race WHERE id = ?");
+    query.addBindValue(trackId["race"]);
+
+    if(!query.exec() || !query.next())
+    {
+        QMessageBox::warning(this, tr("Une erreur est survenue"),
+                             tr("Impossible de récupérer le numéro de la course"));
+        return;
+    }
+
+    trackId["race_num"] = query.value(0).toInt();
+    qDebug() << "Numéro du tour = " << query.value(0).toInt();
+    // ====================================================================================
+
     // Get the time in milliseconds for the selected item
     QModelIndex rowIndex = rowsSelectedIndexes.at(0);
     float time1 = this->raceInformationTableModel->data(

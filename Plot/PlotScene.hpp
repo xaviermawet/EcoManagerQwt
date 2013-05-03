@@ -2,7 +2,7 @@
 #define __PLOTSCENE_HPP__
 
 #include "PlotCurve.hpp"
-#include "../Common/ColorPicker.hpp"
+#include "../Utils/ColorPicker.hpp"
 #include "../Map/TickItem.hpp"
 #include <QtGui>
 

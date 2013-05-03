@@ -8,7 +8,7 @@
 #include "SectorItem.hpp"
 #include "AnimateSectorItem.hpp"
 #include "MapView.hpp"
-#include "../Common/ColorPicker.hpp"
+#include "../Utils/ColorPicker.hpp"
 #include "../Common/IndexedPosition.hpp"
 #include "../Common/CoordinateItem.hpp"
 #include <QtGui>

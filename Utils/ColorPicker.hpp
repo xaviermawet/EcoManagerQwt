@@ -1,9 +1,3 @@
-/* TODO
- * ---------------
- *
- *  Bouger cette classe et la mettre dans le dossier Utils
- */
-
 #ifndef __COLORPICKER_HPP__
 #define __COLORPICKER_HPP__
 

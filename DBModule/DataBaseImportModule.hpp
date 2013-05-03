@@ -1,10 +1,3 @@
-/* TODO :
- * -----------
- * voir la code de la méthode prepare de la classe QsqlQuery de la doc Qt
- * --> http://qt-project.org/doc/qt-4.8/qsqlquery.html#prepare
- * et regarder si on ne peut pas utiliser cette nomenclature quelque part
- */
-
 #ifndef __DATABASEIMPORTMODULE_HPP__
 #define __DATABASEIMPORTMODULE_HPP__
 

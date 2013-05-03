@@ -2,7 +2,7 @@
 #define __ADVANCEPLOT_HPP__
 
 #include "Plot.hpp"
-#include "../Common/ColorPicker.hpp"
+#include "../Utils/ColorPicker.hpp"
 
 #define DEFAULT_NB_COLOR 8
 

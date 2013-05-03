@@ -26,7 +26,6 @@ SOURCES += main.cpp\
     Map/TickItem.cpp \
     Map/PathBuilder.cpp \
     Map/MapScene.cpp \
-    Common/ColorPicker.cpp \
     DBModule/GeoCoordinate.cpp \
     Map/MapFrame.cpp \
     DBModule/DataPoint.cpp \
@@ -71,7 +70,8 @@ SOURCES += main.cpp\
     Qwt/Zoomer.cpp \
     Qwt/QPlotCurve.cpp \
     FileParameterDialog.cpp \
-    Qwt/AdvancedPlot.cpp
+    Qwt/AdvancedPlot.cpp \
+    Utils/ColorPicker.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -86,7 +86,6 @@ HEADERS  += MainWindow.hpp \
     Map/TickItem.hpp \
     Map/PathBuilder.hpp \
     Map/MapScene.hpp \
-    Common/ColorPicker.hpp \
     DBModule/GeoCoordinate.hpp \
     Map/MapFrame.hpp \
     DBModule/DataPoint.hpp \
@@ -131,7 +130,8 @@ HEADERS  += MainWindow.hpp \
     Qwt/Zoomer.hpp \
     Qwt/QPlotCurve.hpp \
     FileParameterDialog.hpp \
-    Qwt/AdvancedPlot.hpp
+    Qwt/AdvancedPlot.hpp \
+    Utils/ColorPicker.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

@@ -1,7 +1,7 @@
 #ifndef __COLORIZERPROXYMODEL_HPP__
 #define __COLORIZERPROXYMODEL_HPP__
 
-#include "ColorPicker.hpp"
+#include "../Utils/ColorPicker.hpp"
 #include <QIdentityProxyModel>
 
 class ColorizerProxyModel : public QIdentityProxyModel
