@@ -118,10 +118,19 @@ void MainWindow::on_actionImport_triggered(void)
             return;
 
         if(dial.isNewlyCreated())
+        {
             // Create new entry for the competition in the database
             raceDataImporter.createCompetition(dial.competitionName(),
                                                dial.wheelRadius() / 100.0,
                                                dial.place());
+
+            // Update combobox that contains the list of competition names
+            this->competitionNameModel->select();
+
+            // Display the newest competition
+            this->competitionBox->setCurrentIndex(
+                        this->competitionBox->count() - 1);
+        }
 
         Race newRace(dial.competitionName());
         newRace.setDate(dial.date());
@@ -129,8 +138,8 @@ void MainWindow::on_actionImport_triggered(void)
         // Add race data to the data base
         raceDataImporter.addRace(newRace, raceDataDirPath);
 
-        // Update combobox taht contains the list of competition names
-        this->competitionNameModel->select();
+        // Update combobox that contains the list of competition names
+       this->reloadRaceView();
     }
     catch(QException const& ex)
     {
@@ -1065,10 +1074,9 @@ void MainWindow::on_actionCompter_tous_les_tuples_de_toutes_les_tables_triggered
 
 void MainWindow::loadCompetition(int index)
 {
-    this->currentCompetition = competitionNameModel->record(index).value(0).toString();
+    qDebug() << "loadCompetition";
 
-//    if(this->currentCompetition.isEmpty())
-//        return;
+    this->currentCompetition = competitionNameModel->record(index).value(0).toString();
 
     // Clear all tracks information of each view
     this->on_actionClearAllData_triggered();
