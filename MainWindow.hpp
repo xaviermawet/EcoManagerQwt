@@ -36,6 +36,7 @@
 #include "LapDataCompartor.hpp"
 #include "Utils/DataBaseManager.hpp"
 #include "Utils/QCSVParser.hpp"
+#include "FileParameterDialog.hpp"
 
 // Qwt
 #include <Qwt/Plot.hpp>
@@ -148,7 +149,8 @@ class MainWindow : public QMainWindow
         void on_actionIncreaseAccuracy_triggered(void);
         void on_actionReduceAccuracy_triggered(void);
 
-        void on_actionExportToPDF_triggered();
+        void on_actionExportToPDF_triggered(void);
+        void on_actionChangeFileNames_triggered(void);
 
     private:
 

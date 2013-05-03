@@ -425,9 +425,16 @@
     <addaction name="separator"/>
     <addaction name="actionExecuter_une_requete"/>
    </widget>
+   <widget class="QMenu" name="menuConfigure">
+    <property name="title">
+     <string>&amp;Configurer</string>
+    </property>
+    <addaction name="actionChangeFileNames"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuDisplay"/>
+   <addaction name="menuConfigure"/>
    <addaction name="menuAbout"/>
    <addaction name="menuDebug"/>
   </widget>
@@ -467,7 +474,7 @@
      <normaloff>:/Resources/Icons/download.png</normaloff>:/Resources/Icons/download.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Importer</string>
+    <string>&amp;Importer les données d'une course</string>
    </property>
    <property name="toolTip">
     <string>Importer les données d'une course</string>
@@ -995,6 +1002,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionChangeFileNames">
+   <property name="text">
+    <string>Modifier le nom des &amp;fichiers nécessaires à l'importation</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

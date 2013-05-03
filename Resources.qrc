@@ -44,6 +44,7 @@
         <file alias="color">Resources/Icons/Text-Formatting-Bg-color-icon.png</file>
         <file alias="erase">Resources/Icons/Editing-Erase-icon.png</file>
         <file alias="focusOn">Resources/Icons/Image-Edition-Tools-Collapse-icon.png</file>
+        <file>Resources/Icons/checkmark.png</file>
     </qresource>
     <qresource prefix="/sql">
         <file alias="schemaTable">Resources/SQL/DB.sql</file>

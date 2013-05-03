@@ -2485,7 +2485,7 @@ void MainWindow::on_actionReduceAccuracy_triggered(void)
                           plot->axisMaxMajor(QwtPlot::xBottom) - 1);
 }
 
-void MainWindow::on_actionExportToPDF_triggered()
+void MainWindow::on_actionExportToPDF_triggered(void)
 {
     QString pdfFile = QFileDialog::getSaveFileName(
                 this, tr("Sauvegarder le graphique"), QDir::homePath(),
@@ -2498,4 +2498,10 @@ void MainWindow::on_actionExportToPDF_triggered()
     renderer.setDiscardFlag(QwtPlotRenderer::DiscardBackground);
     renderer.renderDocument(this->currentPlot(), pdfFile,
                             this->currentPlot()->size());
+}
+
+void MainWindow::on_actionChangeFileNames_triggered(void)
+{
+    FileParameterDialog dial(this);
+    dial.exec();
 }

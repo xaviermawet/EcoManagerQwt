@@ -85,7 +85,7 @@ void DataBaseImportModule::loadConfiguration(void)
 {
     QSettings settings;
 
-    settings.beginGroup("Import");
+    settings.beginGroup("Files");
 
     if(!settings.contains(GPS_KEY))
         settings.setValue(GPS_KEY, DEFAULT_GPS_FILENAME);

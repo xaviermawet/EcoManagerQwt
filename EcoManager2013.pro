@@ -69,7 +69,8 @@ SOURCES += main.cpp\
     Qwt/DoubleXAxisPlot.cpp \
     Qwt/PlotMagnifier.cpp \
     Qwt/Zoomer.cpp \
-    Qwt/QPlotCurve.cpp
+    Qwt/QPlotCurve.cpp \
+    FileParameterDialog.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -127,7 +128,8 @@ HEADERS  += MainWindow.hpp \
     Qwt/DoubleXAxisPlot.hpp \
     Qwt/PlotMagnifier.hpp \
     Qwt/Zoomer.hpp \
-    Qwt/QPlotCurve.hpp
+    Qwt/QPlotCurve.hpp \
+    FileParameterDialog.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \
@@ -135,7 +137,8 @@ FORMS    += MainWindow.ui \
     Map/MapFrame.ui \
     Plot/PlotFrame.ui \
     LapDataCompartor.ui \
-    Plot/PlotPrintDialog.ui
+    Plot/PlotPrintDialog.ui \
+    FileParameterDialog.ui
 
 RESOURCES += \
     Resources.qrc

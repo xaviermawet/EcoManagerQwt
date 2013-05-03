@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FileParameterDialog</class>
+ <widget class="QDialog" name="FileParameterDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>651</width>
+    <height>158</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Paramétrage du nom des fichiers nécessaire pour l'importation</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainVerticalLayout">
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="GPSFileLabel">
+       <property name="text">
+        <string>Fichier de données GPS</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="GPSFileLineEdit"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="speedFileLabel">
+       <property name="text">
+        <string>Fichier de données de vitesse</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="speedFileLineEdit"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="megasquirtFileLabel">
+       <property name="text">
+        <string>Fichier de données du Megasquirt</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="megasquirtFileLineEdit"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="generateMegasquirtFileLabel">
+       <property name="text">
+        <string>Fichier généré avec les données Megasquirt converties</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="generateMegasquirtFileLineEdit"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="pushButtonHorizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="savePushButton">
+       <property name="text">
+        <string>Sauvegarder</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Resources.qrc">
+         <normaloff>:/Resources/Icons/checkmark.png</normaloff>:/Resources/Icons/checkmark.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelPushButton">
+       <property name="text">
+        <string>Annuler</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Resources.qrc">
+         <normaloff>:/Resources/Icons/close.png</normaloff>:/Resources/Icons/close.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="Resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>cancelPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>FileParameterDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>605</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>124</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
