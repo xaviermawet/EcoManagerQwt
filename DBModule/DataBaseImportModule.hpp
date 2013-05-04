@@ -48,6 +48,7 @@ class DataBaseImportModule : public QObject
 
         void loadGPSData(QString const& GPSFilePath, Race &race);
         void loadSpeedData(QString const& speedFilePath, Race &race);
+        void loadSpeedData_2(QString const& speedFilePath, Race &race);
         void loadMegasquirtData(QString const& megasquirtDATFilePath,
                                 QString const& megasquirtCSVFilePath,
                                 Race& race);

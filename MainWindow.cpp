@@ -2167,6 +2167,7 @@ bool MainWindow::getAllDataFromSpeed(
         speed = query.value(1).toDouble();
 
         int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
+        qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
         pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
 
         // Données a afficher dans le tableau

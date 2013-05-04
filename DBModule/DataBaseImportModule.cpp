@@ -69,6 +69,7 @@ void DataBaseImportModule::addRace(Race &race, const QDir &dataDirectory) throw(
          * course et tous les autres tuples qui référencient cette course */
         this->loadGPSData(dataDirectory.filePath(this->_gpsFileName), race);
         this->loadSpeedData(dataDirectory.filePath(this->_speedFileName), race);
+        this->loadSpeedData_2(dataDirectory.filePath(this->_speedFileName), race);
         this->loadMegasquirtData(
                     dataDirectory.filePath(this->_MegasquirtDATFileName),
                     dataDirectory.filePath(this->_MegasquirtCSVFileName),
@@ -343,7 +344,7 @@ void DataBaseImportModule::loadSpeedData(
 
     QTextStream in(&speedFile);
     if (in.atEnd())
-        return; // Seules les données GPS seront sauvegardées
+        throw QException(tr("le fichier ") + speedFilePath + tr(" est vide"));
 
     /* ---------------------------------------------------------------------- *
      *       Lecture de la première valeur de temps comme (origine)           *
@@ -357,7 +358,7 @@ void DataBaseImportModule::loadSpeedData(
     prevAbsTime = origin;
     QTime lapTimeOrigin(0, 0);
 
-    qDebug() << "distance : " << race.wheelPerimeter();
+    qDebug() << "Périmètre de la roue : " << race.wheelPerimeter();
     while (!in.atEnd())
     {
         QString currentLine = in.readLine();
@@ -397,6 +398,112 @@ void DataBaseImportModule::loadSpeedData(
     query.addBindValue(values);
     query.addBindValue(refRaces);
     query.addBindValue(refNums);
+
+    DataBaseManager::execBatch(query, QSqlQuery::ValuesAsColumns);
+}
+
+void DataBaseImportModule::loadSpeedData_2(
+        const QString &speedFilePath, Race &race)
+{
+    qDebug() << "Chargement des données de vitesse, distance, accélération ...";
+
+    /* ---------------------------------------------------------------------- *
+     *                Vérifie la validité du fichier de données               *
+     * ---------------------------------------------------------------------- */
+
+    QFile speedFile(speedFilePath);
+    if (!speedFile.open(QIODevice::ReadOnly))
+        throw QException(tr("Impossible d'ouvrir le fichier ") + speedFilePath);
+
+    QTextStream in(&speedFile);
+    if (in.atEnd())
+        throw QException(tr("le fichier ") + speedFilePath + tr(" est vide"));
+
+    /* ---------------------------------------------------------------------- *
+     *                     Requete d'insertion des données                    *
+     * ---------------------------------------------------------------------- */
+
+    QSqlQuery query("INSERT INTO datarace VALUES (?, ?, ?, ?, ?, ?)");
+    QVariantList timestamps;
+    QVariantList refNums;
+    QVariantList refRaces;
+    QVariantList speeds;
+    QVariantList distances;
+    QVariantList accelerations;
+
+    /* ---------------------------------------------------------------------- *
+     *     Boucle de calcul des données de vitesse, distance, accélération    *
+     * ---------------------------------------------------------------------- */
+
+    int raceId(race.id());
+    int currentLap(-1),  previousLap(-1);
+    quint64 currentTime(0), previousTime(0);
+    QTime lapTimeOrigin(0, 0);
+    QString currentLine;
+
+    // Lecture de la première données de temps
+    currentLine = in.readLine();
+    currentTime = currentLine.section(";", 0, 0).toULongLong() * 1000000000
+                + (currentLine.section(";", -1, -1).toULongLong());
+
+    while(!in.atEnd())
+    {
+        previousTime = currentTime;
+
+        // Lecture du nombre de secondes + nanosecondes écoulées depuis l'époque
+        currentLine = in.readLine();
+        currentTime = currentLine.section(";", 0, 0).toULongLong() * 1000000000
+                    + (currentLine.section(";", -1, -1).toULongLong());
+
+        // Détermination de l'appartenance à un tour
+        QDateTime dt = QDateTime::fromMSecsSinceEpoch(currentTime / (1000 * 1000));
+        currentLap = race.numLap(dt.time());
+
+        qDebug() << "Num tour = " << currentLap;
+
+        // Données qui précèdent l'heure de début du premier tour
+        if (currentLap < 0)
+            continue;
+
+        // Si on est passé au tour suivant
+        if (currentLap > previousLap)
+        {
+            previousLap = currentLap;
+            lapTimeOrigin = race.lap(currentLap).first;
+        }
+
+        // Calcul de la vitesse en km/h
+        qreal speed = race.wheelPerimeter() * 3600.0 * 1000 * 1000
+                                    /
+                        (currentTime - previousTime);
+
+        /* Si on a une vitesse supérieure à 70 km/h, c-à-d si deux captures de
+         * temps sont trop proches, on ignore cette donnée */
+        if (speed > 70)
+            continue;
+
+        // Calcul de la distance
+        // Calcul de l'accélération
+
+        // Ajout des données du tuple
+        timestamps << lapTimeOrigin.msecsTo(dt.time());
+        refNums << currentLap;
+        refRaces << raceId;
+        speeds << speed;
+        distances << -1;
+        accelerations << -1;
+    }
+
+    /* ---------------------------------------------------------------------- *
+     *              Insertion des données dans la base de données             *
+     * ---------------------------------------------------------------------- */
+
+    query.addBindValue(timestamps);
+    query.addBindValue(refNums);
+    query.addBindValue(refRaces);
+    query.addBindValue(speeds);
+    query.addBindValue(distances);
+    query.addBindValue(accelerations);
 
     DataBaseManager::execBatch(query, QSqlQuery::ValuesAsColumns);
 }

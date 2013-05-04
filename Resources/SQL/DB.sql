@@ -79,6 +79,20 @@ create table ACCELERATION
     FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE
 );
 
+create table DATARACE
+(
+    timestamp 		TIME,    	-- Temps depuis le début du tour (ms)
+    ref_lap_num 	INTEGER,	-- reférence du tour
+    ref_lap_race	INTEGER,    -- référence de la course
+
+    speed           FLOAT,      -- Vitesse (hm/h) au temps timestamp
+    distance        FLOAT,      -- Distance (m) par rapport au début du tour au temps timestamp
+    acceleration    FLOAT,      -- L'accélératon (m/s²) au moment timestamp
+
+    FOREIGN KEY (ref_lap_num, ref_lap_race) REFERENCES LAP(num, ref_race) ON DELETE CASCADE,
+    PRIMARY KEY (timestamp, ref_lap_num, ref_lap_race)
+);
+
 create table MEGASQUIRT
 (
     timestamp 		TIME,    	-- Temps depuis le début du tour
