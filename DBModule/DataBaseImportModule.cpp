@@ -435,20 +435,38 @@ void DataBaseImportModule::loadSpeedData_2(
      *     Boucle de calcul des données de vitesse, distance, accélération    *
      * ---------------------------------------------------------------------- */
 
-    int raceId(race.id());
+    const int raceId(race.id());
+    const qreal wheelPerimeter(race.wheelPerimeter());
+
     int currentLap(-1),  previousLap(-1);
     quint64 currentTime(0), previousTime(0);
+    qreal   currentSpeed(0), previousSpeed(0);
+    qreal   currentPos(wheelPerimeter), previousPos(0);
+    double   currentTimeS, previousTimeS;
     QTime lapTimeOrigin(0, 0);
     QString currentLine;
 
-    // Lecture de la première données de temps
+    // Lecture de la première données de temps (t1)
+    currentLine = in.readLine();
+    previousTime = currentLine.section(";", 0, 0).toULongLong() * 1000000000
+                 + (currentLine.section(";", -1, -1).toULongLong());
+
+    // Lecture de la deuxième données de temps (t2)
     currentLine = in.readLine();
     currentTime = currentLine.section(";", 0, 0).toULongLong() * 1000000000
                 + (currentLine.section(";", -1, -1).toULongLong());
 
+    // Calcul de la première vitesse (sera previousSpeed une fois ds la boucle)
+    currentSpeed = wheelPerimeter * 3600.0 * 1000 * 1000
+                                         /
+                            (currentTime - previousTime); // NOTE : vérifier que c'est bien des nanosecondes qu'il faut ici
+
     while(!in.atEnd())
     {
-        previousTime = currentTime;
+        previousTime  = currentTime;
+        previousSpeed = currentSpeed;
+        previousPos   = currentPos;
+        previousTimeS = currentTimeS;
 
         // Lecture du nombre de secondes + nanosecondes écoulées depuis l'époque
         currentLine = in.readLine();
@@ -459,11 +477,12 @@ void DataBaseImportModule::loadSpeedData_2(
         QDateTime dt = QDateTime::fromMSecsSinceEpoch(currentTime / (1000 * 1000));
         currentLap = race.numLap(dt.time());
 
-        qDebug() << "Num tour = " << currentLap;
-
         // Données qui précèdent l'heure de début du premier tour
         if (currentLap < 0)
+        {
+            qDebug() << "données avant début du tour ...";
             continue;
+        }
 
         // Si on est passé au tour suivant
         if (currentLap > previousLap)
@@ -472,26 +491,46 @@ void DataBaseImportModule::loadSpeedData_2(
             lapTimeOrigin = race.lap(currentLap).first;
         }
 
-        // Calcul de la vitesse en km/h
-        qreal speed = race.wheelPerimeter() * 3600.0 * 1000 * 1000
-                                    /
-                        (currentTime - previousTime);
+        /* ------------------------------------------------------------------ *
+         *                    Calcul de la vitesse en km/h                    *
+         * ------------------------------------------------------------------ */
+
+        currentSpeed = wheelPerimeter * 3600.0 * 1000 * 1000
+                                             /
+                                (currentTime - previousTime);
 
         /* Si on a une vitesse supérieure à 70 km/h, c-à-d si deux captures de
          * temps sont trop proches, on ignore cette donnée */
-        if (speed > 70)
+        if (currentSpeed > 70)
             continue;
 
-        // Calcul de la distance
-        // Calcul de l'accélération
+        /* ------------------------------------------------------------------ *
+         *                     Calcul de la distance en m                     *
+         * ------------------------------------------------------------------ */
 
-        // Ajout des données du tuple
+        double deltaTimeSeconds = (currentTime - previousTime) * 0.000000001;
+
+        int multipleWheelPerimeter = ceil(((currentSpeed + previousSpeed) / (2 * 3.6)) * deltaTimeSeconds) / wheelPerimeter;
+        qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
+        currentPos = previousPos + multipleWheelPerimeter * wheelPerimeter;
+
+        /* ------------------------------------------------------------------ *
+         *                  Calcul de l'accélération en m/s²                  *
+         * ------------------------------------------------------------------ */
+
+        qreal diff = (currentSpeed - previousSpeed) / 3.6; // Vitesse en m/s
+        qreal acc  = diff / deltaTimeSeconds;
+
+        /* ------------------------------------------------------------------ *
+         *                     Ajout des données du tuple                     *
+         * ------------------------------------------------------------------ */
+
         timestamps << lapTimeOrigin.msecsTo(dt.time());
         refNums << currentLap;
         refRaces << raceId;
-        speeds << speed;
-        distances << -1;
-        accelerations << -1;
+        speeds << currentSpeed;
+        distances << currentPos;
+        accelerations << acc;
     }
 
     /* ---------------------------------------------------------------------- *
