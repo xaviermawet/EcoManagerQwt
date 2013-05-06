@@ -71,7 +71,8 @@ SOURCES += main.cpp\
     Qwt/QPlotCurve.cpp \
     FileParameterDialog.cpp \
     Qwt/AdvancedPlot.cpp \
-    Utils/ColorPicker.cpp
+    Utils/ColorPicker.cpp \
+    Qwt/TrackPlotCurve.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -131,7 +132,8 @@ HEADERS  += MainWindow.hpp \
     Qwt/QPlotCurve.hpp \
     FileParameterDialog.hpp \
     Qwt/AdvancedPlot.hpp \
-    Utils/ColorPicker.hpp
+    Utils/ColorPicker.hpp \
+    Qwt/TrackPlotCurve.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

@@ -511,8 +511,12 @@ void DataBaseImportModule::loadSpeedData_2(
         double deltaTimeSeconds = (currentTime - previousTime) * 0.000000001;
 
         int multipleWheelPerimeter = ceil(((currentSpeed + previousSpeed) / (2 * 3.6)) * deltaTimeSeconds) / wheelPerimeter;
-        qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
-        currentPos = previousPos + multipleWheelPerimeter * wheelPerimeter;
+
+        if (multipleWheelPerimeter < 10)
+        {
+            qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
+            currentPos = previousPos + multipleWheelPerimeter * wheelPerimeter;
+        }
 
         /* ------------------------------------------------------------------ *
          *                  Calcul de l'accélération en m/s²                  *
