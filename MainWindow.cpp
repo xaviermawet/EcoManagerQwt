@@ -2399,11 +2399,11 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
                           test2.value(1).toFloat());
 
     QwtPointSeriesData* serie2 = new QwtPointSeriesData(points2);
-    TrackPlotCurve* trackCurve2 = new TrackPlotCurve("vitesse", trackIdentifier, QPen("red"));
+    TrackPlotCurve* trackCurve2 = new TrackPlotCurve("vitesse", trackIdentifier, QPen("red"), trackCurve);
     trackCurve2->setData(serie2);
-    trackCurve2->attach(this->megasquirtDataPlot);
+    //trackCurve2->attach(this->megasquirtDataPlot);
 
-    trackCurve2->attachTo(trackCurve);
+    //trackCurve2->attachTo(trackCurve);
     // =========================================================================
 }
 

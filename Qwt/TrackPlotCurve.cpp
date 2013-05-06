@@ -9,10 +9,11 @@ TrackPlotCurve::TrackPlotCurve(
 }
 
 TrackPlotCurve::TrackPlotCurve(
-        const QwtText &title, const TrackIdentifier &trackId,
-        const QPen &pen, TrackPlotCurve *parent) :
-    QPlotCurve(title, pen), _trackIdentifier(trackId), parentCurve(parent)
+        QwtText const& title, TrackIdentifier const& trackId,
+        QPen const& pen, TrackPlotCurve* parent) :
+    QPlotCurve(title, pen), _trackIdentifier(trackId), parentCurve(NULL)
 {
+    this->attachTo(parent);
 }
 
 TrackPlotCurve::~TrackPlotCurve(void)
