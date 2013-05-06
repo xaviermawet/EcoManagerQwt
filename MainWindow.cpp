@@ -2354,6 +2354,57 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
                 " " + this->ui->megaSquirtComboBox->currentText(),
                 megasquirtCurvePoints);
     this->setPlotCurveVisibile(curve, true);
+
+    // =========================================================================
+    // NOTE : ce qui suit est un test pour les courbes associées
+    QSqlQuery test("SELECT timestamp, speed FROM datarace WHERE ref_lap_race = ? and ref_lap_num = ? order by timestamp");
+    test.addBindValue(trackIdentifier["race"].toInt());
+    test.addBindValue(trackIdentifier["lap"].toInt());
+
+    if (!test.exec())
+    {
+        QMessageBox::warning(this, tr("Impossible de tracer la courbe"),
+                             tr("Erreur de récupération des données de vitesse ")
+                             + test.lastError().text());
+        return;
+    }
+
+    QVector<QPointF> points;
+    while(test.next())
+        points << QPointF(test.value(0).toFloat() / 1000,
+                          test.value(1).toFloat());
+
+    QwtPointSeriesData* serie = new QwtPointSeriesData(points);
+    TrackPlotCurve* trackCurve = new TrackPlotCurve("vitesse", trackIdentifier, QPen("red"));
+    trackCurve->setData(serie);
+    trackCurve->attach(this->megasquirtDataPlot);
+
+
+    // Courbe enfant
+    QSqlQuery test2("SELECT timestamp, distance FROM datarace WHERE ref_lap_race = ? and ref_lap_num = ? order by timestamp");
+    test2.addBindValue(trackIdentifier["race"].toInt());
+    test2.addBindValue(trackIdentifier["lap"].toInt());
+
+    if (!test2.exec())
+    {
+        QMessageBox::warning(this, tr("Impossible de tracer la courbe"),
+                             tr("Erreur de récupération des données de vitesse ")
+                             + test2.lastError().text());
+        return;
+    }
+
+    QVector<QPointF> points2;
+    while(test2.next())
+        points2 << QPointF(test2.value(0).toFloat() / 1000,
+                          test2.value(1).toFloat());
+
+    QwtPointSeriesData* serie2 = new QwtPointSeriesData(points2);
+    TrackPlotCurve* trackCurve2 = new TrackPlotCurve("vitesse", trackIdentifier, QPen("red"));
+    trackCurve2->setData(serie2);
+    trackCurve2->attach(this->megasquirtDataPlot);
+
+    trackCurve2->attachTo(trackCurve);
+    // =========================================================================
 }
 
 void MainWindow::updateMenus(void)

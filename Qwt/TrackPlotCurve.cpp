@@ -3,7 +3,7 @@
 TrackPlotCurve::TrackPlotCurve(
         const QString &title, const TrackIdentifier &trackId,
         const QPen &pen, TrackPlotCurve *parent) :
-    TrackPlotCurve(title, trackId, pen, parent)
+    TrackPlotCurve(QwtText(title), trackId, pen, parent)
 {
     // Delegating constructors only available with -std=c++11 or -std=gnu++11
 }
@@ -18,7 +18,8 @@ TrackPlotCurve::TrackPlotCurve(
 TrackPlotCurve::~TrackPlotCurve(void)
 {
     foreach (TrackPlotCurve* childCurve, this->children)
-        delete childCurve;
+        if(childCurve->parent() == NULL)
+            delete childCurve;
 }
 
 TrackIdentifier TrackPlotCurve::trackIdentifier(void) const
@@ -33,6 +34,8 @@ TrackPlotCurve const* TrackPlotCurve::parent(void) const
 
 void TrackPlotCurve::setVisible(bool visible)
 {
+    qDebug() << "On change la visibilité ...";
+
     QPlotCurve::setVisible(visible);
 
     // Hide or show child curves
@@ -40,18 +43,33 @@ void TrackPlotCurve::setVisible(bool visible)
         childCurve->setVisible(visible);
 }
 
-void TrackPlotCurve::attach(TrackPlotCurve* child)
+void TrackPlotCurve::attachChild(TrackPlotCurve* child)
 {
+    if (child == NULL)
+        return;
+
     // Detach the child from previous parent
     child->detachFromParentCurve();
 
     this->children.append(child);
     child->parentCurve = this;
+
+    // Change legend item visibility to false (only the parent is visible)
+    child->setItemAttribute(Legend, false);
+
+    // Attach the child in the same plot as its new parent
+    child->attach(this->plot());
 }
 
 void TrackPlotCurve::attachTo(TrackPlotCurve* parent)
 {
-    parent->attach(this);
+    if(parent == NULL)
+    {
+        this->detachFromParentCurve();
+        return;
+    }
+
+    parent->attachChild(this);
 }
 
 void TrackPlotCurve::detachFromParentCurve(void)
@@ -61,6 +79,29 @@ void TrackPlotCurve::detachFromParentCurve(void)
 
     this->parentCurve->removeChild(this);
     this->parentCurve = NULL;
+
+    // Change legend item visibility
+    this->setItemAttribute(Legend, true);
+}
+
+void TrackPlotCurve::attach(QwtPlot *plot)
+{
+    qDebug() << "On attache la courbe courante et tous ses enfants ...";
+
+    QPlotCurve::attach(plot);
+
+    foreach (TrackPlotCurve* childCurve, this->children)
+        childCurve->attach(plot);
+}
+
+void TrackPlotCurve::detach(void)
+{
+    qDebug() << "On détache la courbe courante et tous ses enfants ...";
+
+    QPlotCurve::detach();
+
+    foreach (TrackPlotCurve* childCurve, this->children)
+        childCurve->detach();
 }
 
 void TrackPlotCurve::removeChild(TrackPlotCurve * const &child)

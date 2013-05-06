@@ -1,3 +1,15 @@
+/* TODO :
+ * ------------------
+ * Disons que le titre passé ne contient pas le numéro du tour, ni le
+ * numéro de la course (attention c'est bien le numéro et pas l'id pour la
+ * course) --> alors, dans le constructeur, ajouter au titre le numéro de
+ * la course et le numéro du tour
+ *
+ * Supprimer le possibilité de renseigner un parent dans le constructeur
+ *
+ * Modifier le boundingRect de la courbe pour qu'elle tienne compte de tous ses enfants
+ *
+ */
 #ifndef __TRACKPLOTCURVE_HPP__
 #define __TRACKPLOTCURVE_HPP__
 
@@ -57,10 +69,12 @@ class TrackPlotCurve : public QPlotCurve
          * \brief Attache une courbe (enfant) à la courbe courante
          * \param curve la courbe enfant à attacher à la courbe courante
          */
-        void attach(TrackPlotCurve* child);
+        void attachChild(TrackPlotCurve* child);
 
         /*!
-         * \brief Attache la courbe courante à une courbe parente
+         * \brief Attache la courbe courante à une courbe parente.
+         *        Si la parent vaut NULL, la courbe courante est simplement
+         *        détachée de sont éventuel parent courant
          * \param parent Courbe à laquelle attacher la courbe courante
          */
         void attachTo(TrackPlotCurve* parent);
@@ -69,6 +83,18 @@ class TrackPlotCurve : public QPlotCurve
          * \brief Détache la courbe courante de sa courbe parente
          */
         void detachFromParentCurve(void);
+
+        /*!
+         * \brief Attache la courbe courante et tous ses enfants à un plot
+         * \param plot graphique auquel attacher la courbe courante et ses
+         *        courbes enfant
+         */
+        void attach(QwtPlot *plot);
+
+        /*!
+         * \brief Détache la courbe courante et tous ses enfants du graphique
+         */
+        void detach(void);
 
     protected:
 

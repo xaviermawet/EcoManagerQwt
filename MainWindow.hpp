@@ -39,8 +39,9 @@
 #include "FileParameterDialog.hpp"
 
 // Qwt
-#include <Qwt/AdvancedPlot.hpp>
-#include <Qwt/QPlotCurve.hpp>
+#include "Qwt/AdvancedPlot.hpp"
+#include "Qwt/QPlotCurve.hpp"
+#include "Qwt/TrackPlotCurve.hpp"
 #include <qwt_plot_renderer.h>
 
 #include <QtGui>
