@@ -134,3 +134,15 @@ void TrackPlotCurve::detach(void)
     foreach (TrackPlotCurve* childCurve, this->children)
         childCurve->detach();
 }
+
+QPointF TrackPlotCurve::closestPointOfX(qreal x) const
+{
+    QPointF point(x, 0);
+
+    int indice = this->closestPoint(point.toPoint());
+
+    QPointF nearestPoint = this->data()->sample(indice);
+    qDebug() << "nearestPoint = " << nearestPoint;
+
+    return nearestPoint;
+}

@@ -98,6 +98,13 @@ class TrackPlotCurve : public QPlotCurve
          */
         void detach(void);
 
+        /*!
+         * \brief Obtenir le point le plus proche d'une valeur des abscisses
+         * \param x valeur de l'abscisse
+         * \return Le point le plus proche
+         */
+        QPointF closestPointOfX(qreal x) const;
+
     protected:
 
         /*!

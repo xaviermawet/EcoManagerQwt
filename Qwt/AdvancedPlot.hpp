@@ -4,6 +4,7 @@
 #include "Plot.hpp"
 #include "../Utils/ColorPicker.hpp"
 #include "TrackPlotCurve.hpp"
+#include <qwt_picker_machine.h>
 
 #define DEFAULT_NB_COLOR 8
 
@@ -44,6 +45,12 @@ class AdvancedPlot : public Plot
          */
         virtual QPlotCurve* addCurve(QString const& title,
                                      QVector<QPointF> const& points);
+
+    protected slots:
+
+        void pointsSelected(QRectF const& selectedRect);
+        void pointSelected(QPointF const& point);
+        void selectedPoints(QVector<QPointF> const& points);
 
     protected:
 
