@@ -105,6 +105,17 @@ void TrackPlotCurve::detach(void)
         childCurve->detach();
 }
 
+QRectF TrackPlotCurve::boundingRect(void) const
+{
+    QRectF rect = QwtPlotCurve::boundingRect();
+
+    foreach (TrackPlotCurve* child, this->children) {
+        rect = rect.united(child->boundingRect());
+    }
+
+    return rect;
+}
+
 void TrackPlotCurve::removeChild(TrackPlotCurve * const &child)
 {
     this->children.removeOne(child);

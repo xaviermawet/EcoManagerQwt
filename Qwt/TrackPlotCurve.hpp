@@ -5,15 +5,16 @@
  * course) --> alors, dans le constructeur, ajouter au titre le numéro de
  * la course et le numéro du tour
  *
- * Supprimer le possibilité de renseigner un parent dans le constructeur
- *
  * Modifier le boundingRect de la courbe pour qu'elle tienne compte de tous ses enfants
+ *
+ * Lorsqu'on attache une courbe enfant à un parent, il faut faire correspondre leur trackId
  *
  */
 #ifndef __TRACKPLOTCURVE_HPP__
 #define __TRACKPLOTCURVE_HPP__
 
 #include "QPlotCurve.hpp"
+#include <qwt_plot.h>
 
 typedef QMap<QString, QVariant> TrackIdentifier;
 
@@ -95,6 +96,8 @@ class TrackPlotCurve : public QPlotCurve
          * \brief Détache la courbe courante et tous ses enfants du graphique
          */
         void detach(void);
+
+        virtual QRectF boundingRect(void) const;
 
     protected:
 
