@@ -1,15 +1,3 @@
-/* TODO :
- * ------------------
- * Disons que le titre passé ne contient pas le numéro du tour, ni le
- * numéro de la course (attention c'est bien le numéro et pas l'id pour la
- * course) --> alors, dans le constructeur, ajouter au titre le numéro de
- * la course et le numéro du tour
- *
- * Modifier le boundingRect de la courbe pour qu'elle tienne compte de tous ses enfants
- *
- * Lorsqu'on attache une courbe enfant à un parent, il faut faire correspondre leur trackId
- *
- */
 #ifndef __TRACKPLOTCURVE_HPP__
 #define __TRACKPLOTCURVE_HPP__
 
@@ -25,7 +13,7 @@ class TrackPlotCurve : public QPlotCurve
         /*!
          * \brief Constructeur
          * \param title Titre donné à la courbe
-         * \param trackId Identifiant unique d'un tour
+         * \param trackId Identifiant unique d'un tour. Sera ajouté au titre
          * \param pen Pinceau utilisé pour dessiner la courbe
          */
         explicit TrackPlotCurve(QString const& title,
@@ -35,7 +23,7 @@ class TrackPlotCurve : public QPlotCurve
         /*!
          * \brief Constructeur
          * \param title Titre donné à la courbe
-         * \param trackId Identifiant unique d'un tour
+         * \param trackId Identifiant unique d'un tour. Sera ajouté au titre
          * \param pen Pinceau utilisé pour dessiner la courbe
          */
         explicit TrackPlotCurve(QwtText const& title,
@@ -61,8 +49,15 @@ class TrackPlotCurve : public QPlotCurve
         TrackPlotCurve const* parent(void) const;
 
         /*!
-         * \brief Affiche ou masque la courbe
-         * \param visible true permet d'afficher la courbe, false de la masquer
+         * \brief Obtenir le rectangle de délimitation de la courbe courante et
+         *        ses enfants
+         * \return Le rectangle de délimitation de l'ensemble des courbes
+         */
+        virtual QRectF boundingRect(void) const;
+
+        /*!
+         * \brief Affiche ou masque la courbe courante et ses courbes enfant
+         * \param visible true pour afficher les courbes, false pour les masquer
          */
         virtual void setVisible(bool visible);
 
@@ -86,6 +81,12 @@ class TrackPlotCurve : public QPlotCurve
         void detachFromParentCurve(void);
 
         /*!
+         * \brief Détache la courbe enfant de la courbe courante
+         * \param child
+         */
+        bool removeChild(TrackPlotCurve* const& child);
+
+        /*!
          * \brief Attache la courbe courante et tous ses enfants à un plot
          * \param plot graphique auquel attacher la courbe courante et ses
          *        courbes enfant
@@ -97,11 +98,7 @@ class TrackPlotCurve : public QPlotCurve
          */
         void detach(void);
 
-        virtual QRectF boundingRect(void) const;
-
     protected:
-
-        void removeChild(TrackPlotCurve* const& child);
 
         /*!
          * \brief Identifiant unique d'un tour

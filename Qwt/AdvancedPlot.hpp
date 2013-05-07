@@ -3,6 +3,7 @@
 
 #include "Plot.hpp"
 #include "../Utils/ColorPicker.hpp"
+#include "TrackPlotCurve.hpp"
 
 #define DEFAULT_NB_COLOR 8
 

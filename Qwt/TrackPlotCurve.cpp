@@ -14,12 +14,17 @@ TrackPlotCurve::TrackPlotCurve(
     QPlotCurve(title, pen), _trackIdentifier(trackId), parentCurve(NULL)
 {
     this->attachTo(parent);
+
+    this->setTitle(title.text() + QObject::tr(" (course ") +
+                   trackId["race_num"].toString() + QObject::tr(" tour ") +
+            trackId["lap"].toString() + ")");
 }
 
 TrackPlotCurve::~TrackPlotCurve(void)
 {
+    qDebug() << "TrackPlotCurve, suppression de : " << this->title().text();
+
     foreach (TrackPlotCurve* childCurve, this->children)
-        if(childCurve->parent() == NULL)
             delete childCurve;
 }
 
@@ -31,6 +36,17 @@ TrackIdentifier TrackPlotCurve::trackIdentifier(void) const
 TrackPlotCurve const* TrackPlotCurve::parent(void) const
 {
     return this->parentCurve;
+}
+
+QRectF TrackPlotCurve::boundingRect(void) const
+{
+    QRectF rect = QwtPlotCurve::boundingRect();
+
+    foreach (TrackPlotCurve* child, this->children) {
+        rect = rect.united(child->boundingRect());
+    }
+
+    return rect;
 }
 
 void TrackPlotCurve::setVisible(bool visible)
@@ -60,6 +76,8 @@ void TrackPlotCurve::attachChild(TrackPlotCurve* child)
 
     // Attach the child in the same plot as its new parent
     child->attach(this->plot());
+
+    child->_trackIdentifier = this->_trackIdentifier;
 }
 
 void TrackPlotCurve::attachTo(TrackPlotCurve* parent)
@@ -79,10 +97,22 @@ void TrackPlotCurve::detachFromParentCurve(void)
         return;
 
     this->parentCurve->removeChild(this);
-    this->parentCurve = NULL;
+}
+
+bool TrackPlotCurve::removeChild(TrackPlotCurve * const &child)
+{
+    if(!this->children.contains(child))
+        return false;
+
+    if(!this->children.removeOne(child))
+        return false;
+
+    child->parentCurve = NULL;
 
     // Change legend item visibility
-    this->setItemAttribute(Legend, true);
+    child->setItemAttribute(Legend, true);
+
+    return true;
 }
 
 void TrackPlotCurve::attach(QwtPlot *plot)
@@ -103,20 +133,4 @@ void TrackPlotCurve::detach(void)
 
     foreach (TrackPlotCurve* childCurve, this->children)
         childCurve->detach();
-}
-
-QRectF TrackPlotCurve::boundingRect(void) const
-{
-    QRectF rect = QwtPlotCurve::boundingRect();
-
-    foreach (TrackPlotCurve* child, this->children) {
-        rect = rect.united(child->boundingRect());
-    }
-
-    return rect;
-}
-
-void TrackPlotCurve::removeChild(TrackPlotCurve * const &child)
-{
-    this->children.removeOne(child);
 }
