@@ -23,7 +23,8 @@ class DataBaseManager
                                          QString const& dbName = DEFAULT_DB_NAME);
 
         static QSqlQuery execQuery(QString const& queryString,
-                                   QList<QVariant> const& values);
+                                   QVariantList const& values,
+                                   bool forwardOnly = true);
         static void execTransaction(QSqlQuery& query);
         static void execBatch(QSqlQuery& query,
                               QSqlQuery::BatchExecutionMode mode

@@ -51,13 +51,15 @@ bool DataBaseManager::openExistingDataBase(const QDir &destDir,
 }
 
 QSqlQuery DataBaseManager::execQuery(const QString &queryString,
-                                     const QList<QVariant> &values)
+                                     const QVariantList &values, bool forwardOnly)
 {
     QSqlQuery query(queryString);
 
     // bind values
     foreach (QVariant value, values)
         query.addBindValue(value);
+
+    query.setForwardOnly(forwardOnly);
 
     if (!query.exec())
         throw QException(QObject::tr("La requete a échouée : ")

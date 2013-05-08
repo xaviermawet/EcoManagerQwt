@@ -1,18 +1,11 @@
 /* TODO :
  * ------------------------
- * Quand on delete une competition, il n'y a pas de "reloadRaceView"
- * donc on voit tjs la liste des courses ... pas bon ça
- *
- * dans la méthode getAllDataFromSpeed, dans le message d'erreur en cas
- * d'echeque de la requete, afficher le msg d'erreur sql
  *
  * utiliser DataBaseManager::execBatch() et DataBaseManager::execTransaction()
  * partout là ou c'est possible
  *
  * Mettre a jout le titre du grahique (ou des futurs graphiques) pour y intégrer
  * le nom de la compétition courante
- *
- * Mettre le menu "Graphique courant" directement dans la bar de menu ?
  */
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
