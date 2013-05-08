@@ -13,27 +13,19 @@ AdvancedPlot::AdvancedPlot(QwtText const& title, int nbColor, QWidget* parent) :
     this->_xBottomYLeftZoomer->setRubberBand(QwtPicker::NoRubberBand);
     this->_xBottomYLeftZoomer->setTrackerMode(QwtPicker::AlwaysOff);
 
-    // Picker with click point machine to provide point selection
-    QwtPlotPicker* clickPicker = new QwtPlotPicker(this->canvas());
-    clickPicker->setStateMachine(new QwtPickerClickPointMachine);
-    clickPicker->setMousePattern(0,Qt::LeftButton,Qt::SHIFT);
-    connect(clickPicker, SIGNAL(appended(QPointF)),
-            this, SLOT(pointSelected(QPointF)));
+//    // Picker with click point machine to provide point selection
+//    QwtPlotPicker* clickPicker = new QwtPlotPicker(this->canvas());
+//    clickPicker->setStateMachine(new QwtPickerClickPointMachine);
+//    clickPicker->setMousePattern(0,Qt::LeftButton,Qt::SHIFT);
+//    connect(clickPicker, SIGNAL(appended(QPointF)),
+//            this, SLOT(pointSelected(QPointF)));
 
     // Picker with drag rect machine to provide multiple points selection
-    QwtPlotPicker* rectPicker = new QwtPlotPicker(
-                this->xBottom, this->yLeft, QwtPicker::RectRubberBand,
-                QwtPicker::AlwaysOff, this->canvas());
-    QwtPickerDragRectMachine* test = new QwtPickerDragRectMachine();
-    test->setState(QwtPickerMachine::RectSelection);
-    rectPicker->setStateMachine(test);
+    QwtPlotPicker* rectPicker = new QwtPlotPicker(this->canvas());
+    rectPicker->setRubberBand(QwtPicker::RectRubberBand);
+    rectPicker->setStateMachine(new QwtPickerDragRectMachine);
     connect(rectPicker, SIGNAL(selected(QRectF)),
             this, SLOT(pointsSelected(QRectF)));
-
-    connect(clickPicker, SIGNAL(selected(QVector<QPointF>)),
-            this, SLOT(selectedPoints(QVector<QPointF>)));
-    connect(rectPicker, SIGNAL(selected(QVector<QPointF>)),
-            this, SLOT(selectedPoints(QVector<QPointF>)));
 }
 
 AdvancedPlot::~AdvancedPlot(void)
@@ -64,16 +56,18 @@ QPlotCurve* AdvancedPlot::addCurve(const QString& title,
 
 void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
 {
+    if(selectedRect.left() == selectedRect.right())
+        qDebug() << "On a sélectionné qu'un seul point ...";
+    else
+        qDebug() << "On a sélectionné des points ....";
+
     foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
         // la seletion ne peut se faire que sur une courbe parente
         if(curve == NULL || curve->parent() != NULL)
-        {
-            qDebug() << "pas une bonne courbe";
             continue;
-        }
 
         // La selection ne peut se faire que sur les courbes visibles
         if(!curve->isVisible())
@@ -102,7 +96,7 @@ void AdvancedPlot::pointSelected(const QPointF &point)
         // la seletion ne peut se faire que sur une courbe parente
         if(tmpCurve == NULL || tmpCurve->parent() != NULL || !tmpCurve->isVisible())
         {
-            qDebug() << "pas une bonne courbe";
+            qDebug() << "Point Selected : pas une bonne courbe";
             continue;
         }
 
