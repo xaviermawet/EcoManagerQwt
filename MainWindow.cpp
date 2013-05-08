@@ -2374,6 +2374,7 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
         points << QPointF(test.value(0).toFloat() / 1000,
                           test.value(1).toFloat());
 
+    qDebug() << "Nombre de points dans la courbe vitesse = " << points.count();
     QwtPointSeriesData* serie = new QwtPointSeriesData(points);
     TrackPlotCurve* trackCurve = new TrackPlotCurve("vitesse", trackIdentifier, QPen("red"));
     trackCurve->setData(serie);

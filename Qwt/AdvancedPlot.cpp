@@ -10,8 +10,7 @@ AdvancedPlot::AdvancedPlot(QwtText const& title, int nbColor, QWidget* parent) :
     Plot(title, parent), colorPicker(nbColor)
 {
     // Désactive le rubberBand du zoomer pour celui du picker
-    this->_xBottomYLeftZoomer->setRubberBand(QwtPicker::NoRubberBand);
-    this->_xBottomYLeftZoomer->setTrackerMode(QwtPicker::AlwaysOff);
+//    this->_xBottomYLeftZoomer->setRubberBand(QwtPicker::NoRubberBand);
 
 //    // Picker with click point machine to provide point selection
 //    QwtPlotPicker* clickPicker = new QwtPlotPicker(this->canvas());
@@ -21,10 +20,15 @@ AdvancedPlot::AdvancedPlot(QwtText const& title, int nbColor, QWidget* parent) :
 //            this, SLOT(pointSelected(QPointF)));
 
     // Picker with drag rect machine to provide multiple points selection
-    QwtPlotPicker* rectPicker = new QwtPlotPicker(this->canvas());
-    rectPicker->setRubberBand(QwtPicker::RectRubberBand);
-    rectPicker->setStateMachine(new QwtPickerDragRectMachine);
-    connect(rectPicker, SIGNAL(selected(QRectF)),
+//    QwtPlotPicker* rectPicker = new QwtPlotPicker(this->canvas());
+//    rectPicker->setRubberBand(QwtPicker::RectRubberBand);
+//    rectPicker->setStateMachine(new QwtPickerDragRectMachine);
+//    connect(rectPicker, SIGNAL(selected(QRectF)),
+//            this, SLOT(pointsSelected(QRectF)));
+
+    /* _xBottomYLeftZoomer = Picker with drag rect machine to provide
+     * multiple points selection */
+    connect(this->_xBottomYLeftZoomer, SIGNAL(selected(QRectF)),
             this, SLOT(pointsSelected(QRectF)));
 }
 
@@ -56,30 +60,44 @@ QPlotCurve* AdvancedPlot::addCurve(const QString& title,
 
 void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
 {
-    if(selectedRect.left() == selectedRect.right())
-        qDebug() << "On a sélectionné qu'un seul point ...";
-    else
-        qDebug() << "On a sélectionné des points ....";
+    qDebug() << "Rectangle de sélection : Left = " << selectedRect.left() << " right = " << selectedRect.right();
 
     foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
-        // la seletion ne peut se faire que sur une courbe parente
-        if(curve == NULL || curve->parent() != NULL)
-            continue;
-
-        // La selection ne peut se faire que sur les courbes visibles
-        if(!curve->isVisible())
+        // la seletion ne peut se faire que sur une courbe parente et visible
+        if(curve == NULL || curve->parent() != NULL || !curve->isVisible())
             continue;
 
         if (!curve->boundingRect().intersects(selectedRect))
             continue;
 
-        // Recherche des points les plus proches des extremités du rectangle
-        qDebug() << "coupe la ligne : " << curve->title().text();
+        // Récupérer la liste des points de la courbe
+        QwtSeriesData<QPointF>* curvePoints = curve->data();
 
-        curve->closestPointOfX(selectedRect.left());
+        QPolygonF pointsSelected;
+
+        qDebug() << "Nombre de points dans la courbe " << curve->title().text()
+                 << " = " << curvePoints->size();
+
+        unsigned int i;
+        for(i = 0;i < curvePoints->size()
+                   && curvePoints->sample(i).x() < selectedRect.left(); ++i);
+
+        for(i; i < curvePoints->size()
+               && curvePoints->sample(i).x() < selectedRect.right(); ++i)
+            if (selectedRect.contains(curvePoints->sample(i)))
+                pointsSelected << curvePoints->sample(i);
+
+        if (!pointsSelected.isEmpty())
+        {
+            qDebug() << "Premier = " << pointsSelected.first() << " dernier = " << pointsSelected.last();
+
+            emit this->intervalSelected(pointsSelected.first().x(),
+                                        pointsSelected.last().x(),
+                                        curve->trackIdentifier());
+        }
     }
 }
 
@@ -113,9 +131,4 @@ void AdvancedPlot::pointSelected(const QPointF &point)
     if(curve != NULL)
     qDebug() << "Point le plus proche = " << curve->sample(index)
              << "courbe = " << curve->title().text();
-}
-
-void AdvancedPlot::selectedPoints(const QVector<QPointF> &points)
-{
-    qDebug() << "Nombre de points sélectionnées = " << points.count();
 }

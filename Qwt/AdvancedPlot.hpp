@@ -46,11 +46,14 @@ class AdvancedPlot : public Plot
         virtual QPlotCurve* addCurve(QString const& title,
                                      QVector<QPointF> const& points);
 
+    signals:
+
+        void intervalSelected(float minX, float maxX, QVariant trackId);
+
     protected slots:
 
         void pointsSelected(QRectF const& selectedRect);
         void pointSelected(QPointF const& point);
-        void selectedPoints(QVector<QPointF> const& points);
 
     protected:
 

@@ -64,7 +64,6 @@ Plot::Plot(const QwtText& title, QWidget* parent) :
     // Allow to zoom with left button by dragging a rect
     this->_xBottomYLeftZoomer->setRubberBand(QwtPicker::RectRubberBand);
 
-
     // Manage zoom with the mouse wheel and keyborad
     this->_magnifier = new PlotMagnifier(this->canvas());
     this->_magnifier->setZoomOutKey(Qt::Key_Minus, Qt::ControlModifier);
