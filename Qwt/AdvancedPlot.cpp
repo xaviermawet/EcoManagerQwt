@@ -64,13 +64,16 @@ QPlotCurve* AdvancedPlot::addCurve(const QString& title,
 
 void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
 {
-    foreach (QwtPlotItem* item, this->itemList())
+    foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
         // la seletion ne peut se faire que sur une courbe parente
         if(curve == NULL || curve->parent() != NULL)
+        {
+            qDebug() << "pas une bonne courbe";
             continue;
+        }
 
         // La selection ne peut se faire que sur les courbes visibles
         if(!curve->isVisible())
@@ -80,7 +83,7 @@ void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
             continue;
 
         // Recherche des points les plus proches des extremités du rectangle
-        qDebug() << "couple la ligne : " << curve->title().text();
+        qDebug() << "coupe la ligne : " << curve->title().text();
 
         curve->closestPointOfX(selectedRect.left());
     }
@@ -88,7 +91,34 @@ void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
 
 void AdvancedPlot::pointSelected(const QPointF &point)
 {
-    qDebug() << "un point a été sélectionné : " << point;
+    double minDist = 10e10;
+    int index(-1);
+    TrackPlotCurve* curve(NULL);
+
+    foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
+    {
+        TrackPlotCurve* tmpCurve = (TrackPlotCurve*) item;
+
+        // la seletion ne peut se faire que sur une courbe parente
+        if(tmpCurve == NULL || tmpCurve->parent() != NULL || !tmpCurve->isVisible())
+        {
+            qDebug() << "pas une bonne courbe";
+            continue;
+        }
+
+        double tmpDist;
+        int tmpIndex = tmpCurve->closestPoint(point.toPoint(), &tmpDist);
+        if (tmpDist < minDist && tmpIndex > -1)
+        {
+            curve = tmpCurve;
+            minDist = tmpDist;
+            index = tmpIndex;
+        }
+    }
+
+    if(curve != NULL)
+    qDebug() << "Point le plus proche = " << curve->sample(index)
+             << "courbe = " << curve->title().text();
 }
 
 void AdvancedPlot::selectedPoints(const QVector<QPointF> &points)

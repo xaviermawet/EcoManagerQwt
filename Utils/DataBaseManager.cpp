@@ -50,6 +50,22 @@ bool DataBaseManager::openExistingDataBase(const QDir &destDir,
     return DataBaseManager::openExistingDataBase(destDir.filePath(dbName));
 }
 
+QSqlQuery DataBaseManager::execQuery(const QString &queryString,
+                                     const QList<QVariant> &values)
+{
+    QSqlQuery query(queryString);
+
+    // bind values
+    foreach (QVariant value, values)
+        query.addBindValue(value);
+
+    if (!query.exec())
+        throw QException(QObject::tr("La requete a échouée : ")
+                         + query.lastQuery() + query.lastError().text());
+
+    return query; // Implicit sharing
+}
+
 void DataBaseManager::execTransaction(QSqlQuery &query)
 {
     QSqlDriver* sqlDriver = QSqlDatabase::database().driver();

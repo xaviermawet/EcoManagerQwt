@@ -22,6 +22,8 @@ class DataBaseManager
         static bool openExistingDataBase(QDir const& destDir = QDir::current(),
                                          QString const& dbName = DEFAULT_DB_NAME);
 
+        static QSqlQuery execQuery(QString const& queryString,
+                                   QList<QVariant> const& values);
         static void execTransaction(QSqlQuery& query);
         static void execBatch(QSqlQuery& query,
                               QSqlQuery::BatchExecutionMode mode
