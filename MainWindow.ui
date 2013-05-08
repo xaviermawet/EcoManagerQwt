@@ -128,17 +128,45 @@
         </widget>
         <widget class="QTabWidget" name="plotsTabWidget">
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tabDistance">
           <attribute name="title">
            <string>Distance</string>
           </attribute>
+          <layout class="QVBoxLayout" name="distancePlotLayout">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+          </layout>
          </widget>
          <widget class="QWidget" name="tabTime">
           <attribute name="title">
            <string>Temps</string>
           </attribute>
+          <layout class="QVBoxLayout" name="timePlotLayout">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+          </layout>
          </widget>
          <widget class="QWidget" name="tabMegaSquirt">
           <attribute name="title">

@@ -428,7 +428,10 @@ void MapScene::highlightSector(float t1, float t2, QVariant trackId)
     }
 
     if (!found)
+    {
+        qDebug() << "MapScene::highlightSector : Aucun tour associé ...";
         return;
+    }
 
     AnimateSectorItem* sect = targetTrack->sectorOn(t1, t2);
     if (sect == NULL)

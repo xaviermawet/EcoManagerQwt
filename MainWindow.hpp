@@ -7,6 +7,7 @@
  * Mettre a jout le titre du grahique (ou des futurs graphiques) pour y intégrer
  * le nom de la compétition courante
  */
+
 #ifndef __MAINWINDOW_HPP__
 #define __MAINWINDOW_HPP__
 
@@ -40,6 +41,10 @@
 #include <QtGui>
 #include <QtSql>
 #include <float.h>
+
+#define TAB_DISTANCE    0
+#define TAB_TIME        1
+#define TAB_MEGASQUIRT  2
 
 namespace Ui {
 class MainWindow;
@@ -152,8 +157,7 @@ class MainWindow : public QMainWindow
         void createRaceView(void);
         void createToolsBar(void);
         void createMapZone(void);
-        void createPlotZone(void);
-        void createMegaSquirtZone(void);
+        void createPlotsZone(void);
         void createRaceTable(void);
         void readSettings(void);
         void writeSettings(void) const;
@@ -197,8 +201,8 @@ class MainWindow : public QMainWindow
         MapFrame* mapFrame;
 
         // Plot
-        PlotFrame* distancePlotFrame;
-        PlotFrame* timePlotFrame;
+        AdvancedPlot* distancePlotFrame;
+        AdvancedPlot* timePlotFrame;
         AdvancedPlot* megasquirtDataPlot;
 
         // List of all Plots

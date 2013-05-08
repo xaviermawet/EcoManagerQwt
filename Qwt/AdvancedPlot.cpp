@@ -37,7 +37,7 @@ AdvancedPlot::~AdvancedPlot(void)
     qDebug() << "AdvancedPlot (" << this->objectName() << ") Début destructeur";
 
     // Supprimer les courbes qui on des enfants
-    foreach (QwtPlotItem* item, this->itemList())
+    foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 

@@ -37,8 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->createRaceView();
     this->createRaceTable();
     this->createMapZone();
-    this->createPlotZone();
-    this->createMegaSquirtZone();
+    this->createPlotsZone();
     this->createToolsBar();
     this->createPlotLegendContextMenu();
 
@@ -502,8 +501,8 @@ void MainWindow::on_actionLapDataEraseTable_triggered(void)
     this->mapFrame->scene()->clearSceneSelection();
 
     // Erase all highlited point on the mapping view
-    this->distancePlotFrame->scene()->clearPlotSelection();
-    this->timePlotFrame->scene()->clearPlotSelection();
+//    this->distancePlotFrame->scene()->clearPlotSelection();
+//    this->timePlotFrame->scene()->clearPlotSelection();
 
     // Remove laps information from the table
     this->raceInformationTableModel->removeRows(
@@ -526,8 +525,8 @@ void MainWindow::on_actionClearAllData_triggered(void)
     this->mapFrame->scene()->clearTracks();
 
     // clear the curves of the graphic views
-    this->distancePlotFrame->scene()->clearCurves();
-    this->timePlotFrame->scene()->clearCurves();
+//    this->distancePlotFrame->scene()->clearCurves();
+//    this->timePlotFrame->scene()->clearCurves();
 
     // Clear the list of all tracks currently displayed
     this->currentTracksDisplayed.clear();
@@ -707,10 +706,10 @@ void MainWindow::on_actionLapDataDrawSectors_triggered(void)
     this->mapFrame->scene()->highlightSector(time1, time2, trackId);
 
     //this->distancePlotFrame->scene()->clearPlotSelection();
-    this->distancePlotFrame->scene()->highlightSector(time1, time2, trackId); // FIXME : méthode qui utilise un arondissement car prévu pour des données de temps issues de la vue mapping
+//    this->distancePlotFrame->scene()->highlightSector(time1, time2, trackId); // FIXME : méthode qui utilise un arondissement car prévu pour des données de temps issues de la vue mapping
 
     //this->timePlotFrame->scene()->clearPlotSelection();
-    this->timePlotFrame->scene()->highlightSector(time1, time2, trackId); // FIXME : méthode qui utilise un arondissement car prévu pour des données de temps issues de la vue mapping
+//    this->timePlotFrame->scene()->highlightSector(time1, time2, trackId); // FIXME : méthode qui utilise un arondissement car prévu pour des données de temps issues de la vue mapping
 }
 
 void MainWindow::on_actionLapDataDisplayInAllViews_triggered(void)
@@ -1053,10 +1052,10 @@ void MainWindow::removeTrackFromAllView(QMap<QString, QVariant> const& trackId)
 {
     if (this->mapFrame->scene()->removeTrack(trackId))
         qDebug() << "mapping Supprimé !!!";
-    if (this->distancePlotFrame->scene()->removeCurves(trackId))
-        qDebug() << "distance supprimé !!!";
-    if (this->timePlotFrame->scene()->removeCurves(trackId))
-        qDebug() << "time supprimé !!!";
+//    if (this->distancePlotFrame->scene()->removeCurves(trackId))
+//        qDebug() << "distance supprimé !!!";
+//    if (this->timePlotFrame->scene()->removeCurves(trackId))
+//        qDebug() << "time supprimé !!!";
 
     this->currentTracksDisplayed.removeOne(trackId);
 }
@@ -1413,60 +1412,53 @@ void MainWindow::createMapZone(void)
     this->sectorModel = NULL;
 }
 
-void MainWindow::createPlotZone(void)
+void MainWindow::createPlotsZone(void)
 {
-    // Create distance plot frame
-    this->distancePlotFrame = new PlotFrame;
-    HorizontalScale* distAxis = new HorizontalScale(Scale::Bottom);
-    distAxis->setResolution(5);
-    distAxis->setUnitLabel("d(m)");
-    this->distancePlotFrame->addHorizontalAxis(distAxis);
+    /* ---------------------------------------------------------------------- *
+     *                       Create distance plot frame                       *
+     * ---------------------------------------------------------------------- */
+    this->distancePlotFrame = new AdvancedPlot(
+                tr("Distance - Vitesse"), 6, this);
 
-    VerticalScale* dspeedAxis = new VerticalScale(Scale::Left);
-    dspeedAxis->setResolution(1);
-    dspeedAxis->setUnitLabel("v(km/h)");
-    this->distancePlotFrame->addVerticalAxis(dspeedAxis);
+    this->distancePlotFrame->setAxisTitle(Plot::xBottom, tr("Distance (m)"));
+    this->distancePlotFrame->setAxisTitle(Plot::yLeft, tr("Vitesse (km\\h)"));
+    this->ui->distancePlotLayout->addWidget(this->distancePlotFrame);
 
-    VerticalScale* daccAxis = new VerticalScale(Scale::Right);
-    daccAxis->setResolution(1);
-    daccAxis->translate(-50);
-    daccAxis->scale(0.2);
-    daccAxis->setUnitLabel("a(m/s²)");
-    this->distancePlotFrame->addVerticalAxis(daccAxis);
+    // Connect plot signals to slots
+    connect(this->distancePlotFrame, SIGNAL(legendChecked(QwtPlotItem*, bool)),
+            this,  SLOT(setPlotCurveVisibile(QwtPlotItem*, bool)));
+    connect(this->distancePlotFrame,
+            SIGNAL(legendRightClicked(const QwtPlotItem*,QPoint)),
+            this, SLOT(showLegendContextMenu(const QwtPlotItem*,QPoint)));
 
-    // Add the distance plot frame the the tab widget
-    QVBoxLayout* distancePlotLayout = new QVBoxLayout(this->ui->tabDistance);
-    distancePlotLayout->setMargin(0);
-    distancePlotLayout->addWidget(this->distancePlotFrame);
+    // Settings management configuration
+    this->distancePlotFrame->setObjectName("DistancePlot");
+    this->plots.append(this->distancePlotFrame);
 
-    // Create time plot frame
-    this->timePlotFrame = new PlotFrame;
-    HorizontalScale* timeAxis = new HorizontalScale(Scale::Bottom);
-    timeAxis->setResolution(5);
-    timeAxis->setUnitLabel("t(s)");
-    this->timePlotFrame->addHorizontalAxis(timeAxis);
+    /* ---------------------------------------------------------------------- *
+     *                         Create time plot frame                         *
+     * ---------------------------------------------------------------------- */
 
-    VerticalScale* tspeedAxis = new VerticalScale(Scale::Left);
-    tspeedAxis->setResolution(1);
-    tspeedAxis->setUnitLabel("v(km/h)");
-    this->timePlotFrame->addVerticalAxis(tspeedAxis);
+    this->timePlotFrame = new AdvancedPlot(tr("Temps - Vitesse"), 6, this);
+    this->timePlotFrame->setAxisTitle(Plot::xBottom, tr("Temps (s)"));
+    this->timePlotFrame->setAxisTitle(Plot::yLeft, tr("Vitesse (km\\h)"));
+    this->ui->timePlotLayout->addWidget(this->timePlotFrame);
 
-    VerticalScale* taccAxis = new VerticalScale(Scale::Right);
-    taccAxis->setResolution(1);
-    taccAxis->translate(-50);
-    taccAxis->scale(0.2);
-    taccAxis->setUnitLabel("a(m/s²)");
-    this->timePlotFrame->addVerticalAxis(taccAxis);
+    // Connect plot signals to slots
+    connect(this->timePlotFrame, SIGNAL(legendChecked(QwtPlotItem*, bool)),
+            this,  SLOT(setPlotCurveVisibile(QwtPlotItem*, bool)));
+    connect(this->timePlotFrame,
+            SIGNAL(legendRightClicked(const QwtPlotItem*,QPoint)),
+            this, SLOT(showLegendContextMenu(const QwtPlotItem*,QPoint)));
 
-    // Add the time plot frame the the tab widget
-    QVBoxLayout* timePlotLayout = new QVBoxLayout(this->ui->tabTime);
-    timePlotLayout->setMargin(0);
-    timePlotLayout->addWidget(this->timePlotFrame);
-}
+    // Settings management configuration
+    this->timePlotFrame->setObjectName("TimePlot");
+    this->plots.append(this->timePlotFrame);
 
-void MainWindow::createMegaSquirtZone(void)
-{
-    // Create MegaSquirt plot frame
+    /* ---------------------------------------------------------------------- *
+     *                         Create Megasquirt plot                         *
+     * ---------------------------------------------------------------------- */
+
     this->megasquirtDataPlot = new AdvancedPlot(tr("Données du Megasquirt"),
                                                 6, this);
     this->megasquirtDataPlot->setAxisTitle(Plot::xBottom, tr("Temps (s)"));
@@ -1779,8 +1771,8 @@ void MainWindow::displayDataLap(void)
         //                timeSpeedPoints2 << tPoint;
         //            }
 
-        this->distancePlotFrame->scene()->addCurve(distSpeedPoints, trackIdentifier);//this->distancePlotFrame->addCurve(distSpeedPoints, trackIdentifier);
-        this->timePlotFrame->scene()->addCurve(timeSpeedPoints, trackIdentifier);//this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
+        //this->distancePlotFrame->scene()->addCurve(distSpeedPoints, trackIdentifier);//this->distancePlotFrame->addCurve(distSpeedPoints, trackIdentifier);
+//        this->timePlotFrame->scene()->addCurve(timeSpeedPoints, trackIdentifier);//this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
         //            this->distancePlotFrame->scene()->addCurve(distSpeedPoints2, trackIdentifier);//this->distancePlotFrame->addCurve(distSpeedPoints, trackIdentifier);
         //            this->timePlotFrame->scene()->addCurve(timeSpeedPoints2, trackIdentifier);//this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
 
@@ -1865,14 +1857,14 @@ void MainWindow::connectSignals(void)
             this, SLOT(addSector(QString,int,IndexedPosition,IndexedPosition)));
     connect(this->mapFrame->scene(), SIGNAL(sectorUpdated(QString,int,IndexedPosition,IndexedPosition)),
             this, SLOT(updateSector(QString,int,IndexedPosition,IndexedPosition)));
-    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-            this->distancePlotFrame->scene(), SLOT(highlightPoints(float,QVariant)));
-    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-            this->timePlotFrame->scene(), SLOT(highlightPoints(float,QVariant)));
-    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
-            this->distancePlotFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
-    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
-            this->timePlotFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
+//    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+//            this->distancePlotFrame->scene(), SLOT(highlightPoints(float,QVariant)));
+//    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+//            this->timePlotFrame->scene(), SLOT(highlightPoints(float,QVariant)));
+//    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
+//            this->distancePlotFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
+//    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
+//            this->timePlotFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
     connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
             this, SLOT(displayLapInformation(float,float,QVariant)));
 //    connect(this->mapFrame->scene(), SIGNAL(selectionChanged()),
@@ -1887,34 +1879,38 @@ void MainWindow::connectSignals(void)
     // Distance plot frame/scene
     //connect(this->distancePlotFrame, SIGNAL(selectionChanged()),
             //this->mapFrame->scene(), SLOT(clearSceneSelection()));
-    connect(this->distancePlotFrame->scene(), SIGNAL(selectionChanged()),
-            this, SLOT(on_actionLapDataEraseTable_triggered()));
-    connect(this->distancePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant)));
-    connect(this->distancePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-            this, SLOT(displayLapInformation(float,QVariant)));
-    connect(this->distancePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
-            this->mapFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
-    connect(this->distancePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
-            this, SLOT(displayLapInformation(float,float,QVariant)));
-    connect(this->distancePlotFrame, SIGNAL(clear()),
-            this, SLOT(on_actionClearAllData_triggered()));
+//    connect(this->distancePlotFrame->scene(), SIGNAL(selectionChanged()),
+//            this, SLOT(on_actionLapDataEraseTable_triggered()));
+//    connect(this->distancePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+//            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant)));
+//    connect(this->distancePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+//            this, SLOT(displayLapInformation(float,QVariant)));
+//    connect(this->distancePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
+//            this->mapFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
+//    connect(this->distancePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
+//            this, SLOT(displayLapInformation(float,float,QVariant)));
+//    connect(this->distancePlotFrame, SIGNAL(clear()),
+//            this, SLOT(on_actionClearAllData_triggered()));
 
     // Time plot frame/scene
     //connect(this->timePlotFrame, SIGNAL(selectionChanged()),
             //this->mapFrame->scene(), SLOT(clearSceneSelection()));
-    connect(this->timePlotFrame->scene(), SIGNAL(selectionChanged()),
-            this, SLOT(on_actionLapDataEraseTable_triggered()));
-    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant)));
-    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-            this, SLOT(displayLapInformation(float,QVariant)));
-    connect(this->timePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
-            this->mapFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
-    connect(this->timePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
-            this, SLOT(displayLapInformation(float,float,QVariant)));
-    connect(this->timePlotFrame, SIGNAL(clear()),
-            this, SLOT(on_actionClearAllData_triggered()));
+//    connect(this->timePlotFrame->scene(), SIGNAL(selectionChanged()),
+//            this, SLOT(on_actionLapDataEraseTable_triggered()));
+//    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+//            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant)));
+//    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+//            this, SLOT(displayLapInformation(float,QVariant)));
+//    connect(this->timePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
+//            this->mapFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
+//    connect(this->timePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
+//            this, SLOT(displayLapInformation(float,float,QVariant)));
+//    connect(this->timePlotFrame, SIGNAL(clear()),
+//            this, SLOT(on_actionClearAllData_triggered()));
+
+    // Test de la connection des graphiques Qwt
+    connect(this->megasquirtDataPlot, SIGNAL(intervalSelected(float,float,QVariant)),
+            this->mapFrame->scene(), SLOT(highlightOnlySector(float,float,QVariant)));
 }
 
 void MainWindow::reloadRaceView(void)
@@ -2062,8 +2058,8 @@ void MainWindow::highlightPointInAllView(const QModelIndex &index)
 
     // Highlight point in all view
     this->mapFrame->scene()->highlightPoint(time, trackId);
-    this->timePlotFrame->scene()->highlightPoint(time, trackId);
-    this->distancePlotFrame->scene()->highlightPoint(time, trackId);
+//    this->timePlotFrame->scene()->highlightPoint(time, trackId);
+//    this->distancePlotFrame->scene()->highlightPoint(time, trackId);
 }
 
 void MainWindow::updateDataBase(QString const& dbFilePath,
@@ -2521,29 +2517,17 @@ void MainWindow::showLegendContextMenu(const QwtPlotItem* item,
 
 Plot* MainWindow::currentPlot(void) const
 {
-//    switch (this->ui->mainTabWidget->currentIndex())
-//    {
-//    case TAB_BENCH_TEST:
-//        switch (this->ui->benchTestTabWidget->currentIndex())
-//        {
-//            case TAB_COUPLE_AND_POWER:
-//                return this->couplePowerPlot;
-//            case TAB_COUPLE_AND_SPECIFIC_POWER:
-//                return this->coupleSpecificPowerPlot;
-//            case TAB_REDUCTION_RATIO:
-//                return this->reductionRatioPlot;
-//            case TAB_WHEEL_SLIPPAGE:
-//                return this->wheelSlippagePlot;
-//            default:
-//                return NULL;
-//        }
-//    case TAB_MEGASQUIRT_DATA:
-//        return this->megasquirtDataPlot;
-//    default:
-//        return NULL;
-//    }
-
-    return this->megasquirtDataPlot;
+    switch (this->ui->plotsTabWidget->currentIndex())
+    {
+        case TAB_DISTANCE:
+            return this->distancePlotFrame;
+        case TAB_TIME:
+            return this->timePlotFrame;
+        case TAB_MEGASQUIRT:
+            return this->megasquirtDataPlot;
+        default:
+            return NULL;
+    }
 }
 
 void MainWindow::createPlotLegendContextMenu(void)
