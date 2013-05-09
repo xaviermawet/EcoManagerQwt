@@ -9,26 +9,14 @@ AdvancedPlot::AdvancedPlot(QString const& title, int nbColor, QWidget* parent) :
 AdvancedPlot::AdvancedPlot(QwtText const& title, int nbColor, QWidget* parent) :
     Plot(title, parent), colorPicker(nbColor)
 {
-    // Désactive le rubberBand du zoomer pour celui du picker
-//    this->_xBottomYLeftZoomer->setRubberBand(QwtPicker::NoRubberBand);
-
-//    // Picker with click point machine to provide point selection
-//    QwtPlotPicker* clickPicker = new QwtPlotPicker(this->canvas());
-//    clickPicker->setStateMachine(new QwtPickerClickPointMachine);
-//    clickPicker->setMousePattern(0,Qt::LeftButton,Qt::SHIFT);
-//    connect(clickPicker, SIGNAL(appended(QPointF)),
-//            this, SLOT(pointSelected(QPointF)));
+    /* je ne pouvais pas utiliser le Zoomer comme picker car il ne génère pas
+     * d'évènement lors d'un simple clic, donc dans tous les cas, je devais
+     * ajouter un nouveau picker */
 
     // Picker with drag rect machine to provide multiple points selection
-//    QwtPlotPicker* rectPicker = new QwtPlotPicker(this->canvas());
-//    rectPicker->setRubberBand(QwtPicker::RectRubberBand);
-//    rectPicker->setStateMachine(new QwtPickerDragRectMachine);
-//    connect(rectPicker, SIGNAL(selected(QRectF)),
-//            this, SLOT(pointsSelected(QRectF)));
-
-    /* _xBottomYLeftZoomer = Picker with drag rect machine to provide
-     * multiple points selection */
-    connect(this->_xBottomYLeftZoomer, SIGNAL(selected(QRectF)),
+    QwtPlotPicker* rectPicker = new QwtPlotPicker(this->canvas());
+    rectPicker->setStateMachine(new QwtPickerDragRectMachine);
+    connect(rectPicker, SIGNAL(selected(QRectF)),
             this, SLOT(pointsSelected(QRectF)));
 }
 
@@ -60,6 +48,20 @@ QPlotCurve* AdvancedPlot::addCurve(const QString& title,
 
 void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
 {
+    if (selectedRect.left() == selectedRect.right() &&
+        selectedRect.top() == selectedRect.bottom())
+    {
+        if (this->isCrossLineVisible())
+        {
+            qDebug() << "On veut un point de toutes les courbes...";
+            this->pointSelected(selectedRect.topLeft()); // Top left au hasard, les 4 extrémités sont sur le meme point
+        }
+        else
+            qDebug() << "Sélection d'un seul point ...";
+        return;
+    }
+
+
     qDebug() << "Rectangle de sélection : Left = " << selectedRect.left() << " right = " << selectedRect.right();
 
     foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
@@ -103,32 +105,17 @@ void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
 
 void AdvancedPlot::pointSelected(const QPointF &point)
 {
-    double minDist = 10e10;
-    int index(-1);
-    TrackPlotCurve* curve(NULL);
+    qDebug() << "Point sélectionné = " << point;
 
     foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
     {
-        TrackPlotCurve* tmpCurve = (TrackPlotCurve*) item;
+        TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
         // la seletion ne peut se faire que sur une courbe parente
-        if(tmpCurve == NULL || tmpCurve->parent() != NULL || !tmpCurve->isVisible())
-        {
-            qDebug() << "Point Selected : pas une bonne courbe";
+        if(curve == NULL || curve->parent() != NULL || !curve->isVisible())
             continue;
-        }
 
-        double tmpDist;
-        int tmpIndex = tmpCurve->closestPoint(point.toPoint(), &tmpDist);
-        if (tmpDist < minDist && tmpIndex > -1)
-        {
-            curve = tmpCurve;
-            minDist = tmpDist;
-            index = tmpIndex;
-        }
+        qDebug() << "courbe = " << curve->title().text()
+                 << " Point le plus proche = " << curve->closestPointF(point, NULL);
     }
-
-    if(curve != NULL)
-    qDebug() << "Point le plus proche = " << curve->sample(index)
-             << "courbe = " << curve->title().text();
 }

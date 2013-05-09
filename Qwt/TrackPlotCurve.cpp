@@ -18,6 +18,9 @@ TrackPlotCurve::TrackPlotCurve(
     this->setTitle(title.text() + QObject::tr(" (course ") +
                    trackId["race_num"].toString() + QObject::tr(" tour ") +
             trackId["lap"].toString() + ")");
+
+    this->setSymbol(new QwtSymbol( QwtSymbol::Ellipse,
+                                   Qt::gray, pen, QSize( 2, 2 ) ) );
 }
 
 TrackPlotCurve::~TrackPlotCurve(void)
@@ -135,14 +138,60 @@ void TrackPlotCurve::detach(void)
         childCurve->detach();
 }
 
-QPointF TrackPlotCurve::closestPointOfX(qreal x) const
+QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
 {
-    QPointF point(x, 0);
+    // Récupérer la liste des points
+    const QwtSeriesData<QPointF>* curvePoints = this->data();
 
-    int indice = this->closestPoint(point.toPoint());
+    // Effectuer une recherche dichotomique sur la valeur en x
+    unsigned int indiceMin(0);
+    unsigned int indiceMax(curvePoints->size() - 1);
 
-    QPointF nearestPoint = this->data()->sample(indice);
-    qDebug() << "nearestPoint = " << nearestPoint;
+    while (indiceMin <= indiceMax)
+    {
+        unsigned int mid = (indiceMin + indiceMax) / 2;
 
-    return nearestPoint;
+        if (curvePoints->sample(mid).x() < pos.x())
+            indiceMin = mid + 1;
+        else
+            indiceMax = mid - 1;
+    }
+
+    // Ce point est le point juste à droite de pos mais celui de gauche est p-e plus pres
+    if (indiceMin == 0)
+    {
+        QPointF pointF = curvePoints->sample(indiceMax);
+        if (dist)
+            *dist = qAbs(pointF.x() - pos.x()) + qAbs(pointF.y() - pos.y());
+        return pointF;
+    }
+
+    qDebug() << "indiceMin = " << indiceMin << " indiceMax = " << indiceMax;
+    QPointF pointF1 = curvePoints->sample(indiceMin); // le point après la pos
+    QPointF pointF2 = curvePoints->sample(indiceMax); // Le point avant la pos
+
+    double distF1 = qAbs(pointF1.x() - pos.x()) + qAbs(pointF1.y() - pos.y());
+    double distF2 = qAbs(pointF2.x() - pos.x()) + qAbs(pointF2.y() - pos.y());
+
+    if (distF1 < distF2)
+    {
+        if (dist)
+            *dist = distF1;
+        return pointF1;
+    }
+
+    if (dist)
+        *dist = distF2;
+    return pointF2;
+
+//    if (qAbs(pointF1.x() - pos.x()) < qAbs(pointF2.x() - pos.x()))
+//    {
+//        if (dist != NULL)
+//            *dist = qAbs(pointF1.x() - pos.x());
+//        return pointF1;
+//    }
+
+//    if (dist!= NULL)
+//        *dist = qAbs(pointF2.x() - pos.x());
+//    return pointF2;
 }

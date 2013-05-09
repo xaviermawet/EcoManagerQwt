@@ -2375,6 +2375,7 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
     TrackPlotCurve* trackCurve = new TrackPlotCurve("vitesse", trackIdentifier, QPen("red"));
     trackCurve->setData(serie);
     trackCurve->attach(this->megasquirtDataPlot);
+    this->setPlotCurveVisibile(trackCurve, true);
 
 
     // Courbe enfant
@@ -2396,9 +2397,10 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
                           test2.value(1).toFloat());
 
     QwtPointSeriesData* serie2 = new QwtPointSeriesData(points2);
-    TrackPlotCurve* trackCurve2 = new TrackPlotCurve("enfant", trackIdentifier, QPen("red"), trackCurve);
+    TrackPlotCurve* trackCurve2 = new TrackPlotCurve("enfant", trackIdentifier, QPen("red"));
     trackCurve2->setData(serie2);
-    //trackCurve2->attach(this->megasquirtDataPlot);
+    trackCurve2->attach(this->megasquirtDataPlot);
+    this->setPlotCurveVisibile(trackCurve2, true);
 
     //trackCurve2->attachTo(trackCurve);
     // =========================================================================

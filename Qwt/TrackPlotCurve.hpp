@@ -3,6 +3,7 @@
 
 #include "QPlotCurve.hpp"
 #include <qwt_plot.h>
+#include <qwt_symbol.h>
 
 typedef QMap<QString, QVariant> TrackIdentifier;
 
@@ -99,11 +100,11 @@ class TrackPlotCurve : public QPlotCurve
         void detach(void);
 
         /*!
-         * \brief Obtenir le point le plus proche d'une valeur des abscisses
+         * \brief Obtenir le point le plus proche d'un point donné
          * \param x valeur de l'abscisse
          * \return Le point le plus proche
          */
-        QPointF closestPointOfX(qreal x) const;
+        QPointF closestPointF(QPointF const& pos, double* dist) const;
 
     protected:
 
