@@ -151,13 +151,15 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
     {
         unsigned int mid = (indiceMin + indiceMax) / 2;
 
+        qDebug() << "mid = " << mid << " min = " << indiceMin << " max = " << indiceMax;
+
         if (curvePoints->sample(mid).x() < pos.x())
             indiceMin = mid + 1;
         else
             indiceMax = mid - 1;
     }
 
-    // Ce point est le point juste à droite de pos mais celui de gauche est p-e plus pres
+    // Qu'un point possible
     if (indiceMin == 0)
     {
         QPointF pointF = curvePoints->sample(indiceMax);
@@ -166,12 +168,17 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
         return pointF;
     }
 
+    /* Deux points possibles --> choix du plus proche on fonction
+     * des différences de position en X */
     qDebug() << "indiceMin = " << indiceMin << " indiceMax = " << indiceMax;
     QPointF pointF1 = curvePoints->sample(indiceMin); // le point après la pos
     QPointF pointF2 = curvePoints->sample(indiceMax); // Le point avant la pos
 
     double distF1 = qAbs(pointF1.x() - pos.x()) + qAbs(pointF1.y() - pos.y());
     double distF2 = qAbs(pointF2.x() - pos.x()) + qAbs(pointF2.y() - pos.y());
+
+    qDebug() << "dist point avant = " << distF2;
+    qDebug() << "dist point après = " << distF1;
 
     if (distF1 < distF2)
     {
@@ -194,4 +201,50 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
 //    if (dist!= NULL)
 //        *dist = qAbs(pointF2.x() - pos.x());
 //    return pointF2;
+}
+
+QPointF TrackPlotCurve::closestPointFOfX(const qreal &posX, double *dist) const
+{
+    // Récupérer la liste des points
+    const QwtSeriesData<QPointF>* curvePoints = this->data();
+
+    // Effectuer une recherche dichotomique sur la valeur en x
+    unsigned int indiceMin(0);
+    unsigned int indiceMax(curvePoints->size() - 1);
+
+    while (indiceMin <= indiceMax)
+    {
+        unsigned int mid = (indiceMin + indiceMax) / 2;
+
+        if (curvePoints->sample(mid).x() < posX)
+            indiceMin = mid + 1;
+        else
+            indiceMax = mid - 1;
+    }
+
+    // Qu'un point possible
+    if (indiceMin == 0)
+    {
+        QPointF pointF = curvePoints->sample(indiceMax);
+        if (dist)
+            *dist = qAbs(pointF.x() - posX);
+        return pointF;
+    }
+
+    /* Deux points possibles --> choix du plus proche on fonction
+     * des différences de position en X */
+    qDebug() << "indiceMin = " << indiceMin << " indiceMax = " << indiceMax;
+    QPointF pointF1 = curvePoints->sample(indiceMin); // le point après la pos
+    QPointF pointF2 = curvePoints->sample(indiceMax); // Le point avant la pos
+
+    if (qAbs(pointF1.x() - posX) < qAbs(pointF2.x() - posX))
+    {
+        if (dist != NULL)
+            *dist = qAbs(pointF1.x() - posX);
+        return pointF1;
+    }
+
+    if (dist!= NULL)
+        *dist = qAbs(pointF2.x() - posX);
+    return pointF2;
 }

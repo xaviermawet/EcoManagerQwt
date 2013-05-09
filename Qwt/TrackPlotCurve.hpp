@@ -104,7 +104,9 @@ class TrackPlotCurve : public QPlotCurve
          * \param x valeur de l'abscisse
          * \return Le point le plus proche
          */
-        QPointF closestPointF(QPointF const& pos, double* dist) const;
+        QPointF closestPointF(QPointF const& pos, double* dist = NULL) const;
+
+        QPointF closestPointFOfX(qreal const& posX, double* dist = NULL) const;
 
     protected:
 
