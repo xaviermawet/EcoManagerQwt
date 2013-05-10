@@ -2590,6 +2590,11 @@ void MainWindow::on_actionExportToPDF_triggered(void)
     if (pdfFile.isNull() || pdfFile.isEmpty()) // User canceled
         return;
 
+    // Ask precision
+    ExportConfigurationDialog exportConfig;
+    if(exportConfig.exec() != QDialog::Accepted)
+        return;
+
     // Add the current competition to the plot title just for export
     QString oldTitle = this->currentPlot()->title().text();
 
@@ -2597,8 +2602,9 @@ void MainWindow::on_actionExportToPDF_triggered(void)
 
     QwtPlotRenderer renderer;
     renderer.setDiscardFlag(QwtPlotRenderer::DiscardBackground);
-    renderer.renderDocument(this->currentPlot(), pdfFile,
-                            this->currentPlot()->size());
+    renderer.renderDocument(
+                this->currentPlot(), pdfFile,
+                this->currentPlot()->size() / exportConfig.precision());
 
     // Restore title
     this->currentPlot()->setTitle(oldTitle);

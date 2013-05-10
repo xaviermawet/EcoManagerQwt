@@ -72,7 +72,8 @@ SOURCES += main.cpp\
     FileParameterDialog.cpp \
     Qwt/AdvancedPlot.cpp \
     Utils/ColorPicker.cpp \
-    Qwt/TrackPlotCurve.cpp
+    Qwt/TrackPlotCurve.cpp \
+    ExportConfigurationDialog.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -133,7 +134,8 @@ HEADERS  += MainWindow.hpp \
     FileParameterDialog.hpp \
     Qwt/AdvancedPlot.hpp \
     Utils/ColorPicker.hpp \
-    Qwt/TrackPlotCurve.hpp
+    Qwt/TrackPlotCurve.hpp \
+    ExportConfigurationDialog.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \
@@ -142,7 +144,8 @@ FORMS    += MainWindow.ui \
     Plot/PlotFrame.ui \
     LapDataCompartor.ui \
     Plot/PlotPrintDialog.ui \
-    FileParameterDialog.ui
+    FileParameterDialog.ui \
+    ExportConfigurationDialog.ui
 
 RESOURCES += \
     Resources.qrc

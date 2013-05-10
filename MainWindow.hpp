@@ -28,6 +28,7 @@
 #include "Utils/DataBaseManager.hpp"
 #include "Utils/QCSVParser.hpp"
 #include "FileParameterDialog.hpp"
+#include "ExportConfigurationDialog.hpp"
 
 // Qwt
 #include "Qwt/AdvancedPlot.hpp"
