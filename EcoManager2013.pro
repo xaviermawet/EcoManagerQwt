@@ -6,6 +6,10 @@
 
 QT       += core gui sql
 CONFIG   += qwt
+
+LIBS += /usr/lib/libgsl.so
+LIBS += /usr/lib/libgslcblas.so
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = EcoManager2013
@@ -73,7 +77,8 @@ SOURCES += main.cpp\
     Qwt/AdvancedPlot.cpp \
     Utils/ColorPicker.cpp \
     Qwt/TrackPlotCurve.cpp \
-    ExportConfigurationDialog.cpp
+    ExportConfigurationDialog.cpp \
+    Utils/polifitgsl.cpp
 
 HEADERS  += MainWindow.hpp \
     CompetitionEntryDialog.hpp \
@@ -135,7 +140,8 @@ HEADERS  += MainWindow.hpp \
     Qwt/AdvancedPlot.hpp \
     Utils/ColorPicker.hpp \
     Qwt/TrackPlotCurve.hpp \
-    ExportConfigurationDialog.hpp
+    ExportConfigurationDialog.hpp \
+    Utils/polifitgsl.hpp
 
 FORMS    += MainWindow.ui \
     CompetitionEntryDialog.ui \

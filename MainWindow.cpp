@@ -2447,6 +2447,58 @@ void MainWindow::changeCurveColor(void)
         this->curveAssociatedToLegendItem->setPen(QPen(newColor));
 }
 
+void MainWindow::createPolynomialTrendline(void)
+{
+    // if no curve associated to the legend item. This shouldn't happen!
+    if (this->curveAssociatedToLegendItem == NULL)
+        return;
+
+    bool ok(false);
+    int degree = QInputDialog::getInt(
+                this, tr("Courbe de tendance polynomiale"),
+                tr("Ordre de complexité ?"), 2, 2, 100, 1, &ok);
+
+    if (!ok) // User canceled
+        return;
+
+    // Récupération de la série des points de la courbe
+    QwtPointSeriesData* curveSeriesData =
+            (QwtPointSeriesData*)this->curveAssociatedToLegendItem->data();
+    if (!curveSeriesData)
+        return;
+
+    // Récupération de la liste des points de la courbe
+    QVector<QPointF> curvePoints(curveSeriesData->samples());
+
+    // Calcul de tous les coefficients de l'équation
+    QVector<double> coefficients(polynomialfit(curvePoints, degree));
+
+    // Création de la liste des points de la courbe de tendance
+    for(int i(0); i < curvePoints.count(); ++i)
+    {
+        // Calcul de la nouvelle valeur de y
+        double y(0);
+        for(int j(0); j < coefficients.count(); ++j)
+            y += coefficients.at(j) * qPow(curvePoints.at(i).x(), j);
+
+        curvePoints[i].setY(y);
+    }
+
+    // Création de la courbe
+    QwtPointSeriesData* trendlineSeriesData =
+            new QwtPointSeriesData(curvePoints);
+
+    QPlotCurve* trendlineCurve = new QPlotCurve(
+                this->curveAssociatedToLegendItem->title().text() +
+                tr(" Poly(") + QString::number(degree) + ")",
+                this->curveAssociatedToLegendItem->pen());
+    trendlineCurve->setAxes(this->curveAssociatedToLegendItem->xAxis(),
+                            this->curveAssociatedToLegendItem->yAxis());
+    trendlineCurve->setData(trendlineSeriesData);
+    trendlineCurve->attach(this->curveAssociatedToLegendItem->plot());
+    this->setPlotCurveVisibile(trendlineCurve, true);
+}
+
 void MainWindow::renameCurve(void)
 {
     // if no curve associated to the legend item. This shouldn't happen!
@@ -2533,6 +2585,10 @@ void MainWindow::createPlotLegendContextMenu(void)
     this->legendContextMenu->addAction(
                 QIcon("://color"), tr("Changer la couleur"), this,
                 SLOT(changeCurveColor()));
+    this->legendContextMenu->addAction(
+                QIcon("://trendLine"),
+                tr("Ajouter une courbe de tendance polynomiale"), this,
+                SLOT(createPolynomialTrendline()));
     this->legendContextMenu->addAction(
                 tr("Renommer"), this, SLOT(renameCurve()));
 }

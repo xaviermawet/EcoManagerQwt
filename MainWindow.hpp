@@ -29,6 +29,7 @@
 #include "Utils/QCSVParser.hpp"
 #include "FileParameterDialog.hpp"
 #include "ExportConfigurationDialog.hpp"
+#include "Utils/polifitgsl.hpp"
 
 // Qwt
 #include "Qwt/AdvancedPlot.hpp"
@@ -136,6 +137,7 @@ class MainWindow : public QMainWindow
         void eraseCurve(void);
         void centerOnCurve(void);
         void changeCurveColor(void);
+        void createPolynomialTrendline(void);
         void renameCurve(void);
         void setPlotCurveVisibile(QwtPlotItem* item, bool visible);
         void showLegendContextMenu(QwtPlotItem const* item, QPoint const& pos);
