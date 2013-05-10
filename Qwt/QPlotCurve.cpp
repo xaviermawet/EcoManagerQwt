@@ -14,3 +14,8 @@ QPlotCurve::QPlotCurve(const QwtText &title, const QPen &pen) :
     this->setItemAttribute(QwtPlotItem::Legend); // true default value
     //this->setLegendAttribute(LegendShowLine);
 }
+
+int QPlotCurve::rtti(void) const
+{
+    return Rtti_CustomPlotCurve;
+}

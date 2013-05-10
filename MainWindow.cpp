@@ -547,20 +547,8 @@ void MainWindow::on_actionClearAllData_triggered(void)
     // Erase plot crurves from Qwt plot
     foreach (Plot* plot, this->plots)
     {
-        foreach (QwtPlotItem* item, plot->itemList())
-        {
-            // if the plot item isn't a curve
-            if (item->rtti() != QwtPlotItem::Rtti_PlotCurve)
-                continue;
-
-            // Delete the curve
-            QPlotCurve* curve = (QPlotCurve*) item;
-            if (curve == NULL) // cast failed
-                continue;
-
-            curve->detach();
-            delete curve;
-        }
+        foreach (QwtPlotItem* item, plot->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
+            delete item;
 
         // Refresh the plot to erase curves
         plot->replot();

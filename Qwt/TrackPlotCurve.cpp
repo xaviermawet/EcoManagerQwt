@@ -27,8 +27,15 @@ TrackPlotCurve::~TrackPlotCurve(void)
 {
     qDebug() << "TrackPlotCurve, suppression de : " << this->title().text();
 
+    this->detach();
+
     foreach (TrackPlotCurve* childCurve, this->children)
             delete childCurve;
+}
+
+int TrackPlotCurve::rtti(void) const
+{
+    return Rtti_TrackPlotCurve;
 }
 
 TrackIdentifier TrackPlotCurve::trackIdentifier(void) const

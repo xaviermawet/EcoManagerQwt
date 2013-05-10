@@ -12,6 +12,21 @@ class TrackPlotCurve : public QPlotCurve
     public:
 
         /*!
+           \brief Runtime type information
+
+           RttiValues is used to cast plot items, without
+           having to enable runtime type information of the compiler.
+        */
+        enum RttiValues
+        {
+            /*!
+             * Values >= Rtti_PlotUserItem (1000) are reserved for plot items
+             * not implemented in the Qwt library.
+             */
+            Rtti_TrackPlotCurve = 2001
+        };
+
+        /*!
          * \brief Constructeur
          * \param title Titre donné à la courbe
          * \param trackId Identifiant unique d'un tour. Sera ajouté au titre
@@ -35,6 +50,16 @@ class TrackPlotCurve : public QPlotCurve
          * \brief Destructeur
          */
         virtual ~TrackPlotCurve(void);
+
+        /*!
+         * \brief Return rtti for the specific class represented.
+         *
+         *  The rtti value is useful for environments, where the runtime
+         *  type information is disabled and it is not possible to do
+         *  a dynamic_cast<...>.
+         * \return la valeur du rtti
+         */
+        virtual int rtti(void) const;
 
         /*!
          * \brief Obtenir l'identifiant unique (course + tour) auquel la courbe
