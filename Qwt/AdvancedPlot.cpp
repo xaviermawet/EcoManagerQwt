@@ -64,7 +64,7 @@ void AdvancedPlot::pointsSelected(const QRectF &selectedRect)
 
     qDebug() << "Rectangle de sélection : Left = " << selectedRect.left() << " right = " << selectedRect.right();
 
-    foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
@@ -107,7 +107,7 @@ void AdvancedPlot::pointSelected(const QPointF &point)
 {
     qDebug() << "Point sélectionné = " << point;
 
-    foreach (QwtPlotItem* item, this->itemList(QwtPlotItem::Rtti_PlotCurve))
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
