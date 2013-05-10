@@ -2590,10 +2590,18 @@ void MainWindow::on_actionExportToPDF_triggered(void)
     if (pdfFile.isNull() || pdfFile.isEmpty()) // User canceled
         return;
 
+    // Add the current competition to the plot title just for export
+    QString oldTitle = this->currentPlot()->title().text();
+
+    this->currentPlot()->setTitle(this ->currentCompetition + " : " + oldTitle);
+
     QwtPlotRenderer renderer;
     renderer.setDiscardFlag(QwtPlotRenderer::DiscardBackground);
     renderer.renderDocument(this->currentPlot(), pdfFile,
                             this->currentPlot()->size());
+
+    // Restore title
+    this->currentPlot()->setTitle(oldTitle);
 }
 
 void MainWindow::on_actionChangeFileNames_triggered(void)

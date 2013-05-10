@@ -3,9 +3,6 @@
  *
  * utiliser DataBaseManager::execBatch() et DataBaseManager::execTransaction()
  * partout là ou c'est possible
- *
- * Mettre a jout le titre du grahique (ou des futurs graphiques) pour y intégrer
- * le nom de la compétition courante
  */
 
 #ifndef __MAINWINDOW_HPP__
