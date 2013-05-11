@@ -26,6 +26,8 @@ class Race
 
         void display(void) const;
 
+        void restartLapCounting(void);
+
     protected:
 
         int _id;

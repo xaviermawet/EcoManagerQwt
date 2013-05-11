@@ -359,6 +359,7 @@ void DataBaseImportModule::loadSpeedData(
     QTime lapTimeOrigin(0, 0);
 
     qDebug() << "Périmètre de la roue : " << race.wheelPerimeter();
+    race.restartLapCounting();
     while (!in.atEnd())
     {
         QString currentLine = in.readLine();
@@ -442,7 +443,6 @@ void DataBaseImportModule::loadSpeedData_2(
     quint64 currentTime(0), previousTime(0);
     qreal   currentSpeed(0), previousSpeed(0);
     qreal   currentPos(wheelPerimeter), previousPos(0);
-    double   currentTimeS, previousTimeS;
     QTime lapTimeOrigin(0, 0);
     QString currentLine;
 
@@ -459,14 +459,14 @@ void DataBaseImportModule::loadSpeedData_2(
     // Calcul de la première vitesse (sera previousSpeed une fois ds la boucle)
     currentSpeed = wheelPerimeter * 3600.0 * 1000 * 1000
                                          /
-                            (currentTime - previousTime); // NOTE : vérifier que c'est bien des nanosecondes qu'il faut ici
+                            (currentTime - previousTime);
 
+    race.restartLapCounting();
     while(!in.atEnd())
     {
         previousTime  = currentTime;
         previousSpeed = currentSpeed;
         previousPos   = currentPos;
-        previousTimeS = currentTimeS;
 
         // Lecture du nombre de secondes + nanosecondes écoulées depuis l'époque
         currentLine = in.readLine();
@@ -513,10 +513,7 @@ void DataBaseImportModule::loadSpeedData_2(
         int multipleWheelPerimeter = ceil(((currentSpeed + previousSpeed) / (2 * 3.6)) * deltaTimeSeconds) / wheelPerimeter;
 
         if (multipleWheelPerimeter < 10)
-        {
-            qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
             currentPos = previousPos + multipleWheelPerimeter * wheelPerimeter;
-        }
 
         /* ------------------------------------------------------------------ *
          *                  Calcul de l'accélération en m/s²                  *
@@ -602,6 +599,7 @@ void DataBaseImportModule::loadMegasquirtData(
      *  Boucle de calcul pour le timestamp et la référence du numéro du tour  *
      * ---------------------------------------------------------------------- */
 
+    race.restartLapCounting();
     for(int rowNum(1); rowNum < parser.rowCount(); ++rowNum)
     {
         nsSinceEpoch = parser.row(rowNum).at(0).toULongLong() * 1000000000

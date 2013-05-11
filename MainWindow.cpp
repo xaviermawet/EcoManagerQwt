@@ -2397,10 +2397,12 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
     QwtPointSeriesData* serie2 = new QwtPointSeriesData(points2);
     TrackPlotCurve* trackCurve2 = new TrackPlotCurve("enfant", trackIdentifier, QPen("red"));
     trackCurve2->setData(serie2);
-    trackCurve2->attach(this->megasquirtDataPlot);
-    this->setPlotCurveVisibile(trackCurve2, true);
+    //trackCurve2->attach(this->megasquirtDataPlot);
 
-    //trackCurve2->attachTo(trackCurve);
+    //this->setPlotCurveVisibile(trackCurve2, true);
+
+    qDebug() << "MainWindow : avant de m'attacher ...";
+    trackCurve2->attachTo(trackCurve);
     // =========================================================================
 }
 

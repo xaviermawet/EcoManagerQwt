@@ -119,3 +119,8 @@ void Race::display(void) const
         qDebug() << val.first.toString() << "-" << val.second.toString();
     }
 }
+
+void Race::restartLapCounting(void)
+{
+    this->_lastReturned = 0;
+}
