@@ -174,7 +174,7 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
         qDebug() << "C'est le tout premier point ...";
         QPointF pointF = curvePoints->sample(indiceMin);
         if (dist)
-            *dist = qAbs(pointF.x() - pos.x()) + qAbs(pointF.y() - pos.y());
+            *dist = qSqrt(qPow(pointF.x() - pos.x(), 2) + qPow(pointF.y() - pos.y(), 2));
         return pointF;
     }
 
@@ -183,7 +183,7 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
     {
         QPointF pointF = curvePoints->sample(indiceMax);
         if (dist)
-            *dist = qAbs(pointF.x() - pos.x()) + qAbs(pointF.y() - pos.y());
+            *dist = qSqrt(qPow(pointF.x() - pos.x(), 2) + qPow(pointF.y() - pos.y(), 2));
         return pointF;
     }
 
