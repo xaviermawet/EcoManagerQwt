@@ -544,10 +544,20 @@ void MainWindow::on_actionClearAllData_triggered(void)
         this->ui->sectorView->update();
     }
 
-    // Erase plot crurves from Qwt plot
+    // Erase track plot crurves from Qwt plot
     foreach (Plot* plot, this->plots)
     {
         foreach (QwtPlotItem* item, plot->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
+            delete item;
+
+        // Refresh the plot to erase curves
+        plot->replot();
+    }
+
+    // Erase plot crurves from Qwt plot
+    foreach (Plot* plot, this->plots)
+    {
+        foreach (QwtPlotItem* item, plot->itemList(QPlotCurve::Rtti_CustomPlotCurve))
             delete item;
 
         // Refresh the plot to erase curves

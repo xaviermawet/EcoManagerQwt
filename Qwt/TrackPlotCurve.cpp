@@ -159,9 +159,6 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
     while (indiceMin <= indiceMax)
     {
         unsigned int mid = (indiceMin + indiceMax) / 2;
-
-        qDebug() << "mid = " << mid << " min = " << indiceMin << " max = " << indiceMax;
-
         if (curvePoints->sample(mid).x() < pos.x())
             indiceMin = mid + 1;
         else
@@ -171,7 +168,6 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
     // Si c'est le premier point
     if (indiceMin == 0)
     {
-        qDebug() << "C'est le tout premier point ...";
         QPointF pointF = curvePoints->sample(indiceMin);
         if (dist)
             *dist = qSqrt(qPow(pointF.x() - pos.x(), 2) + qPow(pointF.y() - pos.y(), 2));
@@ -181,7 +177,6 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
     // Si c'est le dernier point
     if (indiceMin >= (int)curvePoints->size())
     {
-        qDebug() << "C'est le tout dernier point ...";
         QPointF pointF = curvePoints->sample(indiceMax);
         if (dist)
             *dist = qSqrt(qPow(pointF.x() - pos.x(), 2) + qPow(pointF.y() - pos.y(), 2));
@@ -190,16 +185,11 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
 
     /* Deux points possibles --> choix du plus proche on fonction de leur
      * distance par rapport au point initial (pointF du clic */
-    qDebug() << "indiceMin = " << indiceMin << " indiceMax = " << indiceMax;
-
     QPointF pointF1 = curvePoints->sample(indiceMin); // le point après la pos
     QPointF pointF2 = curvePoints->sample(indiceMax); // Le point avant la pos
 
     double distF1 = qSqrt(qPow(pointF1.x() - pos.x(), 2) + qPow(pointF1.y() - pos.y(), 2));
     double distF2 = qSqrt(qPow(pointF2.x() - pos.x(), 2) + qPow(pointF2.y() - pos.y(), 2));
-
-    qDebug() << "dist point avant = " << distF2;
-    qDebug() << "dist point après = " << distF1;
 
     if (distF1 < distF2)
     {
@@ -211,17 +201,6 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
     if (dist)
         *dist = distF2;
     return pointF2;
-
-//    if (qAbs(pointF1.x() - pos.x()) < qAbs(pointF2.x() - pos.x()))
-//    {
-//        if (dist != NULL)
-//            *dist = qAbs(pointF1.x() - pos.x());
-//        return pointF1;
-//    }
-
-//    if (dist!= NULL)
-//        *dist = qAbs(pointF2.x() - pos.x());
-//    return pointF2;
 }
 
 QPointF TrackPlotCurve::closestPointFOfX(const qreal &posX, double *dist) const

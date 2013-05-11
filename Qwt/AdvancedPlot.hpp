@@ -48,12 +48,15 @@ class AdvancedPlot : public Plot
 
     signals:
 
-        void intervalSelected(float minX, float maxX, QVariant trackId);
+        void pointSelected(float absciss, const QVariant& idTrack);
+        void intervalSelected(float firstAbsciss, float secondAbsciss,
+                              const QVariant& idTrack);
 
     protected slots:
 
-        void pointsSelected(QRectF const& selectedRect);
-        void pointSelected(QPointF const& point);
+        void selectPoint(QPointF const& pos);
+        void selectPoints(QPointF const& pos);
+        void selectInterval(QRectF const& selectedRect);
 
     protected:
 
