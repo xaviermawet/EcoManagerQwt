@@ -116,6 +116,6 @@ void AdvancedPlot::pointSelected(const QPointF &point)
             continue;
 
         qDebug() << "courbe = " << curve->title().text()
-                 << " Point le plus proche = " << curve->closestPointF(point, NULL);
+                 << " Point le plus proche = " << curve->closestPointFOfX(point.x(), NULL);
     }
 }
