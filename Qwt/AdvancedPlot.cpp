@@ -54,7 +54,7 @@ void AdvancedPlot::selectPoint(const QPointF &pos)
     QPointF closestPoint;
     TrackPlotCurve* curve = NULL;
 
-    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
     {
         TrackPlotCurve* tmpCurve = (TrackPlotCurve*) item;
 
@@ -94,7 +94,7 @@ void AdvancedPlot::selectPoints(const QPointF &pos)
 {
     qDebug() << "On cherche les points les plus proche de la valeur en abscisse de la position du curseur ...";
 
-    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
@@ -132,7 +132,7 @@ void AdvancedPlot::selectInterval(const QRectF &selectedRect)
 
     qDebug() << "Rectangle de sélection : Left = " << selectedRect.left() << " right = " << selectedRect.right();
 
-    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 

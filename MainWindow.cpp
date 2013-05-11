@@ -544,10 +544,10 @@ void MainWindow::on_actionClearAllData_triggered(void)
         this->ui->sectorView->update();
     }
 
-    // Erase track plot crurves from Qwt plot
+    // Erase parent track plot crurves from Qwt plot
     foreach (Plot* plot, this->plots)
     {
-        foreach (QwtPlotItem* item, plot->itemList(TrackPlotCurve::Rtti_TrackPlotCurve))
+        foreach (QwtPlotItem* item, plot->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
             delete item;
 
         // Refresh the plot to erase curves
@@ -2342,11 +2342,23 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
         megasquirtCurvePoints << QPointF(query.value(0).toFloat() / 1000,
                                          query.value(1).toFloat());
 
+    if(megasquirtCurvePoints.count() == 0)
+    {
+        QMessageBox::information(
+                    this, tr("Action impossible"), tr("Aucune donnée ") +
+                    this->ui->megaSquirtComboBox->currentText() +
+                    tr(" associée au tour ") +
+                    trackIdentifier["lap"].toString() + tr(" de la course ") +
+                    trackIdentifier["race_num"].toString());
+        return;
+    }
+
     QPlotCurve* curve = this->megasquirtDataPlot->addCurve(
                 tr("Course ") + trackIdentifier["race_num"].toString() +
                 tr(" tour ") + trackIdentifier["lap"].toString() +
                 " " + this->ui->megaSquirtComboBox->currentText(),
                 megasquirtCurvePoints);
+
     this->setPlotCurveVisibile(curve, true);
 
     // =========================================================================
@@ -2549,6 +2561,9 @@ void MainWindow::renameCurve(void)
 
 void MainWindow::setPlotCurveVisibile(QwtPlotItem* item, bool visible)
 {
+    if (item == NULL)
+        return;
+
     item->setVisible(visible);
     QWidget* w = item->plot()->legend()->find(item);
     if ( w && w->inherits("QwtLegendItem") )

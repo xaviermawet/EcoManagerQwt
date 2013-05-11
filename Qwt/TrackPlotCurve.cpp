@@ -35,7 +35,11 @@ TrackPlotCurve::~TrackPlotCurve(void)
 
 int TrackPlotCurve::rtti(void) const
 {
-    return Rtti_TrackPlotCurve;
+    // If it's a child
+    if(this->parentCurve)
+        return Rtti_TrackPlotCurveChild;
+
+    return Rtti_TrackPlotCurveParent;
 }
 
 TrackIdentifier TrackPlotCurve::trackIdentifier(void) const

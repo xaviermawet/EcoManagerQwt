@@ -23,7 +23,8 @@ class TrackPlotCurve : public QPlotCurve
              * Values >= Rtti_PlotUserItem (1000) are reserved for plot items
              * not implemented in the Qwt library.
              */
-            Rtti_TrackPlotCurve = 2001
+            Rtti_TrackPlotCurveParent = 2001,
+            Rtti_TrackPlotCurveChild = 2002
         };
 
         /*!
