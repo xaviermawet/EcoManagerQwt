@@ -150,9 +150,11 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
     // Récupérer la liste des points
     const QwtSeriesData<QPointF>* curvePoints = this->data();
 
-    // Effectuer une recherche dichotomique sur la valeur en x
-    unsigned int indiceMin(0);
-    unsigned int indiceMax(curvePoints->size() - 1);
+    /* On suppose que tous les points sont triés par ordre croissant suivant
+     * leur valeur en abscisse
+     * --> Effectuer une recherche dichotomique sur la valeur en x */
+    int indiceMin(0);
+    int indiceMax(curvePoints->size() - 1);
 
     while (indiceMin <= indiceMax)
     {
@@ -166,8 +168,18 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
             indiceMax = mid - 1;
     }
 
-    // Qu'un point possible
+    // Si c'est le premier point
     if (indiceMin == 0)
+    {
+        qDebug() << "C'est le tout premier point ...";
+        QPointF pointF = curvePoints->sample(indiceMin);
+        if (dist)
+            *dist = qAbs(pointF.x() - pos.x()) + qAbs(pointF.y() - pos.y());
+        return pointF;
+    }
+
+    // Si c'est le dernier point
+    if (indiceMin >= curvePoints->size())
     {
         QPointF pointF = curvePoints->sample(indiceMax);
         if (dist)
@@ -175,14 +187,15 @@ QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
         return pointF;
     }
 
-    /* Deux points possibles --> choix du plus proche on fonction
-     * des différences de position en X */
+    /* Deux points possibles --> choix du plus proche on fonction de leur
+     * distance par rapport au point initial (pointF du clic */
     qDebug() << "indiceMin = " << indiceMin << " indiceMax = " << indiceMax;
+
     QPointF pointF1 = curvePoints->sample(indiceMin); // le point après la pos
     QPointF pointF2 = curvePoints->sample(indiceMax); // Le point avant la pos
 
-    double distF1 = qAbs(pointF1.x() - pos.x()) + qAbs(pointF1.y() - pos.y());
-    double distF2 = qAbs(pointF2.x() - pos.x()) + qAbs(pointF2.y() - pos.y());
+    double distF1 = qSqrt(qPow(pointF1.x() - pos.x(), 2) + qPow(pointF1.y() - pos.y(), 2));
+    double distF2 = qSqrt(qPow(pointF2.x() - pos.x(), 2) + qPow(pointF2.y() - pos.y(), 2));
 
     qDebug() << "dist point avant = " << distF2;
     qDebug() << "dist point après = " << distF1;
