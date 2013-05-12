@@ -300,19 +300,6 @@ void MainWindow::on_raceView_pressed(const QModelIndex& index)
                  << race_num << " race id = "
                  << ref_race << " lap = " << ref_lap;
     }
-
-    // ---------------------------------------------------------------------------------------------------------------------------------
-    // NOTE : ce qui suit est un test et doit etre supprimé par la suite
-    // ---------------------------------------------------------------------------------------------------------------------------------
-
-    if(this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
-        qDebug() << "C'est un tour !!!";
-
-    if(this->raceViewItemidentifier.canConvert<int>())
-        qDebug() << "C'est un course !!!";
-
-    if(this->raceViewItemidentifier.canConvert<QDate>())
-        qDebug() << "C'est une date !!!";
 }
 
 /* Event that occured when the user double click on a race tree view item
@@ -1589,9 +1576,9 @@ void MainWindow::displayDataLap(void)
     int ref_race = trackIdentifier["race"].toInt();
     int ref_lap  = trackIdentifier["lap"].toInt();
 
-    /* ------------------------------------------------------------------ *
-         *                         Populate map scene                         *
-         * ------------------------------------------------------------------ */
+    /* ---------------------------------------------------------------------- *
+     *                           Populate map scene                           *
+     * ---------------------------------------------------------------------- */
     QSqlQuery posQuery("select longitude, latitude, timestamp from POSITION where ref_lap_race = ? and ref_lap_num = ? order by timestamp");
     posQuery.addBindValue(ref_race);
     posQuery.addBindValue(ref_lap);
@@ -1621,200 +1608,45 @@ void MainWindow::displayDataLap(void)
     if (!this->mapFrame->scene()->hasSectors())
         this->loadSectors(this->currentCompetition);
 
-    /* ------------------------------------------------------------------ *
-         *         Populate plot frames (play the role of plot scene )        *
-         * ------------------------------------------------------------------ */
-    QSqlQuery speedQuery;
-    speedQuery.prepare("select timestamp, value from SPEED where ref_lap_race = ? and ref_lap_num = ? order by timestamp");
-    speedQuery.addBindValue(ref_race);
-    speedQuery.addBindValue(ref_lap);
-
-    if (speedQuery.exec())
+    /* ---------------------------------------------------------------------- *
+     *                          Populate pots scene                           *
+     * ---------------------------------------------------------------------- */
+    try
     {
-        QList<IndexedPosition> distSpeedPoints; // liste des points de la vitesse par rapport à la distance
-        QList<IndexedPosition> timeSpeedPoints; // Liste des points de la vitesse par rapport au temps
-        //            QList<IndexedPosition> distSpeedPoints2; // liste des points de la vitesse par rapport à la distance
-        //            QList<IndexedPosition> timeSpeedPoints2; // Liste des points de la vitesse par rapport au temps
-        QList<IndexedPosition> dAccPoints;      // Liste des points de l'accélération par rapport à la distance
-        QList<IndexedPosition> tAccPoints;      // Liste des points de l'accélération par rapport au temps
-        QPointF lastSpeed(0,0); // Modifié
+        // Vérifie que mes courbes sont les memes que JB
+        QVariantList param;
+        param << ref_race << ref_lap;
+        QSqlQuery test = DataBaseManager::execQuery(
+                    "SELECT timestamp, speed, distance "
+                    "FROM datarace "
+                    "WHERE ref_lap_race = ? AND ref_lap_num = ? ORDER BY timestamp",
+                    param);
 
-        double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
-        int count = 0;
-        double lastPos = wheelPerimeter;
+        QVector<QPointF> distanceSpeedPoints;
+        QVector<QPointF> timeSpeedPoints;
 
-        while (speedQuery.next())
+        while(test.next())
         {
-            //qDebug() << "timestamp = " << speedQuery.value(0).toFloat();
+            distanceSpeedPoints << QPointF(test.value(2).toReal(),
+                                           test.value(1).toReal());
 
-            double time = speedQuery.value(0).toFloat() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
-            double speed = speedQuery.value(1).toDouble();
-            double pos;
-
-            IndexedPosition dPoint, tPoint;
-            dPoint.setIndex(time);
-            tPoint.setIndex(time);
-
-            //                if (count > 0)
-            //                {
-            qreal diff = (speed - lastSpeed.y()) / 3.6; // vitesse en m/s
-            qreal acc = diff / (time - lastSpeed.x());
-
-            //                    if (qAbs(acc) < 2 && (time - lastSpeed.x()) < 1)
-            //                    {
-            int multipleWheelPerimeter = ceil(((speed + lastSpeed.y()) / (2 * 3.6)) * (time - lastSpeed.x())) / wheelPerimeter;
-            pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
-
-            //qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
-
-            dPoint.setX(pos);
-            dPoint.setY(speed);
-            lastPos = pos;
-
-
-
-            tPoint.setX(time);
-            tPoint.setY(speed);
-            timeSpeedPoints << tPoint;
-
-            dAccPoints << IndexedPosition((pos + lastPos) / 2, acc, time);
-            tAccPoints << IndexedPosition((lastSpeed.x() + time) / 2, acc, time);
-            //                    }
-            //                    else
-            //                    {
-            //                        qDebug() << "count : " << count;
-            //                        dPoint.setX(lastPos);
-            //                        dPoint.setY(lastSpeed.y());
-            //                        tPoint.setX(time);
-            //                        tPoint.setY(lastSpeed.y());
-            //                        timeSpeedPoints << tPoint;
-            //                    }
-            //                }
-            //                else
-            //                {
-            //                    dPoint.setX(0);
-            //                    dPoint.setY(speed);
-            //                }
-
-            distSpeedPoints << dPoint;
-            lastSpeed = QPointF(time, speed);
-            count++;
+            timeSpeedPoints << QPointF(test.value(0).toReal() / 1000,
+                                       test.value(1).toReal());
         }
 
-        /*
-            QList<QPointF> lineZero;
+        TrackPlotCurve* curve;
+        curve = this->distancePlotFrame->addCurve(
+                    "", distanceSpeedPoints, trackIdentifier);
+        this->setPlotCurveVisibile(curve, true);
 
-            if (! dAccPoints.isEmpty()) {
-                lineZero << QPointF(dAccPoints.first().x(), 50) << QPointF(dAccPoints.last().x(), 50);
-                PlotCurve* dc = distancePlotFrame->addCurve(dAccPoints, trackIdentifier);
-                dc->translate(0, 50);
-                dc->scale(1, 5);
-                distancePlotFrame->addCurve(lineZero);
-
-                lineZero.clear();
-                lineZero << QPointF(tAccPoints.first().x(), 50) << QPointF(tAccPoints.last().x(), 50);
-                PlotCurve* tc = timePlotFrame->addCurve(tAccPoints, trackIdentifier);
-                tc->translate(0, 50);
-                tc->scale(1, 5);
-                timePlotFrame->addCurve(lineZero);
-            }
-*/
-
-        //            QList<QList<QVariant> > lapdata;
-        //            this->getAllDataFromSpeed(trackIdentifier, 0, 10000, lapdata);
-
-        //            for(int i(0); i < lapdata.count(); ++i)
-        //            {
-        //                QList<QVariant> data = lapdata.at(i);
-
-        //                IndexedPosition dPoint, tPoint;
-        //                dPoint.setIndex(data.at(1).toFloat()); // Tps (s)
-        //                tPoint.setIndex(data.at(1).toFloat()); // Tps (s)
-
-        //                dPoint.setX(data.at(2).toFloat()); // Dist (m)
-        //                dPoint.setY(data.at(3).toFloat() + 1); // V (km\h)
-
-        //                tPoint.setX(data.at(1).toFloat()); // Tps (s)
-        //                tPoint.setY(data.at(3).toFloat() + 1); // V (km\h)
-
-        //                distSpeedPoints2 << dPoint;
-        //                timeSpeedPoints2 << tPoint;
-        //            }
-
-        //this->distancePlotFrame->scene()->addCurve(distSpeedPoints, trackIdentifier);//this->distancePlotFrame->addCurve(distSpeedPoints, trackIdentifier);
-//        this->timePlotFrame->scene()->addCurve(timeSpeedPoints, trackIdentifier);//this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
-        //            this->distancePlotFrame->scene()->addCurve(distSpeedPoints2, trackIdentifier);//this->distancePlotFrame->addCurve(distSpeedPoints, trackIdentifier);
-        //            this->timePlotFrame->scene()->addCurve(timeSpeedPoints2, trackIdentifier);//this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
-
-        //            bool accelerationPositiv = false;
-
-        //            foreach (const IndexedPosition& ip, dAccPoints) {
-        //                qreal value = (ip.y() - 50) / 5;
-        //                qDebug() << value;
-        //                if (value > 0 && ! accelerationPositiv) {
-        //                    qDebug() << "+ transition found";
-        //                    mapFrame->scene()->fixSymbol(ip.index(), QColor(0, 255, 0, 150), trackIdentifier);
-        //                    accelerationPositiv = true;
-        //                } else if (value < 0 && accelerationPositiv) {
-        //                    qDebug() << "- transition found";
-        //                    mapFrame->scene()->fixSymbol(ip.index(), QColor(203, 0, 0, 150), trackIdentifier);
-        //                    accelerationPositiv = false;
-        //                }
-        //            }
-        //            if (tAccPoints.size() > 2) {
-        //                CurvePathBuilder builder(tAccPoints.at(0), tAccPoints.at(1), 1);
-
-        //                for (int i = 2; i < tAccPoints.size(); i++)
-        //                    builder.append(tAccPoints.at(i));
-        //                timePlotFrame->scene()->addPath(builder.exBound());
-        //            }
-
-        /*
-            QList<QVariant> raceInformation;
-            for (int i(0); i < tAccPoints.count(); i++)
-            {
-                raceInformation.clear();
-
-                // ajout des informations
-                raceInformation.append("Course " + QString::number(ref_race) + " tour " + QString::number(ref_lap)); // course
-                raceInformation.append(timeSpeedPoints.at(i).index()); // tps 1
-                raceInformation.append(timeSpeedPoints.at(i).index()); // tps 2
-                raceInformation.append(distSpeedPoints.at(i).x()); // distance
-                raceInformation.append(timeSpeedPoints.at(i).y()); // vitesse
-                raceInformation.append(tAccPoints.at(i).y()); // Acceleration
-                raceInformation.append("RPM"); // RPM
-                raceInformation.append("PW"); // PW
-
-                this->raceInformationTableModel->addRaceInformation(raceInformation);
-            }
-            */
-
-        qDebug() << "Nb lignes retournées par la requete = " << count;
-        qDebug() << "distSpeedPoints.count() = " << distSpeedPoints.count();
-        qDebug() << "timeSpeedPoints.count() = " << timeSpeedPoints.count();
-        qDebug() << "dAccPoints.count() = " << dAccPoints.count();
-        qDebug() << "tAccPoints.count() = " << tAccPoints.count();
-
-        //            QList<QVariant> raceInformation;
-        //            for (int i(0); i < tAccPoints.count(); i++) // Environ 1000 éléments
-        //            {
-        //                raceInformation.clear();
-
-        //                // ajout des informations
-        //                raceInformation.append(QVariant());
-        //                raceInformation.append(timeSpeedPoints.at(i).index()); // tps 1
-        //                raceInformation.append(timeSpeedPoints.at(i).index()); // tps 2
-        //                raceInformation.append(distSpeedPoints.at(i).x()); // distance
-        //                raceInformation.append(timeSpeedPoints.at(i).y()); // vitesse
-        //                raceInformation.append(tAccPoints.at(i).y()); // Acceleration
-        //                raceInformation.append("RPM"); // RPM
-        //                raceInformation.append("PW");  // PW
-
-        //                this->raceInformationTableModel->addRaceInformation(
-        //                            ref_race, ref_lap, raceInformation);
-        //            }
-
-        //            this->ui->raceTable->expandAll();
+        curve = this->timePlotFrame->addCurve(
+                    "", timeSpeedPoints, trackIdentifier);
+        this->setPlotCurveVisibile(curve, true);
+    }
+    catch(QException const& ex)
+    {
+        QMessageBox::warning(
+                    this, tr("Impossible d'afficher les courbes"), ex.what());
     }
 }
 

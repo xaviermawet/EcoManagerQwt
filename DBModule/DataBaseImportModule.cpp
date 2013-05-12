@@ -489,6 +489,7 @@ void DataBaseImportModule::loadSpeedData_2(
         {
             previousLap = currentLap;
             lapTimeOrigin = race.lap(currentLap).first;
+            previousPos = 0;
         }
 
         /* ------------------------------------------------------------------ *
