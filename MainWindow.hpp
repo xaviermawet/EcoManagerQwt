@@ -50,7 +50,7 @@ class MainWindow;
 }
 
 typedef QMap<QString, QVariant> TrackIdentifier;
-typedef QList<Plot*> PlotList;
+typedef QList<AdvancedPlot*> PlotList;
 
 class MainWindow : public QMainWindow
 {

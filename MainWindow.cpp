@@ -539,24 +539,8 @@ void MainWindow::on_actionClearAllData_triggered(void)
     }
 
     // Erase parent track plot crurves from Qwt plot
-    foreach (Plot* plot, this->plots)
-    {
-        foreach (QwtPlotItem* item, plot->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
-            delete item;
-
-        // Refresh the plot to erase curves
-        plot->replot();
-    }
-
-    // Erase plot crurves from Qwt plot
-    foreach (Plot* plot, this->plots)
-    {
-        foreach (QwtPlotItem* item, plot->itemList(QPlotCurve::Rtti_CustomPlotCurve))
-            delete item;
-
-        // Refresh the plot to erase curves
-        plot->replot();
-    }
+    foreach (AdvancedPlot* plot, this->plots)
+        plot->clearcurves();
 }
 
 void MainWindow::on_raceTable_customContextMenuRequested(const QPoint &pos)

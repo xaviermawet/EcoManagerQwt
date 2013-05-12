@@ -24,9 +24,7 @@ AdvancedPlot::~AdvancedPlot(void)
 {
     qDebug() << "AdvancedPlot (" << this->objectName() << ") Début destructeur";
 
-    // Supprimer les courbes qui on des enfants
-    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
-        delete item;
+    this->clearcurves();
 
     qDebug() << "AdvancedPlot (" << this->objectName() << ") fin destructeur";
 }
@@ -56,6 +54,38 @@ TrackPlotCurve* AdvancedPlot::addCurve(const QString &title,
     curve->attach(this);
 
     return curve;
+}
+
+void AdvancedPlot::clearcurves(void)
+{
+    // Supprime les courbes associées à un tour
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
+        delete item;
+
+    // Supprime les courbes normales
+    foreach (QwtPlotItem* item, this->itemList(QPlotCurve::Rtti_CustomPlotCurve))
+        delete item;
+
+    // Rafraichi le graphique
+    this->replot();
+}
+
+void AdvancedPlot::changeForegroundColor(void)
+{
+    // TODO
+}
+
+void AdvancedPlot::globalZoom(void)
+{
+    QRectF rect;
+
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
+        rect = rect.united(item->boundingRect());
+
+    foreach (QwtPlotItem* item, this->itemList(QPlotCurve::Rtti_CustomPlotCurve))
+        rect = rect.united(item->boundingRect());
+
+    this->zoom(rect);
 }
 
 void AdvancedPlot::selectPoint(const QPointF &pos)

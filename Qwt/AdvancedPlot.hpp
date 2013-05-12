@@ -56,6 +56,12 @@ class AdvancedPlot : public Plot
         void intervalSelected(float firstAbsciss, float secondAbsciss,
                               const QVariant& idTrack);
 
+    public slots:
+
+        void clearcurves(void);
+        void changeForegroundColor(void);
+        void globalZoom(void);
+
     protected slots:
 
         void selectPoint(QPointF const& pos);
