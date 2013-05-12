@@ -1641,6 +1641,14 @@ void MainWindow::displayDataLap(void)
 
         curve = this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
         this->setPlotCurveVisibile(curve, true);
+
+        // test
+        timeSpeedPoints = timeSpeedPoints.mid(10, 20);
+        QPen pen = curve->pen();
+        pen.setWidth(5);
+        TrackPlotCurve* child = new TrackPlotCurve("test", trackIdentifier, pen, curve);
+        QwtPointSeriesData* serie2 = new QwtPointSeriesData(timeSpeedPoints);
+        child->setData(serie2);
     }
     catch(QException const& ex)
     {
@@ -2318,7 +2326,7 @@ void MainWindow::changeCurveColor(void)
 
     // If the user cancels the dialog, an invalid color is returned
     if (newColor.isValid())
-        this->curveAssociatedToLegendItem->setPen(QPen(newColor));
+        this->curveAssociatedToLegendItem->setColor(newColor);
 }
 
 void MainWindow::createPolynomialTrendline(void)

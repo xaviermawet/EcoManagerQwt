@@ -19,3 +19,14 @@ int QPlotCurve::rtti(void) const
 {
     return Rtti_CustomPlotCurve;
 }
+
+void QPlotCurve::setColor(const QColor &color)
+{
+    if (!color.isValid())
+        return;
+
+    QPen pen = this->pen();
+    pen.setColor(color);
+
+    this->setPen(pen);
+}

@@ -44,6 +44,26 @@ int TrackPlotCurve::rtti(void) const
     return Rtti_TrackPlotCurveParent;
 }
 
+void TrackPlotCurve::setColor(const QColor &color)
+{
+    qDebug() << "Changement de couleur ....";
+
+    // change la couleur de la courbe
+    QPlotCurve::setColor(color);
+
+    foreach (TrackPlotCurve* curve, this->children)
+        curve->setColor(color);
+
+    // Change la couleur des points
+    const QwtSymbol* symbol = this->symbol();
+    if (!symbol)
+        return;
+
+    if (this->parentCurve == NULL)
+        this->setSymbol(new QwtSymbol(
+                            QwtSymbol::Ellipse, Qt::gray, QPen(color), QSize(2, 2)));
+}
+
 TrackIdentifier TrackPlotCurve::trackIdentifier(void) const
 {
     return this->_trackIdentifier;
@@ -94,6 +114,8 @@ void TrackPlotCurve::attachChild(TrackPlotCurve* child)
     child->attach(this->plot());
 
     child->_trackIdentifier = this->_trackIdentifier;
+
+    child->setSymbol(NULL);
 }
 
 void TrackPlotCurve::attachTo(TrackPlotCurve* parent)

@@ -51,6 +51,8 @@ class QPlotCurve : public QwtPlotCurve
          * \return la valeur du rtti
          */
         virtual int rtti(void) const;
+
+        virtual void setColor(const QColor& color);
 };
 
 #endif /* __QPLOTCURVE_HPP__ */
