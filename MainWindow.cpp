@@ -478,12 +478,12 @@ void MainWindow::on_actionConfiguredLayout4_triggered(void)
 
 void MainWindow::on_actionLapDataEraseTable_triggered(void)
 {
-    // Erase all highlited point or sector on the mapping view
-    this->mapFrame->scene()->clearSceneSelection();
+//    // Erase all highlited point or sector on the mapping view
+//    this->mapFrame->scene()->clearSceneSelection();
 
-    // Erase all highlited point on the mapping view
-//    this->distancePlotFrame->scene()->clearPlotSelection();
-//    this->timePlotFrame->scene()->clearPlotSelection();
+//    // Erase all highlited point on the mapping view
+//    this->distancePlotFrame->clearSecondaryCurves();
+//    this->timePlotFrame->clearSecondaryCurves();
 
     // Remove laps information from the table
     this->raceInformationTableModel->removeRows(
@@ -505,10 +505,6 @@ void MainWindow::on_actionClearAllData_triggered(void)
     // Clear the tracks of the mapping view
     this->mapFrame->scene()->clearTracks();
 
-    // clear the curves of the graphic views
-//    this->distancePlotFrame->scene()->clearCurves();
-//    this->timePlotFrame->scene()->clearCurves();
-
     // Clear the list of all tracks currently displayed
     this->currentTracksDisplayed.clear();
 
@@ -525,7 +521,7 @@ void MainWindow::on_actionClearAllData_triggered(void)
         this->ui->sectorView->update();
     }
 
-    // Erase parent track plot crurves from Qwt plot
+    // clear the curves of the graphic views
     foreach (AdvancedPlot* plot, this->plots)
         plot->clearcurves();
 }
@@ -2437,6 +2433,12 @@ void MainWindow::showLegendContextMenu(const QwtPlotItem* item,
     this->curveAssociatedToLegendItem = (QPlotCurve*) item;
     if(!this->curveAssociatedToLegendItem)
         return;
+
+    if (item->rtti() == TrackPlotCurve::Rtti_TrackPlotCurveParent)
+        qDebug() << "On peut ajouter des options au menu ...";
+    else
+        qDebug() << "Pas de chance, c'est une courbe normale";
+
 
     // Display custom contextual menu
     this->legendContextMenu->exec(pos);

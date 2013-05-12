@@ -66,9 +66,27 @@ void AdvancedPlot::clearcurves(void)
     Plot::clearcurves();
 }
 
+void AdvancedPlot::clearSecondaryCurves(void)
+{
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
+    {
+        TrackPlotCurve* curve = (TrackPlotCurve*) item;
+
+        if(!curve)
+            continue;
+
+        curve->clearChildren();
+    }
+
+    this->replot();
+}
+
 void AdvancedPlot::globalZoom(void)
 {
     QRectF globalRect;
+
+    if (this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent).count() == 0)
+        return;
 
     foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
         globalRect = globalRect.united(item->boundingRect());

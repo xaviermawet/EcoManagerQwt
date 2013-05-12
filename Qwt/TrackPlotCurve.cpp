@@ -31,8 +31,7 @@ TrackPlotCurve::~TrackPlotCurve(void)
 
     this->detach();
 
-    foreach (TrackPlotCurve* childCurve, this->children)
-            delete childCurve;
+    this->clearChildren();
 }
 
 int TrackPlotCurve::rtti(void) const
@@ -151,6 +150,12 @@ bool TrackPlotCurve::removeChild(TrackPlotCurve * const &child)
     child->setItemAttribute(Legend, true);
 
     return true;
+}
+
+void TrackPlotCurve::clearChildren(void)
+{
+    while(!this->children.isEmpty())
+        delete this->children.takeFirst();
 }
 
 void TrackPlotCurve::attach(QwtPlot *plot)

@@ -115,6 +115,8 @@ class TrackPlotCurve : public QPlotCurve
          */
         bool removeChild(TrackPlotCurve* const& child);
 
+        void clearChildren(void);
+
         /*!
          * \brief Attache la courbe courante et tous ses enfants à un plot
          * \param plot graphique auquel attacher la courbe courante et ses

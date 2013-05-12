@@ -58,8 +58,9 @@ class AdvancedPlot : public Plot
 
     public slots:
 
-        void clearcurves(void);
-        void globalZoom(void);
+        virtual void clearcurves(void);
+        virtual void clearSecondaryCurves(void);
+        virtual void globalZoom(void);
 
     protected slots:
 
