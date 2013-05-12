@@ -1636,11 +1636,10 @@ void MainWindow::displayDataLap(void)
 
         TrackPlotCurve* curve;
         curve = this->distancePlotFrame->addCurve(
-                    "", distanceSpeedPoints, trackIdentifier);
+                    distanceSpeedPoints, trackIdentifier);
         this->setPlotCurveVisibile(curve, true);
 
-        curve = this->timePlotFrame->addCurve(
-                    "", timeSpeedPoints, trackIdentifier);
+        curve = this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
         this->setPlotCurveVisibile(curve, true);
     }
     catch(QException const& ex)
@@ -2150,7 +2149,7 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
                              trackIdentifier["race_num"].toString());
 
         TrackPlotCurve* curve = this->megasquirtDataPlot->addCurve(
-                    MSParameter, megasquirtCurvePoints, trackIdentifier);
+                    megasquirtCurvePoints, trackIdentifier, MSParameter);
         this->setPlotCurveVisibile(curve, true);
     }
     catch(QException const& ex)

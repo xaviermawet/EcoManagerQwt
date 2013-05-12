@@ -46,9 +46,9 @@ class AdvancedPlot : public Plot
         virtual QPlotCurve* addCurve(QString const& title,
                                      QVector<QPointF> const& points);
 
-        virtual TrackPlotCurve* addCurve(QString const& title,
-                                         QVector<QPointF> const& points,
-                                         TrackIdentifier const& trackId);
+        virtual TrackPlotCurve* addCurve(QVector<QPointF> const& points,
+                                         TrackIdentifier const& trackId,
+                                         QString const& title = QString());
 
     signals:
 

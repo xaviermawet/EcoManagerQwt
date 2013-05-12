@@ -37,9 +37,9 @@ QPlotCurve* AdvancedPlot::addCurve(const QString& title,
                title, points,this->colorPicker.light(this->itemList().count()));
 }
 
-TrackPlotCurve* AdvancedPlot::addCurve(const QString &title,
-                                       const QVector<QPointF> &points,
-                                       const TrackIdentifier &trackId)
+TrackPlotCurve* AdvancedPlot::addCurve(QVector<QPointF> const& points,
+                                       TrackIdentifier const& trackId,
+                                       QString const& title)
 {
     QwtPointSeriesData* serieData = new QwtPointSeriesData(points);
 
