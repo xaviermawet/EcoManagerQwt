@@ -218,6 +218,9 @@ void Plot::globalZoom(void)
 {
     QRectF globalRect;
 
+    if (this->itemList(QPlotCurve::Rtti_CustomPlotCurve).count() == 0)
+        return;
+
     foreach(QwtPlotItem* item, this->itemList(QPlotCurve::Rtti_CustomPlotCurve))
         globalRect = globalRect.united(item->boundingRect());
 
