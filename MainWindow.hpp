@@ -149,6 +149,9 @@ class MainWindow : public QMainWindow
         void on_actionReduceAccuracy_triggered(void);
 
         void on_actionExportToPDF_triggered(void);
+        void on_actionClearAllCurves_triggered(void);
+        void on_actionGlobalPlotCurvesView_triggered(void);
+
         void on_actionChangeFileNames_triggered(void);
 
     private:

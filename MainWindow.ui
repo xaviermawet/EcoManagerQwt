@@ -433,6 +433,8 @@
      <addaction name="actionReduceAccuracy"/>
      <addaction name="separator"/>
      <addaction name="actionExportToPDF"/>
+     <addaction name="actionClearAllCurves"/>
+     <addaction name="actionGlobalPlotCurvesView"/>
     </widget>
     <addaction name="menuEditRaceView"/>
     <addaction name="menuLapDataTable"/>
@@ -1038,6 +1040,36 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionClearAllCurves">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/eraser.png</normaloff>:/Resources/Icons/eraser.png</iconset>
+   </property>
+   <property name="text">
+    <string>Effacer toutes les courbes</string>
+   </property>
+   <property name="toolTip">
+    <string>Effacer toutes les courbes du graphique courant</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionGlobalPlotCurvesView">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/resize.png</normaloff>:/Resources/Icons/resize.png</iconset>
+   </property>
+   <property name="text">
+    <string>Avoir une vue d'ensemble sur toutes les courbes</string>
+   </property>
+   <property name="toolTip">
+    <string>Avoir une vue d'ensemble sur toutes les courbes du graphique courant</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>

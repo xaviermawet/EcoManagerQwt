@@ -59,7 +59,6 @@ class AdvancedPlot : public Plot
     public slots:
 
         void clearcurves(void);
-        void changeForegroundColor(void);
         void globalZoom(void);
 
     protected slots:

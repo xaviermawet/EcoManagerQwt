@@ -200,6 +200,30 @@ void Plot::setLabelPositionVisible(bool visible)
     this->replot();
 }
 
+void Plot::clearcurves(void)
+{
+    foreach(QwtPlotItem* item, this->itemList(QPlotCurve::Rtti_CustomPlotCurve))
+        delete item;
+
+    // Refresh plot
+    this->replot();
+}
+
+void Plot::changeForegroundColor(void)
+{
+    // TODO ... if needed
+}
+
+void Plot::globalZoom(void)
+{
+    QRectF globalRect;
+
+    foreach(QwtPlotItem* item, this->itemList(QPlotCurve::Rtti_CustomPlotCurve))
+        globalRect = globalRect.united(item->boundingRect());
+
+    this->zoom(globalRect);
+}
+
 void Plot::updateCrossLinePosition(const QPointF& pos)
 {
     this->_crossLine->setValue(pos);

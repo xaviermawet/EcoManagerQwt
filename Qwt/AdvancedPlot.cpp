@@ -62,30 +62,21 @@ void AdvancedPlot::clearcurves(void)
     foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
         delete item;
 
-    // Supprime les courbes normales
-    foreach (QwtPlotItem* item, this->itemList(QPlotCurve::Rtti_CustomPlotCurve))
-        delete item;
-
-    // Rafraichi le graphique
-    this->replot();
-}
-
-void AdvancedPlot::changeForegroundColor(void)
-{
-    // TODO
+    // Supprime les courbes normales et rafraichi le plot
+    Plot::clearcurves();
 }
 
 void AdvancedPlot::globalZoom(void)
 {
-    QRectF rect;
+    QRectF globalRect;
 
     foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
-        rect = rect.united(item->boundingRect());
+        globalRect = globalRect.united(item->boundingRect());
 
     foreach (QwtPlotItem* item, this->itemList(QPlotCurve::Rtti_CustomPlotCurve))
-        rect = rect.united(item->boundingRect());
+        globalRect = globalRect.united(item->boundingRect());
 
-    this->zoom(rect);
+    this->zoom(globalRect);
 }
 
 void AdvancedPlot::selectPoint(const QPointF &pos)

@@ -123,7 +123,7 @@ class Plot : public QwtPlot
     public slots:
 
         /* ------------------------------------------------------------------ *
-         *                              Setters                               *
+         *                          Setters - SLOTS                           *
          * ------------------------------------------------------------------ */
 
         /*!
@@ -147,6 +147,12 @@ class Plot : public QwtPlot
          *        false le cas contraire
          */
         void setLabelPositionVisible(bool visible);
+
+        virtual void clearcurves(void);
+
+        virtual void changeForegroundColor(void);
+
+        virtual void globalZoom(void);
 
     protected slots:
 

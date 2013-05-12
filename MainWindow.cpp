@@ -755,8 +755,6 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
          *                         Get date identifier                        *
          * ------------------------------------------------------------------ */
 
-        qDebug() << "On a cliqué droit sur une date ...";
-
         QDate date = this->raceViewItemidentifier.value<QDate>();
 
         this->ui->actionRaceViewDeleteRacesAtSpecificDate->setText(
@@ -771,8 +769,6 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
         /* ------------------------------------------------------------------ *
          *                         Get race identifier                        *
          * ------------------------------------------------------------------ */
-
-        qDebug() << "On a cliqué droit sur une course ...";
 
         // Récupération de l'élément sélectionné
         QModelIndex curIndex = this->ui->raceView->selectionModel()->currentIndex();
@@ -791,8 +787,6 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
         /* ------------------------------------------------------------------ *
          *                        Get track identifier                        *
          * ------------------------------------------------------------------ */
-
-        qDebug() << "On a cliqué droit sur un tour ...";
 
         TrackIdentifier trackIdentifier =
                 this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
@@ -2643,6 +2637,15 @@ void MainWindow::createPlotLegendContextMenu(void)
                 SLOT(createPolynomialTrendline()));
     this->legendContextMenu->addAction(
                 tr("Renommer"), this, SLOT(renameCurve()));
+
+    // Add some "GUI created" actions
+    this->legendContextMenu->addSeparator();
+
+    QList<QAction*> actionList;
+    actionList << this->ui->actionClearAllCurves
+               << this->ui->actionGlobalPlotCurvesView;
+
+    this->legendContextMenu->addActions(actionList);
 }
 
 void MainWindow::on_actionShowGrid_triggered(bool visible)
@@ -2716,6 +2719,22 @@ void MainWindow::on_actionExportToPDF_triggered(void)
 
     // Restore title
     this->currentPlot()->setTitle(oldTitle);
+}
+
+void MainWindow::on_actionClearAllCurves_triggered(void)
+{
+    Plot* plot = this->currentPlot();
+
+    if(plot)
+        plot->clearcurves();
+}
+
+void MainWindow::on_actionGlobalPlotCurvesView_triggered(void)
+{
+    Plot* plot = this->currentPlot();
+
+    if(plot)
+        plot->globalZoom();
 }
 
 void MainWindow::on_actionChangeFileNames_triggered(void)
