@@ -63,7 +63,7 @@ QSqlQuery DataBaseManager::execQuery(const QString &queryString,
 
     if (!query.exec())
         throw QException(QObject::tr("La requete a échouée : ")
-                         + query.lastQuery() + query.lastError().text());
+                         + query.lastQuery() + " " + query.lastError().text());
 
     return query; // Implicit sharing
 }

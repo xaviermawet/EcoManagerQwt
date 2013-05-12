@@ -19,8 +19,10 @@ TrackPlotCurve::TrackPlotCurve(
                    trackId["race_num"].toString() + QObject::tr(" tour ") +
             trackId["lap"].toString() + ")");
 
-    this->setSymbol(new QwtSymbol( QwtSymbol::Ellipse,
-                                   Qt::gray, pen, QSize( 2, 2 ) ) );
+    // Mise en évidence des points de la courbe si c'est une courbe parent
+    if (this->parentCurve == NULL)
+        this->setSymbol(new QwtSymbol(
+                            QwtSymbol::Ellipse, Qt::gray, pen, QSize(2, 2)));
 }
 
 TrackPlotCurve::~TrackPlotCurve(void)

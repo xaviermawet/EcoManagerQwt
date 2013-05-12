@@ -34,8 +34,28 @@ AdvancedPlot::~AdvancedPlot(void)
 QPlotCurve* AdvancedPlot::addCurve(const QString& title,
                                   const QVector<QPointF>& points)
 {
+    /* Ajoute une courbe de couleur aléatoire avec un symbol sur chaque point */
     return Plot::addCurve(
                title, points,this->colorPicker.light(this->itemList().count()));
+}
+
+TrackPlotCurve* AdvancedPlot::addCurve(const QString &title,
+                                       const QVector<QPointF> &points,
+                                       const TrackIdentifier &trackId)
+{
+    QwtPointSeriesData* serieData = new QwtPointSeriesData(points);
+
+    // Récupérer la couleur aléatoire de la courbe
+    QColor color = this->colorPicker.light(
+             this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent).count());
+
+    /* Adapte le titre pour le sufixer du numéro de la course et du tour.
+     * Si c'est une courbe parente, les points sont mis en évidence */
+    TrackPlotCurve* curve = new TrackPlotCurve(title, trackId, color);
+    curve->setData(serieData);
+    curve->attach(this);
+
+    return curve;
 }
 
 void AdvancedPlot::selectPoint(const QPointF &pos)
