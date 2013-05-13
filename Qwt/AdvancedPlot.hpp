@@ -64,6 +64,11 @@ class AdvancedPlot : public Plot
         virtual void clearSecondaryCurves(void);
         virtual void globalZoom(void);
 
+        // slots identiques à ceux de PlotScene
+        void highlightPoint(float timeValue, const QVariant& trackId);
+        void highlightSector(float second, const QVariant& trackId);
+        void highlightSector(float t1, float t2, const QVariant& trackId);
+
     protected slots:
 
         void selectPoint(QPointF const& pos);

@@ -37,7 +37,7 @@ TrackPlotCurve::~TrackPlotCurve(void)
 int TrackPlotCurve::rtti(void) const
 {
     // If it's a child
-    if(this->parentCurve)
+    if(this->parentCurve != NULL)
         return Rtti_TrackPlotCurveChild;
 
     return Rtti_TrackPlotCurveParent;
@@ -218,6 +218,9 @@ void TrackPlotCurve::addPoint(qreal x)
 
 void TrackPlotCurve::addSector(qreal minX, qreal maxX)
 {
+    qreal min = qMin(minX, maxX);
+    qreal max = qMax(minX, maxX);
+
     QwtSeriesData<QPointF>* curvePoints = this->data();
 
     // Récupération de la liste des points du secteur
@@ -226,8 +229,19 @@ void TrackPlotCurve::addSector(qreal minX, qreal maxX)
     {
         QPointF currentCurvePoint = curvePoints->sample(i);
 
-        if(currentCurvePoint.x() >= minX && currentCurvePoint.x() <= maxX)
+        if(currentCurvePoint.x() > max)
+            break;
+
+        if(currentCurvePoint.x() >= min)
             sectorPoints << currentCurvePoint;
+    }
+
+    // S'il n'y a qu'un point pour le secteur, on ajoute plutot un simple point
+    if(sectorPoints.count() < 2)
+    {
+        qDebug() << "il n'y a qu'un point, on crée donc un simple point";
+        this->addPoint(min);
+        return;
     }
 
     QPen pen = this->pen();
@@ -237,7 +251,46 @@ void TrackPlotCurve::addSector(qreal minX, qreal maxX)
                 "sector", this->trackIdentifier(), pen, this);
     QwtPointSeriesData* serie = new QwtPointSeriesData(sectorPoints);
     child->setData(serie);
+}
 
+void TrackPlotCurve::addSector(qreal second)
+{
+    int seconde = qRound(second);
+
+    QwtSeriesData<QPointF>* curvePoints = this->data();
+
+    // Récupération de la liste des points du secteur
+    QVector<QPointF> sectorPoints;
+    for(unsigned int i(0); i < curvePoints->size(); ++i)
+    {
+        QPointF currentCurvePoint = curvePoints->sample(i);
+        int roundSecond = qRound(currentCurvePoint.x());
+
+        if(roundSecond > seconde)
+            break;
+
+        if(roundSecond == seconde)
+            sectorPoints << currentCurvePoint;
+    }
+
+    // S'il n'y a qu'un point pour le secteur, on ajoute plutot un simple point
+    if(sectorPoints.count() < 2)
+    {
+        qDebug() << "il n'y a qu'un point, on crée donc un simple point";
+        this->addPoint(second);
+        return;
+    }
+
+    qDebug() << "la courbe contient plusieurs points pour la meme seconde --> on trace un secteur";
+
+    // Création du secteur
+    QPen pen = this->pen();
+    pen.setWidth(5);
+
+    TrackPlotCurve* child = new TrackPlotCurve(
+                "sector", this->trackIdentifier(), pen, this);
+    QwtPointSeriesData* serie = new QwtPointSeriesData(sectorPoints);
+    child->setData(serie);
 }
 
 QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const

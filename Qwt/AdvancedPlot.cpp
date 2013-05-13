@@ -110,6 +110,60 @@ void AdvancedPlot::globalZoom(void)
     this->zoom(globalRect);
 }
 
+void AdvancedPlot::highlightPoint(float timeValue, const QVariant &trackId)
+{
+    if(!trackId.canConvert<TrackIdentifier>())
+        return;
+
+    // Récupère l'identifiant du tour sélectionné
+    TrackIdentifier trackIdentifier = trackId.value< TrackIdentifier >();
+
+    // la mise en évidence de points ne peut se faire que sur une courbe parente
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
+    {
+        TrackPlotCurve* tmpCurve = (TrackPlotCurve*) item;
+
+        if(tmpCurve && tmpCurve->trackIdentifier() == trackIdentifier)
+            tmpCurve->addPoint(timeValue); // Affichage d'un point sur la courbe
+    }
+}
+
+void AdvancedPlot::highlightSector(float second, const QVariant &trackId)
+{
+    if(!trackId.canConvert<TrackIdentifier>())
+        return;
+
+    // Récupère l'identifiant du tour sélectionné
+    TrackIdentifier trackIdentifier = trackId.value< TrackIdentifier >();
+
+    // la mise en évidence de points ne peut se faire que sur une courbe parente
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
+    {
+        TrackPlotCurve* tmpCurve = (TrackPlotCurve*) item;
+
+        if(tmpCurve && tmpCurve->trackIdentifier() == trackIdentifier)
+            tmpCurve->addSector(second);
+    }
+}
+
+void AdvancedPlot::highlightSector(float t1, float t2, const QVariant &trackId)
+{
+    if(!trackId.canConvert<TrackIdentifier>())
+        return;
+
+    // Récupère l'identifiant du tour sélectionné
+    TrackIdentifier trackIdentifier = trackId.value< TrackIdentifier >();
+
+    // la mise en évidence de points ne peut se faire que sur une courbe parente
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
+    {
+        TrackPlotCurve* tmpCurve = (TrackPlotCurve*) item;
+
+        if(tmpCurve && tmpCurve->trackIdentifier() == trackIdentifier)
+            tmpCurve->addSector(t1, t2);
+    }
+}
+
 void AdvancedPlot::selectPoint(const QPointF &pos)
 {
     qDebug() << "On cherche le point le plus proche du curseur ...";
@@ -118,16 +172,14 @@ void AdvancedPlot::selectPoint(const QPointF &pos)
     QPointF closestPoint;
     TrackPlotCurve* curve = NULL;
 
+    // la seletion ne peut se faire que sur une courbe parente
     foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
     {
         TrackPlotCurve* tmpCurve = (TrackPlotCurve*) item;
 
-         // la seletion ne peut se faire que sur une courbe parente et visible
-        if(tmpCurve == NULL || tmpCurve->parent() != NULL || !tmpCurve->isVisible())
+        // la seletion ne peut se faire que sur une courbe visible
+        if(tmpCurve == NULL || !tmpCurve->isVisible())
             continue;
-
-//        if (!tmpCurve->boundingRect().contains(pos))
-//            continue;
 
         double tmpDist;
         QPointF tmpClosestPoint = tmpCurve->closestPointF(pos, &tmpDist);
@@ -158,12 +210,13 @@ void AdvancedPlot::selectPoints(const QPointF &pos)
 {
     qDebug() << "On cherche les points les plus proche de la valeur en abscisse de la position du curseur ...";
 
+    // la seletion ne peut se faire que sur une courbe parente
     foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
-         // la seletion ne peut se faire que sur une courbe parente et visible
-        if(curve == NULL || curve->parent() != NULL || !curve->isVisible())
+        // la seletion ne peut se faire que sur une courbe visible
+        if(curve == NULL || !curve->isVisible())
             continue;
 
         double dist;
@@ -196,12 +249,13 @@ void AdvancedPlot::selectInterval(const QRectF &selectedRect)
 
     qDebug() << "Rectangle de sélection : Left = " << selectedRect.left() << " right = " << selectedRect.right();
 
+    // la seletion ne peut se faire que sur une courbe parente
     foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
     {
         TrackPlotCurve* curve = (TrackPlotCurve*) item;
 
-        // la seletion ne peut se faire que sur une courbe parente et visible
-        if(curve == NULL || curve->parent() != NULL || !curve->isVisible())
+        // la seletion ne peut se faire que sur une courbe visible
+        if(curve == NULL || !curve->isVisible())
             continue;
 
         if (!curve->boundingRect().intersects(selectedRect))
@@ -210,7 +264,7 @@ void AdvancedPlot::selectInterval(const QRectF &selectedRect)
         // Récupérer la liste des points de la courbe
         QwtSeriesData<QPointF>* curvePoints = curve->data();
 
-        QPolygonF pointsSelected;
+        QList<QPointF> pointsSelected;
 
         qDebug() << "Nombre de points dans la courbe " << curve->title().text()
                  << " = " << curvePoints->size();

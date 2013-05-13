@@ -131,8 +131,14 @@ class TrackPlotCurve : public QPlotCurve
          */
         void detach(void);
 
+        /*!
+         * \brief Met en évidence (gros point noir) le point de la courbe dont
+         *        son abscisse est la plus proche de la valeur de X
+         * \param valeur en abscisse
+         */
         void addPoint(qreal x);
         void addSector(qreal minX, qreal maxX);
+        void addSector(qreal second);
 
         /*!
          * \brief Obtenir le point le plus proche d'un point donné

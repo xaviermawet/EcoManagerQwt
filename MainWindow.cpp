@@ -1653,7 +1653,9 @@ void MainWindow::displayDataLap(void)
 
 //        curve->addPoint(12);
 //        curve->addPoint(20);
-        curve->addSector(12, 20);
+//        curve->addSector(12, 20);
+
+        curve->addSector(15);
     }
     catch(QException const& ex)
     {
