@@ -1635,27 +1635,6 @@ void MainWindow::displayDataLap(void)
 
         curve = this->timePlotFrame->addCurve(timeSpeedPoints, trackIdentifier);
         this->setPlotCurveVisibile(curve, true);
-
-        // test
-        timeSpeedPoints = timeSpeedPoints.mid(10, 20);
-        QPen pen = curve->pen();
-        pen.setWidth(5);
-        TrackPlotCurve* child = new TrackPlotCurve("test", trackIdentifier, pen, curve);
-        QwtPointSeriesData* serie2 = new QwtPointSeriesData(timeSpeedPoints);
-        child->setData(serie2);
-
-//        QwtPlotMarker* marker = new QwtPlotMarker();
-//        marker->setYValue(timeSpeedPoints.last().y());
-//        marker->setXValue(timeSpeedPoints.last().x());
-//        marker->attach(this->timePlotFrame);
-//        marker->setSymbol(new QwtSymbol(
-//                              QwtSymbol::Ellipse, Qt::black, QPen(Qt::black), QSize(7, 7)));
-
-//        curve->addPoint(12);
-//        curve->addPoint(20);
-//        curve->addSector(12, 20);
-
-        curve->addSector(15);
     }
     catch(QException const& ex)
     {
@@ -1673,20 +1652,29 @@ void MainWindow::connectSignals(void)
             this, SLOT(addSector(QString,int,IndexedPosition,IndexedPosition)));
     connect(this->mapFrame->scene(), SIGNAL(sectorUpdated(QString,int,IndexedPosition,IndexedPosition)),
             this, SLOT(updateSector(QString,int,IndexedPosition,IndexedPosition)));
+
 //    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
 //            this->distancePlotFrame->scene(), SLOT(highlightPoints(float,QVariant)));
-//    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-//            this->timePlotFrame->scene(), SLOT(highlightPoints(float,QVariant)));
+
+    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)), //    connect(this->mapFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+            this->timePlotFrame, SLOT(highlightSector(float,QVariant)));    //            this->timePlotFrame->scene(), SLOT(highlightPoints(float,QVariant)));
+
 //    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
 //            this->distancePlotFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
-//    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
-//            this->timePlotFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
+
+
+    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)), //    connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
+            this->timePlotFrame, SLOT(highlightSector(float,float,QVariant)));      //            this->timePlotFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
+
     connect(this->mapFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
             this, SLOT(displayLapInformation(float,float,QVariant)));
 //    connect(this->mapFrame->scene(), SIGNAL(selectionChanged()),
 //            this->distancePlotFrame->scene(), SLOT(clearPlotSelection()));
-//    connect(this->mapFrame->scene(), SIGNAL(selectionChanged()),
-//            this->timePlotFrame->scene(), SLOT(clearPlotSelection()));
+
+
+    connect(this->mapFrame->scene(), SIGNAL(selectionChanged()), //    connect(this->mapFrame->scene(), SIGNAL(selectionChanged()),
+            this->timePlotFrame, SLOT(clearSecondaryCurves())); //            this->timePlotFrame->scene(), SLOT(clearPlotSelection()));
+
     connect(this->mapFrame->scene(), SIGNAL(selectionChanged()),
             this, SLOT(on_actionLapDataEraseTable_triggered()));
     connect(this->mapFrame, SIGNAL(clearTracks()),

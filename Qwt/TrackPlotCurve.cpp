@@ -128,6 +128,7 @@ void TrackPlotCurve::attachChild(TrackPlotCurve* child)
 
     // Attach the child in the same plot as its new parent
     child->attach(this->plot());
+    child->setVisible(this->isVisible());
 
     child->_trackIdentifier = this->_trackIdentifier;
 
@@ -162,6 +163,7 @@ bool TrackPlotCurve::removeChild(TrackPlotCurve * const &child)
         return false;
 
     child->parentCurve = NULL;
+    child->setVisible(true);
 
     // Change legend item visibility
     child->setItemAttribute(Legend, true);
@@ -209,6 +211,7 @@ void TrackPlotCurve::addPoint(qreal x)
 
     QwtPlotMarker* point = new QwtPlotMarker();
     point->setValue(closestPoint);
+    point->setVisible(this->isVisible());
     point->attach(this->plot());
     point->setSymbol(new QwtSymbol(
                           QwtSymbol::Ellipse, Qt::black, QPen(Qt::black), QSize(7, 7)));

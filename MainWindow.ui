@@ -433,8 +433,8 @@
      <addaction name="separator"/>
      <addaction name="actionClearAllCurves"/>
      <addaction name="actionGlobalPlotCurvesView"/>
-     <addaction name="actionExportToPDF"/>
      <addaction name="actionClearSecondaryCurves"/>
+     <addaction name="actionExportToPDF"/>
     </widget>
     <addaction name="menuEditRaceView"/>
     <addaction name="menuLapDataTable"/>
