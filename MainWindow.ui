@@ -428,13 +428,13 @@
      <addaction name="actionShowGrid"/>
      <addaction name="actionShowCrossLine"/>
      <addaction name="actionShowLabelPosition"/>
-     <addaction name="separator"/>
      <addaction name="actionIncreaseAccuracy"/>
      <addaction name="actionReduceAccuracy"/>
      <addaction name="separator"/>
-     <addaction name="actionExportToPDF"/>
      <addaction name="actionClearAllCurves"/>
      <addaction name="actionGlobalPlotCurvesView"/>
+     <addaction name="actionExportToPDF"/>
+     <addaction name="actionClearSecondaryCurves"/>
     </widget>
     <addaction name="menuEditRaceView"/>
     <addaction name="menuLapDataTable"/>
@@ -1060,7 +1060,7 @@
   <action name="actionGlobalPlotCurvesView">
    <property name="icon">
     <iconset resource="Resources.qrc">
-     <normaloff>:/Resources/Icons/resize.png</normaloff>:/Resources/Icons/resize.png</iconset>
+     <normaloff>:/Resources/Icons/Image-Edition-Tools-Expand-icon.png</normaloff>:/Resources/Icons/Image-Edition-Tools-Expand-icon.png</iconset>
    </property>
    <property name="text">
     <string>Avoir une vue d'ensemble sur toutes les courbes</string>
@@ -1070,6 +1070,76 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionClearSecondaryCurves">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/eraser2.png</normaloff>:/Resources/Icons/eraser2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Supprimer tous les éléments mis en évidences</string>
+   </property>
+   <property name="toolTip">
+    <string>Supprimer tous les éléments mis en évidences (zone(s) ou point(s))</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Y</string>
+   </property>
+  </action>
+  <action name="actionClearCurve">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Editing-Erase-icon.png</normaloff>:/Resources/Icons/Editing-Erase-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Effacer</string>
+   </property>
+  </action>
+  <action name="actionCentrerOnCurve">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Image-Edition-Tools-Collapse-icon.png</normaloff>:/Resources/Icons/Image-Edition-Tools-Collapse-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Centrer sur</string>
+   </property>
+  </action>
+  <action name="actionChangeCurveColor">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Text-Formatting-Bg-color-icon.png</normaloff>:/Resources/Icons/Text-Formatting-Bg-color-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Changer la couleur</string>
+   </property>
+  </action>
+  <action name="actionCreatePolynomialTrendline">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Image-Edition-Tools-Line-icon.png</normaloff>:/Resources/Icons/Image-Edition-Tools-Line-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Ajouter une courbe de tendance polynomiale</string>
+   </property>
+  </action>
+  <action name="actionRenameCurve">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/Resources/Icons/Image-Edition-Tools-Text-icon.png</normaloff>:/Resources/Icons/Image-Edition-Tools-Text-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Renommer</string>
+   </property>
+  </action>
+  <action name="actionChangeCurvePointsColor">
+   <property name="text">
+    <string>Changer la couleur des points</string>
+   </property>
+  </action>
+  <action name="actionClearChildrenCurves">
+   <property name="text">
+    <string>Supprimer les éléments mis en évidences</string>
    </property>
   </action>
  </widget>

@@ -45,8 +45,6 @@ int TrackPlotCurve::rtti(void) const
 
 void TrackPlotCurve::setColor(const QColor &color)
 {
-    qDebug() << "Changement de couleur ....";
-
     // change la couleur de la courbe
     QPlotCurve::setColor(color);
 
@@ -61,6 +59,22 @@ void TrackPlotCurve::setColor(const QColor &color)
     if (this->parentCurve == NULL)
         this->setSymbol(new QwtSymbol(
                             QwtSymbol::Ellipse, Qt::gray, QPen(color), QSize(2, 2)));
+}
+
+void TrackPlotCurve::setPointsColor(QColor const& color)
+{
+    const QwtSymbol* symbol = this->symbol();
+
+    if(!symbol || !color.isValid())
+        return;
+
+    qDebug() << "Changement de couleur des points ...";
+//    QwtSymbol* newSymbol = new QwtSymbol(*symbol);
+//    newSymbol->setColor(color);
+//    this->setSymbol(newSymbol);
+
+    this->setSymbol(new QwtSymbol(
+                        QwtSymbol::Ellipse, Qt::gray, QPen(color), QSize(2, 2)));
 }
 
 TrackIdentifier TrackPlotCurve::trackIdentifier(void) const

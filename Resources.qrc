@@ -41,11 +41,13 @@
         <file>Resources/Icons/Arrows-Down-icon.png</file>
         <file>Resources/Icons/Arrows-Up-icon.png</file>
         <file>Resources/Icons/File-Types-Pdf-icon.png</file>
-        <file alias="color">Resources/Icons/Text-Formatting-Bg-color-icon.png</file>
-        <file alias="erase">Resources/Icons/Editing-Erase-icon.png</file>
-        <file alias="focusOn">Resources/Icons/Image-Edition-Tools-Collapse-icon.png</file>
+        <file>Resources/Icons/Text-Formatting-Bg-color-icon.png</file>
+        <file>Resources/Icons/Editing-Erase-icon.png</file>
+        <file>Resources/Icons/Image-Edition-Tools-Collapse-icon.png</file>
         <file>Resources/Icons/checkmark.png</file>
-        <file alias="trendLine">Resources/Icons/Image-Edition-Tools-Line-icon.png</file>
+        <file>Resources/Icons/Image-Edition-Tools-Line-icon.png</file>
+        <file>Resources/Icons/Image-Edition-Tools-Text-icon.png</file>
+        <file>Resources/Icons/Image-Edition-Tools-Expand-icon.png</file>
     </qresource>
     <qresource prefix="/sql">
         <file alias="schemaTable">Resources/SQL/DB.sql</file>

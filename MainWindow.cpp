@@ -2285,7 +2285,7 @@ void MainWindow::updateMenus(void)
     this->ui->actionShowLabelPosition->setEnabled(!plot->isCrossLineVisible());
 }
 
-void MainWindow::eraseCurve(void)
+void MainWindow::on_actionClearCurve_triggered(void)
 {
     // if no curve associated to the legend item. This shouldn't happen!
     if (this->curveAssociatedToLegendItem == NULL)
@@ -2300,7 +2300,7 @@ void MainWindow::eraseCurve(void)
     this->currentPlot()->replot();
 }
 
-void MainWindow::centerOnCurve(void)
+void MainWindow::on_actionCentrerOnCurve_triggered(void)
 {
     // if no curve associated to the legend item. This shouldn't happen!
     if (this->curveAssociatedToLegendItem == NULL)
@@ -2309,7 +2309,7 @@ void MainWindow::centerOnCurve(void)
     this->currentPlot()->zoom(this->curveAssociatedToLegendItem);
 }
 
-void MainWindow::changeCurveColor(void)
+void MainWindow::on_actionChangeCurveColor_triggered(void)
 {
     // if no curve associated to the legend item. This shouldn't happen!
     if (this->curveAssociatedToLegendItem == NULL)
@@ -2325,7 +2325,7 @@ void MainWindow::changeCurveColor(void)
         this->curveAssociatedToLegendItem->setColor(newColor);
 }
 
-void MainWindow::createPolynomialTrendline(void)
+void MainWindow::on_actionCreatePolynomialTrendline_triggered(void)
 {
     // if no curve associated to the legend item. This shouldn't happen!
     if (this->curveAssociatedToLegendItem == NULL)
@@ -2377,7 +2377,7 @@ void MainWindow::createPolynomialTrendline(void)
     this->setPlotCurveVisibile(trendlineCurve, true);
 }
 
-void MainWindow::renameCurve(void)
+void MainWindow::on_actionRenameCurve_triggered(void)
 {
     // if no curve associated to the legend item. This shouldn't happen!
     if (this->curveAssociatedToLegendItem == NULL)
@@ -2413,6 +2413,37 @@ void MainWindow::renameCurve(void)
     }
 }
 
+void MainWindow::on_actionChangeCurvePointsColor_triggered(void)
+{
+    TrackPlotCurve* curve = (TrackPlotCurve*) this->curveAssociatedToLegendItem;
+
+    if(!curve)
+        return;
+
+    // Select a new color
+    QColor newColor = QColorDialog::getColor(
+                curve->pen().color(), this,
+                tr("Choisir une nouvelle couleur pour la courbe"));
+
+    // If the user cancels the dialog, an invalid color is returned
+    if (!newColor.isValid())
+        return;
+
+    curve->setPointsColor(newColor);
+    //curve->plot()->replot();
+}
+
+void MainWindow::on_actionClearChildrenCurves_triggered(void)
+{
+    TrackPlotCurve* curve = (TrackPlotCurve*) this->curveAssociatedToLegendItem;
+
+    if(!curve)
+        return;
+
+    curve->clearChildren();
+    curve->plot()->replot();
+}
+
 void MainWindow::setPlotCurveVisibile(QwtPlotItem* item, bool visible)
 {
     if (item == NULL)
@@ -2434,10 +2465,10 @@ void MainWindow::showLegendContextMenu(const QwtPlotItem* item,
     if(!this->curveAssociatedToLegendItem)
         return;
 
-    if (item->rtti() == TrackPlotCurve::Rtti_TrackPlotCurveParent)
-        qDebug() << "On peut ajouter des options au menu ...";
-    else
-        qDebug() << "Pas de chance, c'est une courbe normale";
+    bool isTrackPlotCurve =
+            item->rtti() == TrackPlotCurve::Rtti_TrackPlotCurveParent;
+    this->ui->actionClearChildrenCurves->setVisible(isTrackPlotCurve);
+    this->ui->actionChangeCurvePointsColor->setVisible(isTrackPlotCurve);
 
 
     // Display custom contextual menu
@@ -2463,28 +2494,16 @@ void MainWindow::createPlotLegendContextMenu(void)
 {
     // Legend actions
     this->legendContextMenu = new QMenu(this);
-    this->legendContextMenu->addAction(
-                QIcon("://erase"), tr("Effacer"),this,
-                SLOT(eraseCurve()));
-    this->legendContextMenu->addAction(
-                QIcon("://focusOn"), tr("Centrer sur"), this,
-                SLOT(centerOnCurve()));
-    this->legendContextMenu->addAction(
-                QIcon("://color"), tr("Changer la couleur"), this,
-                SLOT(changeCurveColor()));
-    this->legendContextMenu->addAction(
-                QIcon("://trendLine"),
-                tr("Ajouter une courbe de tendance polynomiale"), this,
-                SLOT(createPolynomialTrendline()));
-    this->legendContextMenu->addAction(
-                tr("Renommer"), this, SLOT(renameCurve()));
 
     // Add some "GUI created" actions
-    this->legendContextMenu->addSeparator();
-
     QList<QAction*> actionList;
-    actionList << this->ui->actionClearAllCurves
-               << this->ui->actionGlobalPlotCurvesView;
+    actionList << this->ui->actionClearCurve
+               << this->ui->actionCentrerOnCurve
+               << this->ui->actionChangeCurveColor
+               << this->ui->actionChangeCurvePointsColor
+               << this->ui->actionClearChildrenCurves
+               << this->ui->actionCreatePolynomialTrendline
+               << this->ui->actionRenameCurve;
 
     this->legendContextMenu->addActions(actionList);
 }
@@ -2576,6 +2595,14 @@ void MainWindow::on_actionGlobalPlotCurvesView_triggered(void)
 
     if(plot)
         plot->globalZoom();
+}
+
+void MainWindow::on_actionClearSecondaryCurves_triggered(void)
+{
+    AdvancedPlot* plot = (AdvancedPlot*) this->currentPlot();
+
+    plot->clearSecondaryCurves();
+
 }
 
 void MainWindow::on_actionChangeFileNames_triggered(void)

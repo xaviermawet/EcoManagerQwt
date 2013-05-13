@@ -63,6 +63,7 @@ class TrackPlotCurve : public QPlotCurve
         virtual int rtti(void) const;
 
         virtual void setColor(const QColor &color);
+        virtual void setPointsColor(QColor const& color);
 
         /*!
          * \brief Obtenir l'identifiant unique (course + tour) auquel la courbe

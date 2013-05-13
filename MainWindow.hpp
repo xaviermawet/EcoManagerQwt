@@ -134,11 +134,13 @@ class MainWindow : public QMainWindow
 
         // Legend actions management
         void updateMenus(void);
-        void eraseCurve(void);
-        void centerOnCurve(void);
-        void changeCurveColor(void);
-        void createPolynomialTrendline(void);
-        void renameCurve(void);
+        void on_actionClearCurve_triggered(void);
+        void on_actionCentrerOnCurve_triggered(void);
+        void on_actionChangeCurveColor_triggered(void);
+        void on_actionCreatePolynomialTrendline_triggered(void);
+        void on_actionRenameCurve_triggered(void);
+        void on_actionChangeCurvePointsColor_triggered(void);
+        void on_actionClearChildrenCurves_triggered(void);
         void setPlotCurveVisibile(QwtPlotItem* item, bool visible);
         void showLegendContextMenu(QwtPlotItem const* item, QPoint const& pos);
 
@@ -151,6 +153,7 @@ class MainWindow : public QMainWindow
         void on_actionExportToPDF_triggered(void);
         void on_actionClearAllCurves_triggered(void);
         void on_actionGlobalPlotCurvesView_triggered(void);
+        void on_actionClearSecondaryCurves_triggered(void);
 
         void on_actionChangeFileNames_triggered(void);
 
