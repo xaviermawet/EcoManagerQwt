@@ -1651,8 +1651,9 @@ void MainWindow::displayDataLap(void)
 //        marker->setSymbol(new QwtSymbol(
 //                              QwtSymbol::Ellipse, Qt::black, QPen(Qt::black), QSize(7, 7)));
 
-        curve->addPoint(12);
-        curve->addPoint(20);
+//        curve->addPoint(12);
+//        curve->addPoint(20);
+        curve->addSector(12, 20);
     }
     catch(QException const& ex)
     {

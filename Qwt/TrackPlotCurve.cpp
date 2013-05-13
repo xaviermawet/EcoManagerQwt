@@ -216,6 +216,30 @@ void TrackPlotCurve::addPoint(qreal x)
     this->points << point;
 }
 
+void TrackPlotCurve::addSector(qreal minX, qreal maxX)
+{
+    QwtSeriesData<QPointF>* curvePoints = this->data();
+
+    // Récupération de la liste des points du secteur
+    QVector<QPointF> sectorPoints;
+    for(unsigned int i(0); i < curvePoints->size(); ++i)
+    {
+        QPointF currentCurvePoint = curvePoints->sample(i);
+
+        if(currentCurvePoint.x() >= minX && currentCurvePoint.x() <= maxX)
+            sectorPoints << currentCurvePoint;
+    }
+
+    QPen pen = this->pen();
+    pen.setWidth(5);
+
+    TrackPlotCurve* child = new TrackPlotCurve(
+                "sector", this->trackIdentifier(), pen, this);
+    QwtPointSeriesData* serie = new QwtPointSeriesData(sectorPoints);
+    child->setData(serie);
+
+}
+
 QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const
 {
     // Récupérer la liste des points

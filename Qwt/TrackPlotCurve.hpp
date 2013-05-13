@@ -132,6 +132,7 @@ class TrackPlotCurve : public QPlotCurve
         void detach(void);
 
         void addPoint(qreal x);
+        void addSector(qreal minX, qreal maxX);
 
         /*!
          * \brief Obtenir le point le plus proche d'un point donné
