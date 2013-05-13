@@ -131,6 +131,8 @@ class TrackPlotCurve : public QPlotCurve
          */
         void detach(void);
 
+        void addPoint(qreal x);
+
         /*!
          * \brief Obtenir le point le plus proche d'un point donné
          * \param x valeur de l'abscisse

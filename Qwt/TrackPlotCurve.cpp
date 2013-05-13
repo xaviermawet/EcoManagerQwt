@@ -107,6 +107,9 @@ void TrackPlotCurve::setVisible(bool visible)
     // Hide or show child curves
     foreach (TrackPlotCurve* childCurve, this->children)
         childCurve->setVisible(visible);
+
+    foreach (QwtPlotMarker* point, this->points)
+        point->setVisible(visible);
 }
 
 void TrackPlotCurve::attachChild(TrackPlotCurve* child)
@@ -170,6 +173,9 @@ void TrackPlotCurve::clearChildren(void)
 {
     while(!this->children.isEmpty())
         delete this->children.takeFirst();
+
+    while (!this->points.isEmpty())
+        delete this->points.takeFirst();
 }
 
 void TrackPlotCurve::attach(QwtPlot *plot)
@@ -190,6 +196,24 @@ void TrackPlotCurve::detach(void)
 
     foreach (TrackPlotCurve* childCurve, this->children)
         childCurve->detach();
+}
+
+void TrackPlotCurve::addPoint(qreal x)
+{
+    // Récupération du point le plus proche de x
+    double dist;
+    QPointF closestPoint = this->closestPointFOfX(x, &dist);
+
+    if(dist > 3) // NOTE : valeur arbitraire
+        return;
+
+    QwtPlotMarker* point = new QwtPlotMarker();
+    point->setValue(closestPoint);
+    point->attach(this->plot());
+    point->setSymbol(new QwtSymbol(
+                          QwtSymbol::Ellipse, Qt::black, QPen(Qt::black), QSize(7, 7)));
+
+    this->points << point;
 }
 
 QPointF TrackPlotCurve::closestPointF(QPointF const& pos, double* dist) const

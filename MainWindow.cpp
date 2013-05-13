@@ -1644,12 +1644,15 @@ void MainWindow::displayDataLap(void)
         QwtPointSeriesData* serie2 = new QwtPointSeriesData(timeSpeedPoints);
         child->setData(serie2);
 
-        QwtPlotMarker* marker = new QwtPlotMarker();
-        marker->setYValue(timeSpeedPoints.last().y());
-        marker->setXValue(timeSpeedPoints.last().x());
-        marker->attach(this->timePlotFrame);
-        marker->setSymbol(new QwtSymbol(
-                              QwtSymbol::Ellipse, Qt::black, QPen(Qt::black), QSize(7, 7)));
+//        QwtPlotMarker* marker = new QwtPlotMarker();
+//        marker->setYValue(timeSpeedPoints.last().y());
+//        marker->setXValue(timeSpeedPoints.last().x());
+//        marker->attach(this->timePlotFrame);
+//        marker->setSymbol(new QwtSymbol(
+//                              QwtSymbol::Ellipse, Qt::black, QPen(Qt::black), QSize(7, 7)));
+
+        curve->addPoint(12);
+        curve->addPoint(20);
     }
     catch(QException const& ex)
     {
