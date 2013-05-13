@@ -285,7 +285,7 @@ void MainWindow::on_raceView_pressed(const QModelIndex& index)
                     competitionModel->index(index.parent().row(), 0,
                                             index.parent().parent())).toInt();
 
-        QMap<QString, QVariant> trackIdentifier;
+        TrackIdentifier trackIdentifier;
         trackIdentifier["race"] = ref_race;
         trackIdentifier["lap"] = ref_lap;
         trackIdentifier["race_num"] = race_num;
@@ -620,7 +620,7 @@ void MainWindow::on_actionLapDataDrawSectors_triggered(void)
     LapNumModelIndex  = rowsSelectedIndexes.at(0).parent();
     RaceNumModelIndex = LapNumModelIndex.parent();
 
-    QMap<QString, QVariant> trackId;
+    TrackIdentifier trackId;
     trackId["race"] = this->raceInformationTableModel->data(
                 this->raceInformationTableModel->index(RaceNumModelIndex.row(),
                                                        0)).toInt();
@@ -765,14 +765,14 @@ void MainWindow::on_menuEditRaceView_aboutToShow(void)
                     tr("Supprimer la course ") + QString::number(raceNum));
         this->ui->actionRaceViewDeleteRace->setVisible(true);
     }
-    else if(this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
+    else if(this->raceViewItemidentifier.canConvert< TrackIdentifier >())
     {
         /* ------------------------------------------------------------------ *
          *                        Get track identifier                        *
          * ------------------------------------------------------------------ */
 
         TrackIdentifier trackIdentifier =
-                this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
+                this->raceViewItemidentifier.value< TrackIdentifier >();
 
         bool lapAlreadyDisplayed = this->currentTracksDisplayed.contains(
                     trackIdentifier);
@@ -792,12 +792,12 @@ void MainWindow::on_actionRaceViewExportLapDataInCSV_triggered(void)
 {
     /* Vérifie que l'identifiant de l'élément séléctionné dans la liste des
      * courses est bien celui d'un tour. A savoir un QMap<QString, QVariant> */
-    if(!this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
+    if(!this->raceViewItemidentifier.canConvert< TrackIdentifier >())
         return;
 
     // Récupère l'identifiant du tour sélectionné
     TrackIdentifier trackIdentifier =
-            this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
+            this->raceViewItemidentifier.value< TrackIdentifier >();
 
     this->exportLapDataToCSV(trackIdentifier, 0, 10000);
 }
@@ -806,17 +806,17 @@ void MainWindow::on_actionRaceViewRemoveLap_triggered(void)
 {
     /* Vérifie que l'identifiant de l'élément séléctionné dans la liste des
      * courses est bien celui d'un tour. A savoir un QMap<QString, QVariant> */
-    if(!this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
+    if(!this->raceViewItemidentifier.canConvert< TrackIdentifier >())
     {
         qDebug() << "Impossible de convertir le raceViewItemidentifier en "
-                    "QMap<QString, QVariant>. Le QVariant contient surement "
+                    "TrackIdentifier. Le QVariant contient surement "
                     "une valeur d'un autre type";
         return;
     }
 
     // Récupère l'identifiant du tour sélectionné
-    QMap<QString, QVariant> trackIdentifier =
-            this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
+    TrackIdentifier trackIdentifier =
+            this->raceViewItemidentifier.value< TrackIdentifier >();
 
     this->removeTrackFromAllView(trackIdentifier);
 }
@@ -1001,14 +1001,13 @@ void MainWindow::on_actionPRAGMA_foreign_keys_triggered(void)
         qDebug() << "La requete n'a retourné aucun résultat ...";
 }
 
-void MainWindow::removeTrackFromAllView(QMap<QString, QVariant> const& trackId)
+void MainWindow::removeTrackFromAllView(TrackIdentifier const& trackId)
 {
     if (this->mapFrame->scene()->removeTrack(trackId))
         qDebug() << "mapping Supprimé !!!";
-//    if (this->distancePlotFrame->scene()->removeCurves(trackId))
-//        qDebug() << "distance supprimé !!!";
-//    if (this->timePlotFrame->scene()->removeCurves(trackId))
-//        qDebug() << "time supprimé !!!";
+
+    this->distancePlotFrame->deleteCurve(trackId);
+    this->timePlotFrame->deleteCurve(trackId);
 
     this->currentTracksDisplayed.removeOne(trackId);
 }
@@ -1179,7 +1178,7 @@ void MainWindow::displayLapInformation(float timeValue, const QVariant &trackId)
 void MainWindow::displayLapInformation(
         float lowerTimeValue, float upperTimeValue, const QVariant &trackId)
 {
-    if(!trackId.canConvert< QMap<QString, QVariant> >())
+    if(!trackId.canConvert< TrackIdentifier >())
     {
         QMessageBox::warning(this, tr("Une erreur est survenue"),
                              tr("Impossible d'identifier le tour"));
@@ -1187,8 +1186,8 @@ void MainWindow::displayLapInformation(
     }
 
     // Get the race number and the lap number from the trackId
-    QMap<QString, QVariant> trackIdentifier =
-            qvariant_cast< QMap<QString, QVariant> >(trackId);
+    TrackIdentifier trackIdentifier =
+            qvariant_cast< TrackIdentifier >(trackId);
     int ref_race = trackIdentifier["race"].toInt();
     int ref_lap  = trackIdentifier["lap"].toInt();
 
@@ -1550,12 +1549,12 @@ void MainWindow::displayDataLap(void)
 {
     /* Vérifie que l'identifiant de l'élément séléctionné dans la liste des
      * courses est bien celui d'un tour. A savoir un QMap<QString, QVariant> */
-    if(!this->raceViewItemidentifier.canConvert< QMap<QString, QVariant> >())
+    if(!this->raceViewItemidentifier.canConvert< TrackIdentifier >())
         return;
 
     // Get the track id for the selected lap
     TrackIdentifier trackIdentifier =
-            this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
+            this->raceViewItemidentifier.value< TrackIdentifier >();
 
     // Check if the track is already displayed
     if (this->currentTracksDisplayed.contains(trackIdentifier))
@@ -1827,7 +1826,7 @@ void MainWindow::highlightPointInAllView(const QModelIndex &index)
     LapNumModelIndex  = index.parent();
     RaceNumModelIndex = LapNumModelIndex.parent();
 
-    QMap<QString, QVariant> trackId;
+    TrackIdentifier trackId;
     trackId["race"] = this->raceInformationTableModel->data(
                 this->raceInformationTableModel->index(RaceNumModelIndex.row(),
                                                        0)).toInt();
@@ -2122,11 +2121,11 @@ void MainWindow::on_megasquirtAddCurvePushButton_clicked(void)
     try
     {
         // Check if a race has been selected
-        if(!this->raceViewItemidentifier.canConvert<QMap<QString, QVariant> >())
+        if(!this->raceViewItemidentifier.canConvert<TrackIdentifier >())
             throw QException(tr("Vous devez sélectionner un tour dans la liste des courses"));
 
         TrackIdentifier trackIdentifier =
-                this->raceViewItemidentifier.value< QMap<QString, QVariant> >();
+                this->raceViewItemidentifier.value< TrackIdentifier >();
 
         // Paramètre megasquirt pour lequel on veut tracer la courbe
         QString MSParameter = this->ui->megaSquirtComboBox->currentText();

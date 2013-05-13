@@ -174,7 +174,7 @@ class MainWindow : public QMainWindow
         void reloadRaceView(void);
         void loadSectors(const QString& competitionName);
         void highlightPointInAllView(const QModelIndex& index);
-        void removeTrackFromAllView(QMap<QString, QVariant> const& trackId);
+        void removeTrackFromAllView(TrackIdentifier const& trackId);
 
         void updateDataBase(QString const& dbFilePath,
                            bool(*dataBaseAction)(QString const&));

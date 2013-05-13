@@ -50,6 +50,8 @@ class AdvancedPlot : public Plot
                                          TrackIdentifier const& trackId,
                                          QString const& title = QString());
 
+        void deleteCurve(TrackIdentifier const& trackId);
+
     signals:
 
         void pointSelected(float absciss, const QVariant& idTrack);

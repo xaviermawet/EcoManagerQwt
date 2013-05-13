@@ -56,6 +56,19 @@ TrackPlotCurve* AdvancedPlot::addCurve(QVector<QPointF> const& points,
     return curve;
 }
 
+void AdvancedPlot::deleteCurve(TrackIdentifier const& trackId)
+{
+    foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
+    {
+        TrackPlotCurve* curve = (TrackPlotCurve*) item;
+
+        if(curve && curve->trackIdentifier() == trackId)
+            delete curve;
+    }
+
+    this->replot();
+}
+
 void AdvancedPlot::clearcurves(void)
 {
     // Supprime les courbes associées à un tour
