@@ -4,6 +4,7 @@
 #include "QPlotCurve.hpp"
 #include <qwt_plot.h>
 #include <qwt_symbol.h>
+#include <qwt_plot_marker.h>
 
 typedef QMap<QString, QVariant> TrackIdentifier;
 
@@ -155,6 +156,8 @@ class TrackPlotCurve : public QPlotCurve
          *  d'occurence dans la légende
          */
         QList<TrackPlotCurve*> children;
+
+        QList<QwtPlotMarker*> points;
 
         /*!
          * \brief Courbe parente

@@ -15,9 +15,9 @@ TrackPlotCurve::TrackPlotCurve(
 {
     this->attachTo(parent);
 
-    this->setTitle(title.text() + QObject::tr(" (course ") +
+    this->setTitle(title.text() + QObject::tr(" course ") +
                    trackId["race_num"].toString() + QObject::tr(" tour ") +
-            trackId["lap"].toString() + ")");
+            trackId["lap"].toString());
 
     // Mise en évidence des points de la courbe si c'est une courbe parent
     if (this->parentCurve == NULL)

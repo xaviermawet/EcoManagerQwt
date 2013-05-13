@@ -1608,7 +1608,6 @@ void MainWindow::displayDataLap(void)
      * ---------------------------------------------------------------------- */
     try
     {
-        // Vérifie que mes courbes sont les memes que JB
         QVariantList param;
         param << ref_race << ref_lap;
         QSqlQuery test = DataBaseManager::execQuery(
@@ -1644,6 +1643,13 @@ void MainWindow::displayDataLap(void)
         TrackPlotCurve* child = new TrackPlotCurve("test", trackIdentifier, pen, curve);
         QwtPointSeriesData* serie2 = new QwtPointSeriesData(timeSpeedPoints);
         child->setData(serie2);
+
+        QwtPlotMarker* marker = new QwtPlotMarker();
+        marker->setYValue(timeSpeedPoints.last().y());
+        marker->setXValue(timeSpeedPoints.last().x());
+        marker->attach(this->timePlotFrame);
+        marker->setSymbol(new QwtSymbol(
+                              QwtSymbol::Ellipse, Qt::black, QPen(Qt::black), QSize(7, 7)));
     }
     catch(QException const& ex)
     {
@@ -2290,10 +2296,15 @@ void MainWindow::on_actionClearCurve_triggered(void)
     if (this->curveAssociatedToLegendItem == NULL)
         return;
 
-    // Delete the curve associated to the legend item
-    this->curveAssociatedToLegendItem->detach();
-    delete this->curveAssociatedToLegendItem;
-    this->curveAssociatedToLegendItem = NULL;
+    // Si c'est une trackPlotCurve, on la supprime également des autres vues
+    TrackPlotCurve* curve = (TrackPlotCurve*) this->curveAssociatedToLegendItem;
+    if(curve)
+        this->removeTrackFromAllView(curve->trackIdentifier());
+    else
+    {
+        delete this->curveAssociatedToLegendItem;
+        this->curveAssociatedToLegendItem = NULL;
+    }
 
     // update the plot
     this->currentPlot()->replot();
