@@ -54,6 +54,7 @@ class AdvancedPlot : public Plot
 
     signals:
 
+        void selectionChanged(void);
         void pointSelected(float absciss, const QVariant& idTrack);
         void intervalSelected(float firstAbsciss, float secondAbsciss,
                               const QVariant& idTrack);

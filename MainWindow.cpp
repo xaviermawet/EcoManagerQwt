@@ -1701,8 +1701,10 @@ void MainWindow::connectSignals(void)
             //this->mapFrame->scene(), SLOT(clearSceneSelection()));
 //    connect(this->timePlotFrame->scene(), SIGNAL(selectionChanged()),
 //            this, SLOT(on_actionLapDataEraseTable_triggered()));
-//    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-//            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant)));
+
+    connect(this->timePlotFrame, SIGNAL(pointSelected(float,QVariant)),     //    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant))); //            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant)));
+
 //    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
 //            this, SLOT(displayLapInformation(float,QVariant)));
 //    connect(this->timePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),

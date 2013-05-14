@@ -242,8 +242,7 @@ void TrackPlotCurve::addSector(qreal minX, qreal maxX)
     // S'il n'y a qu'un point pour le secteur, on ajoute plutot un simple point
     if(sectorPoints.count() < 2)
     {
-        qDebug() << "il n'y a qu'un point, on crée donc un simple point";
-        this->addPoint(min);
+        this->addSector(min);
         return;
     }
 
@@ -279,12 +278,9 @@ void TrackPlotCurve::addSector(qreal second)
     // S'il n'y a qu'un point pour le secteur, on ajoute plutot un simple point
     if(sectorPoints.count() < 2)
     {
-        qDebug() << "il n'y a qu'un point, on crée donc un simple point";
         this->addPoint(second);
         return;
     }
-
-    qDebug() << "la courbe contient plusieurs points pour la meme seconde --> on trace un secteur";
 
     // Création du secteur
     QPen pen = this->pen();
