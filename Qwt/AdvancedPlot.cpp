@@ -249,6 +249,9 @@ void AdvancedPlot::selectInterval(const QRectF &selectedRect)
 
     qDebug() << "Rectangle de sélection : Left = " << selectedRect.left() << " right = " << selectedRect.right();
 
+    // Peut etre envoyé alors qu'aucun point n'a été sélectionné
+    emit this->selectionChanged();
+
     // la seletion ne peut se faire que sur une courbe parente
     foreach (QwtPlotItem* item, this->itemList(TrackPlotCurve::Rtti_TrackPlotCurveParent))
     {
