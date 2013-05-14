@@ -1,3 +1,5 @@
+// TODO : ne pas rendre les paramètres obligatoire pour la methode execQuery
+
 #ifndef __DATABASEIMPORTMODULE_HPP__
 #define __DATABASEIMPORTMODULE_HPP__
 

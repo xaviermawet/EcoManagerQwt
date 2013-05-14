@@ -1705,8 +1705,9 @@ void MainWindow::connectSignals(void)
     connect(this->timePlotFrame, SIGNAL(pointSelected(float,QVariant)),     //    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
             this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant))); //            this->mapFrame->scene(), SLOT(highlightPoint(float,QVariant)));
 
-//    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
-//            this, SLOT(displayLapInformation(float,QVariant)));
+    connect(this->timePlotFrame, SIGNAL(pointSelected(float,QVariant)), //    connect(this->timePlotFrame->scene(), SIGNAL(pointSelected(float,QVariant)),
+            this, SLOT(displayLapInformation(float,QVariant)));         //            this, SLOT(displayLapInformation(float,QVariant)));
+
 //    connect(this->timePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
 //            this->mapFrame->scene(), SLOT(highlightSector(float,float,QVariant)));
 //    connect(this->timePlotFrame->scene(), SIGNAL(intervalSelected(float,float,QVariant)),
@@ -1923,77 +1924,50 @@ bool MainWindow::getAllDataFromSpeed(
     int ref_race = trackId["race"].toInt();
     int ref_lap  = trackId["lap"].toInt();
 
-    qDebug() << "Calcul de toutes les données pour le tour " << ref_lap << " de la course " << ref_race;
+    qDebug() << "Récupération de toutes les données pour le tour " << ref_lap << " de la course " << ref_race;
     qDebug() << "lower = " << lowerTimeValue;
     qDebug() << "upper = " << upperTimeValue;
 
-    /* upperTimeValue passé en paramètre est exprimé en secondes mais les
-     * timestamp sauvées dans la base de données sont en millisecondes */
-    //int upperTimeStamp = upperTimeValue * 1000;
+    QString queryString = "SELECT timestamp, distance, speed, acceleration "
+                          "FROM datarace "
+                          "WHERE ref_lap_race = ? AND ref_lap_num = ? "
+                            "AND timestamp >= ? AND timestamp <= ? "
+                            "ORDER BY timestamp";
+    QVariantList param;
+    param << ref_race
+          << ref_lap
+          << lowerTimeValue * 1000
+          << upperTimeValue * 1000;
 
-    // Récupérer les informations de temps et de vitesses
-    QSqlQuery query;
-    query.prepare("select timestamp, value from SPEED where timestamp <= ? and ref_lap_race = ? and ref_lap_num = ? order by timestamp");
-    query.addBindValue(upperTimeValue * 1000);
-    query.addBindValue(ref_race);
-    query.addBindValue(ref_lap);
-
-    /* If you only need to move forward through the results (e.g., by using next()),
-     * you can use setForwardOnly(), which will save a significant amount of memory
-     * overhead and improve performance on some databases. */
-    query.setForwardOnly(true);
-
-    if (!query.exec())
+    try
     {
-        QString errorMsg(tr("Impossible de récupérer les données numériques "
-                         "associées à votre sélection pour le tour ") +
-                         QString::number(ref_lap) + tr(" de la course ") +
-                         QString::number(ref_race));
+        QSqlQuery query = DataBaseManager::execQuery(queryString, param);
+
+        while(query.next())
+        {
+            QVariantList lapData;
+            lapData << query.value(0)                        // Tps (ms)
+                    << query.value(0).toDouble() / 1000.0    // Tps (s)
+                    << query.value(1)                        // Distance (m)
+                    << query.value(2)                        // Vitesse (km\h)
+                    << (query.value(3).toReal() > 2 ?
+                            "NS" : query.value(3).toString()); // Acc (m\s²)
+
+            // Ajout de la ligne de données à la liste
+            data << lapData;
+        }
+
+        qDebug() << "Nombre de données RECUPEREES = " << data.count();
+    }
+    catch(QException const& ex)
+    {
         QMessageBox::warning(this, tr("Erreur de récupération de données"),
-                             errorMsg);
+                             ex.what());
         return false;
     }
 
-    double wheelPerimeter(this->getCurrentCompetitionWheelPerimeter());
-    double time(0),  lastTime(0);
-    double speed(0), lastSpeed(0);
-    double pos(wheelPerimeter),   lastPos(0);
-
-    while(query.next())
-    {
-        lastTime  = time;
-        lastSpeed = speed;
-        lastPos   = pos;
-
-        time  = query.value(0).toDouble() / 1000; // Le temps est sauvé en millisecondes dans la db et on le veut en secondes
-        speed = query.value(1).toDouble();
-
-        int multipleWheelPerimeter = ceil(((speed + lastSpeed) / (2 * 3.6)) * (time - lastTime)) / wheelPerimeter;
-        qDebug() << "multipleWheelPerimeter = " << multipleWheelPerimeter;
-        pos = lastPos + multipleWheelPerimeter * wheelPerimeter;
-
-        // Données a afficher dans le tableau
-        if(time >= lowerTimeValue)
-        {
-            qreal diff = (speed -lastSpeed) / 3.6; // vitesse en m/s
-            qreal acc  = diff / (time - lastTime);
-
-            QList<QVariant> lapData;
-            lapData.append(time * 1000); // Tps (ms)
-            lapData.append(time);        // Tps (s)
-            lapData.append(pos);         // Dist (m)
-            lapData.append(speed);       // V (km\h)
-            lapData.append(qAbs(acc) > 2 ? "NS" : QString::number(acc)); // Acc (m\s²)
-
-            // Ajout de la ligne de données à la liste
-            data.append(lapData);
-        }
-    }
-
-    qDebug() << "Nombre de données calculées = " << data.count();
-
     /* ---------------------------------------------------------------------- *
-     *                Ajout des tours moteur et du pulse width                *
+     *             Récupération des tours moteur et du pulse width            *
      * ---------------------------------------------------------------------- */
 
     QSqlQuery megasquirtQuery;
@@ -2005,6 +1979,11 @@ bool MainWindow::getAllDataFromSpeed(
                     "and ref_lap_race = ? "
                     "and ref_lap_num = ? "
                     "order by timestamp");
+
+    // Si on a qu'une données, on cherche les rpm et PW les plus proche
+    if (upperTimeValue == lowerTimeValue)
+        upperTimeValue += 0.5;
+
     megasquirtQuery.addBindValue(lowerTimeValue * 1000);
     megasquirtQuery.addBindValue(upperTimeValue * 1000);
     megasquirtQuery.addBindValue(ref_race);
@@ -2023,7 +2002,7 @@ bool MainWindow::getAllDataFromSpeed(
     }
 
     /* ---------------------------------------------------------------------- *
-     *                   Ajout des données dans le tableau                    *
+     *              Ajout des données RPM et PW dans le tableau               *
      * ---------------------------------------------------------------------- */
 
     int i(1);
